@@ -1,0 +1,26 @@
+{
+    "name": "analytics-query-language",
+    "displayName": "analytics-query-language",
+    "description": "VSCode support for analytics query language",
+    "version": "0.0.1",
+    "publisher": "no-publisher",
+    "engines": {
+        "vscode": "^1.26.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "aql",
+            "aliases": ["analytics-query-language", "aql"],
+            "extensions": ["aql"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "aql",
+            "scopeName": "aql",
+            "path": "./syntaxes/aql.tmLanguage.json"
+        }]
+    }
+}
