@@ -11,13 +11,13 @@
     "Programming Languages"
   ],
   "scripts": {
-    "vscode:prepublish": "cd client && npm run update-vscode && cd .. && npm run compile",
-    "watch:client": "cd client && npm run watch",
-    "compile:client": "cd client && npm run compile",
-    "compile": "npm run compile:client",
-    "postinstall": "cd client && npm postinstall"
+    "vscode:prepublish": "cd vscode-client && npm run update-vscode && cd .. && npm run compile",
+    "watch:client": "cd vscode-client && npm run watch",
+    "compile:vscode-client": "cd vscode-client && npm run compile",
+    "compile": "npm run compile:vscode-client",
+    "postinstall": "cd vscode-client && npm postinstall"
   },
-  "main": "./client/out/extension",
+  "main": "./vscode-client/out/extension",
   "activationEvents": [
     "onLanguage:aql"
   ],
@@ -32,14 +32,14 @@
         "extensions": [
           "aql"
         ],
-        "configuration": "./client/syntaxes/language-configuration.json"
+        "configuration": "./vscode-client/syntaxes/language-configuration.json"
       }
     ],
     "grammars": [
       {
         "language": "aql",
         "scopeName": "aql",
-        "path": "./client/syntaxes/aql.tmLanguage.json"
+        "path": "./vscode-client/syntaxes/aql.tmLanguage.json"
       }
     ]
   }
