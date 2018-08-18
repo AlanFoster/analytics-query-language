@@ -32,7 +32,7 @@
         "extensions": [
           "aql"
         ],
-        "configuration": "./vscode-client/syntaxes/language-configuration.json"
+        "configuration": "./vscode-client/language-configuration.json"
       }
     ],
     "grammars": [
