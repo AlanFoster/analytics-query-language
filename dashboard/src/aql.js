@@ -3,6 +3,29 @@
 // Please see both formats for full details of highlighting requirements:
 //      - language.ts
 //      - aql.tmLanguage.json
+
+export const configuration = {
+  "comments": {
+    "lineComment": "--"
+  },
+
+  // symbols used as brackets
+  brackets: [
+    ["(", ")"]
+  ],
+
+  // symbols that are auto closed when typing
+  autoClosingPairs: [
+    {open: "(", close: ")" },
+    {open: "'", close: "'"}
+  ],
+
+  // symbols that that can be used to surround a selection
+  surroundingPairs: [
+    { open: "(", close: ")" },
+    { open: "'", close: "'" }
+  ]
+};
 export const language = {
     defaultToken: 'invalid',
     tokenPostfix: '.aql',
@@ -49,14 +72,14 @@ export const language = {
 
             // delimiters and operators
             [/[()]/, '@brackets'],
-            [/[*><=!-+/]+/, 'operator'],
+            [/[*><=!\-+/]+/, 'operator'],
 
             // numbers
             [/\d+/, 'number'],
             [/[,]/, 'delimiter'],
 
             // strings
-            [/'([^'\\]|\\.)*$/, 'string.invalid'],  // non-teminated string
+            [/'[^']*$/, 'string.invalid'],  // non-teminated string
             [/'/, {token: 'string.quote', bracket: '@open', next: '@string'}]
         ],
 
