@@ -20,7 +20,7 @@ class AqlEditor extends React.Component {
   render() {
     const { value, onChange } = this.props;
 
-    const fontSize = 24;
+    const fontSize = 20;
     const maxLineHeight = 7;
     const height = Math.min(value.split('\n').length, maxLineHeight) * (1.5 * fontSize);
 

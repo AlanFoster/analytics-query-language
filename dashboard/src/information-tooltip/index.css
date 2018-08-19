@@ -1,0 +1,8 @@
+.information-tooltip {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.information-tooltip--open {
+  opacity: 1;
+}

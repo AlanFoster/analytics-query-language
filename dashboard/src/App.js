@@ -1,8 +1,7 @@
 import React from 'react';
 import AqlEditor from './aql-editor';
-import {Button, Table} from 'reactstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faQuestionCircle } from '@fortawesome/free-regular-svg-icons';
+import {Button, Table, Card, CardTitle } from 'reactstrap';
+import InformationTooltip from './information-tooltip';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Results = ({ results }) => {
@@ -11,13 +10,14 @@ const Results = ({ results }) => {
   return (
     <Table>
       <thead>
-      <tr>
-        <th>#</th>
-        {results.headings.map(function (value) {
-          return <th key={value}>value</th>
-        })}
-      </tr>
+        <tr>
+          <th>#</th>
+          {results.headings.map(function (value) {
+            return <th key={value}>{value}</th>
+          })}
+        </tr>
       </thead>
+
       <tbody>
       {results.values.map(function (values, index) {
         return (
@@ -89,7 +89,7 @@ class App extends React.Component {
   render() {
     return (
       <div style={{ padding: '2rem' }}>
-        <div style={{ display: 'flex', backgroundColor: '#1e1e1e', padding: '0.8rem' }}>
+        <div style={{ display: 'flex', backgroundColor: '#1e1e1e', padding: '0.8rem', borderRadius: '.25rem' }}>
           <AqlEditor
             value={this.state.value}
             onChange={this.onChange}
@@ -101,15 +101,22 @@ class App extends React.Component {
                 Run
               </Button>
               <div style={{ margin: '0 0.5rem' }}>
-                <FontAwesomeIcon icon={faQuestionCircle} color='#3eb4d4' />
+
               </div>
+              <InformationTooltip>
+                  <div>
+                    <div><a href='#help'>Full SQL explanation</a></div>
+                    <div>Run with Ctrl/Cmd + Enter</div>
+                  </div>
+              </InformationTooltip>
             </div>
           </div>
         </div>
 
-        <div style={{ margin: '2rem 0' }}>
+        <Card body style={{ margin: '2rem 0' }}>
+          <CardTitle>Results</CardTitle>
           <Results results={this.state.results}/>
-        </div>
+        </Card>
       </div>
     )
   }
