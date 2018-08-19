@@ -15,6 +15,7 @@
     "watch:client": "cd vscode-client && npm run watch",
     "compile:vscode-client": "cd vscode-client && npm run compile",
     "compile": "npm run compile:vscode-client",
+    "start": "cd dashboard && yarn start",
     "postinstall": "cd vscode-client && npm postinstall"
   },
   "main": "./vscode-client/out/extension",
@@ -41,6 +42,29 @@
         "scopeName": "aql",
         "path": "./vscode-client/syntaxes/aql.tmLanguage.json"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Example configuration",
+      "properties": {
+        "aql.maxNumberOfProblems": {
+          "scope": "resource",
+          "type": "number",
+          "default": 100,
+          "description": "Controls the maximum number of problems produced by the server."
+        },
+        "aql.trace.server": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the language server."
+        }
+      }
+    }
   }
 }

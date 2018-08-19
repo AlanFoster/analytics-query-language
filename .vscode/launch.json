@@ -17,6 +17,22 @@
         "${workspaceFolder}/client/out/**/*.js"
       ],
       "preLaunchTask": "npm: compile:vscode-client"
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach to language server",
+      "address": "localhost",
+      "protocol": "inspector",
+      "port": 6009,
+      "sourceMaps": true,
+      "outFiles": ["${workspaceRoot}/server/out/**/*.js"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Client + Server",
+      "configurations": ["Launch Client", "Attach to language server"]
     }
   ]
 }
