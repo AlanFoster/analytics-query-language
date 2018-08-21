@@ -61,17 +61,65 @@ export function extract({ input, caretPosition = 0 }) {
     let core = new c3.CodeCompletionCore(parser);
 
     const autoCompletionMap = {
+        [AqlParser.RULE_wildcard]: [
+            {
+                label: '* ',
+                kind: CompletionItemKind.Text
+            },
+        ],
+
         [AqlParser.RULE_func_name]: [
-            { label: 'count( ', detail: 'testing', documentation: '', kind: CompletionItemKind.Function },
-            { label: 'max( ', detail: 'testing', documentation: 'testing doc', kind: CompletionItemKind.Function },
-            { label: 'min( ', detail: 'testing', documentation: 'testing doc', kind: CompletionItemKind.Function },
+            {
+                label: 'count',
+                insertText: {
+                    value: 'count(${1:*})'
+                },
+                detail: 'count the given rows',
+                kind: CompletionItemKind.Function
+            },
+            {
+                label: 'max( ',
+                insertText: {
+                    value: 'max(${1:*})'
+                },
+                detail: 'count the maximum value',
+                kind: CompletionItemKind.Function
+            },
+            {
+                label: 'min( ',
+                insertText: {
+                    value: 'min(${1:*})'
+                },
+                detail: 'count the minimum value',
+                kind: CompletionItemKind.Function
+            },
         ],
 
         [AqlParser.RULE_table]: [
-            { label: 'customers', detail: 'detail test', documentation: 'documentation test', kind: CompletionItemKind.Variable },
-            { label: 'transactions', detail: 'detail test', documentation: 'documentation test', kind: CompletionItemKind.Variable },
-            { label: 'employees', detail: 'detail test', documentation: 'documentation test', kind: CompletionItemKind.Variable },
-            { label: 'returns', detail: 'detail test', documentation: 'documentation test', kind: CompletionItemKind.Variable },
+            {
+                label: 'customers',
+                detail: 'customers table',
+                documentation: 'all customer related information',
+                kind: CompletionItemKind.Variable
+            },
+            {
+                label: 'transactions',
+                detail: 'transactions table',
+                documentation: 'all customer related information',
+                kind: CompletionItemKind.Variable
+            },
+            {
+                label: 'employees',
+                detail: 'employees table',
+                documentation: 'all customer related information',
+                kind: CompletionItemKind.Variable
+            },
+            {
+                label: 'returns',
+                detail: 'returns table',
+                documentation: 'all customer related information',
+                kind: CompletionItemKind.Variable
+            },
         ],
 
         [AqlParser.RULE_column]: [
