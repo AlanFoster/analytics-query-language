@@ -62,7 +62,7 @@ export function extract({ input, caretPosition = 0 }) {
 
     const autoCompletionMap = {
         [AqlParser.RULE_func_name]: [
-            { label: 'count( ', detail: 'testing', documentation: 'testing doc', kind: CompletionItemKind.Function },
+            { label: 'count( ', detail: 'testing', documentation: '', kind: CompletionItemKind.Function },
             { label: 'max( ', detail: 'testing', documentation: 'testing doc', kind: CompletionItemKind.Function },
             { label: 'min( ', detail: 'testing', documentation: 'testing doc', kind: CompletionItemKind.Function },
         ],

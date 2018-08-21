@@ -38,7 +38,7 @@ listen({
 
 function createLanguageClient(connection) {
   return new MonacoLanguageClient({
-    name: "Sample Language Client",
+    name: "AQL Language Client",
     clientOptions: {
       // use a language id as a document selector
       documentSelector: [languageId],
@@ -65,6 +65,14 @@ class AqlEditor extends React.Component {
     });
     monaco.languages.setMonarchTokensProvider(languageId, aql.language);
     monaco.languages.setLanguageConfiguration(languageId, aql.configuration);
+
+    monaco.editor.defineTheme(languageId, {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: 'predefined', foreground: '3dc9b0' },
+      ]
+    });
   };
 
   editorDidMount = (editor, monaco) => {
@@ -98,7 +106,7 @@ class AqlEditor extends React.Component {
       hideCursorInOverviewRuler: true,
       lineDecorationsWidth: "0ch",
       wordWrap: "on",
-      theme: "vs-dark",
+      theme: languageId,
       language: languageId,
       cursorStyle: 'line',
       disableLayerHinting: true,

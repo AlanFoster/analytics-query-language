@@ -7,7 +7,7 @@ import {
     CompletionItemKind,
     TextDocumentPositionParams,
     DiagnosticSeverity,
-    Diagnostic
+    Diagnostic,
 } from 'vscode-languageserver/lib/main';
 
 import * as parser from './parser';
@@ -34,7 +34,7 @@ export const listen = function (connection) {
                 textDocumentSync: documents.syncKind,
                 // Tell the client that the server supports code completion
                 completionProvider: {
-                    resolveProvider: true,
+                    resolveProvider: false,
                     // Always offer auto completion after a space has been pressed
                     triggerCharacters: [' ']
                 }
@@ -152,14 +152,6 @@ export const listen = function (connection) {
                 ...domainSuggestions,
                 ...keywordCompletion
             ]
-        }
-    );
-
-    // This handler resolve additional information for the item selected in
-    // the completion list.
-    connection.onCompletionResolve(
-        (item: CompletionItem): CompletionItem => {
-            return item;
         }
     );
 

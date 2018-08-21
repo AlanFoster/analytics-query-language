@@ -41,7 +41,7 @@ class App extends React.Component {
     this.state = {
       value: [
         '-- Simple query to help you get started',
-        'select *',
+        'select count(*)',
         'from table',
         'where id > 500',
         'since monday at \'08:00\'',
