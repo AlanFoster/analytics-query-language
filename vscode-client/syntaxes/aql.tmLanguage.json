@@ -55,7 +55,7 @@
       "patterns": [
         {
           "name": "support.function.aql",
-          "match": "\\b(count|max|min)\\s*\\("
+          "match": "\\b(count|max|min)\\b"
         }
       ]
     },

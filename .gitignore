@@ -1,4 +1,5 @@
 node_modules
 *.vsix
 out
+build
 .DS_Store

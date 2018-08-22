@@ -20,7 +20,7 @@ export function activate(context: ExtensionContext) {
 
     // The server is implemented in node
     let serverModule = context.asAbsolutePath(
-        path.join('server', 'out', 'server.js')
+        path.join('server', 'out', 'index.js')
     );
 
     // The debug options for the server

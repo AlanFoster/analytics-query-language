@@ -1,17 +1,21 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
     "target": "es6",
-    "outDir": "out",
-    "rootDir": "src",
-    "lib": [ "es6", "dom" ],
+    "module": "commonjs",
     "sourceMap": true,
-    "experimentalDecorators": true
+    "lib": [ "es6", "dom" ],
+    "experimentalDecorators": true,
+    "allowJs": true,
+
+    // Note, this is only used when compiled directly for vscode
+    // Neutrino will ignore this configuration for monaco:
+    "outDir": "out",
+    "rootDir": "src"
   },
-  "include": [
-    "src"
-  ],
   "exclude": [
-    "node_modules"
-  ]
+    "node_modules",
+    "build",
+    "out"
+  ],
+  "compileOnSave": false
 }

@@ -2,22 +2,29 @@
   "name": "server",
   "version": "0.0.1",
   "description": "Language server for aql",
-  "private": true,
-  "engines": {
-    "node": "*"
-  },
   "scripts": {
+    "build": "neutrino build",
+    "start": "neutrino start",
+    "lint": "neutrino lint",
+    "test": "neutrino test",
     "compile": "rm -rf out && rm -rf src/parser/gen && antlr4ts -o src/parser/gen Aql.g4 && tsc -p ./"
   },
-  "dependencies": {
+  "devDependencies": {
     "@types/node": "^10.7.1",
+    "@types/webpack-env": "^1.13.6",
+    "@neutrinojs/airbnb-base": "^8.3.0",
+    "@neutrinojs/jest": "^8.3.0",
+    "@neutrinojs/node": "^8.3.0",
+    "neutrino": "^8.3.0",
+    "antlr4ts-cli": "^0.4.0-alpha.4",
+    "awesome-typescript-loader": "^4.0.0",
+    "typescript": "^3.0.1"
+  },
+  "dependencies": {
     "antlr4-c3": "^1.1.8",
     "antlr4ts": "^0.4.1-alpha.0",
-    "antlr4ts-cli": "^0.4.0-alpha.4",
-    "express": "^4.16.3",
-    "typescript": "^3.0.1",
     "vscode-languageserver": "^5.0.3",
-    "vscode-ws-jsonrpc": "0.0.1-alpha.5",
+    "vscode-ws-jsonrpc": "^0.0.1-alpha.5",
     "ws": "^6.0.0"
   }
 }
