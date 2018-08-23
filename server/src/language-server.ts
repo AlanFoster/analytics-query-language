@@ -11,14 +11,23 @@ import {
 } from 'vscode-languageserver/lib/main';
 
 import parser from './parser';
+import Executor from "./executor";
+import {AqlParser} from "./parser/gen/AqlParser";
+import {AqlLexer} from "./parser/gen/AqlLexer";
 
-export const listen = function (connection) {
+export const listen = async function (connection) {
   // Create a simple text document manager. The text document manager
   // supports full document sync only
   const documents: TextDocuments = new TextDocuments();
 
   let hasConfigurationCapability: boolean = false;
   let hasWorkspaceFolderCapability: boolean = false;
+
+  // TODO: Let's ignore pooling for now as part of this spike
+  const executor = new Executor({
+    connectionString: process.env.DATABASE_URL
+  });
+  await executor.start();
 
   connection.onInitialize((params: InitializeParams) => {
     const { capabilities } = params;
@@ -130,21 +139,99 @@ export const listen = function (connection) {
     });
 
     // This handler provides the initial list of the completion items.
-    connection.onCompletion((textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+    connection.onCompletion(async (textDocumentPosition: TextDocumentPositionParams): Promise<CompletionItem[]> => {
       const document = documents.get(textDocumentPosition.textDocument.uri);
       if (!document) return [];
 
-      const { keywords, domainSuggestions } = parser({
+      const schema = await executor.extractSchema();
+      // const dblookup = await executor.runQuery("select * from products");
+      // await executor.generateSampleValues("products", "name");
+
+      const unique = (array) => [...new Set(array)];
+      const allColumns = unique(schema.reduce((acc, table) => acc.concat(table.columns.map(column => column.name)), []));
+
+      const autoCompletionMap = {
+            [AqlParser.RULE_wildcard]: [
+                {
+                    label: '* ',
+                    kind: CompletionItemKind.Text,
+                },
+            ],
+
+            [AqlParser.RULE_func_name]: [
+                {
+                    label: 'count',
+                    insertText: {
+                        value: 'count(${1:*})',
+                    },
+                    detail: 'count the given rows',
+                    kind: CompletionItemKind.Function,
+                },
+                {
+                    label: 'max',
+                    insertText: {
+                        value: 'max(${1:*})',
+                    },
+                    detail: 'count the maximum value',
+                    kind: CompletionItemKind.Function,
+                },
+                {
+                    label: 'min',
+                    insertText: {
+                        value: 'min(${1:*})',
+                    },
+                    detail: 'count the minimum value',
+                    kind: CompletionItemKind.Function,
+                },
+            ],
+
+            [AqlParser.RULE_table]: schema.map(function (table) {
+                return {
+                    label: table.name,
+                    detail: `${table.name} table`,
+                    documentation: `all ${table.name} related information`,
+                    kind: CompletionItemKind.Variable
+                }
+            }),
+
+            // TODO: This currently suggests _all_ known columns, rather than
+            // just the columns associated with the currently known table
+            [AqlParser.RULE_column]:
+                allColumns.map(function (columnName) {
+                    return {
+                        label: columnName,
+                        kind: CompletionItemKind.Variable
+                    }
+                }),
+
+            [AqlParser.RULE_time]: [
+                { label: "'08:00'", kind: CompletionItemKind.Constant },
+                { label: "'12:00'", kind: CompletionItemKind.Constant },
+                { label: "'18:30'", kind: CompletionItemKind.Constant },
+            ],
+        };
+
+      const { candidates } = parser({
         input: document.getText(),
         caretPosition: document.offsetAt(textDocumentPosition.position),
+        preferredRules: Object.keys(autoCompletionMap)
       });
 
-      const keywordCompletion = keywords.map(keyword => ({
+      const keywordCompletion = candidates.keywords.map(keyword => ({
         label: keyword,
         kind: CompletionItemKind.Keyword,
       }));
 
-        // Always show domain completions first - followed by keywords
+      let domainSuggestions = [];
+
+      for (let candidate of candidates.rules) {
+        const parserRule = candidate[0];
+        const suggestions = autoCompletionMap[parserRule];
+        if (suggestions) {
+            domainSuggestions = domainSuggestions.concat(suggestions);
+        }
+      }
+
       return [
         ...domainSuggestions,
         ...keywordCompletion,

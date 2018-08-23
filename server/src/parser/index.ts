@@ -39,7 +39,7 @@ const getTokenPosition = function (input: string, caretPosition: number): number
   return tokenCaretPosition;
 };
 
-export default function extract({ input, caretPosition = 0 }) {
+export default function extract({ input, caretPosition = 0, preferredRules = [] }) {
   const errorAggregator = new ErrorAggregator();
   const tokenCaretPosition = getTokenPosition(input, caretPosition);
 
@@ -60,118 +60,33 @@ export default function extract({ input, caretPosition = 0 }) {
 
   const core = new c3.CodeCompletionCore(parser);
 
-  const autoCompletionMap = {
-    [AqlParser.RULE_wildcard]: [
-      {
-        label: '* ',
-        kind: CompletionItemKind.Text,
-      },
-    ],
-
-    [AqlParser.RULE_func_name]: [
-      {
-        label: 'count',
-        insertText: {
-          value: 'count(${1:*})',
-        },
-        detail: 'count the given rows',
-        kind: CompletionItemKind.Function,
-      },
-      {
-        label: 'max( ',
-        insertText: {
-          value: 'max(${1:*})',
-        },
-        detail: 'count the maximum value',
-        kind: CompletionItemKind.Function,
-      },
-      {
-        label: 'min( ',
-        insertText: {
-          value: 'min(${1:*})',
-        },
-        detail: 'count the minimum value',
-        kind: CompletionItemKind.Function,
-      },
-    ],
-
-    [AqlParser.RULE_table]: [
-      {
-        label: 'customers',
-        detail: 'customers table',
-        documentation: 'all customer related information',
-        kind: CompletionItemKind.Variable,
-      },
-      {
-        label: 'transactions',
-        detail: 'transactions table',
-        documentation: 'all customer related information',
-        kind: CompletionItemKind.Variable,
-      },
-      {
-        label: 'employees',
-        detail: 'employees table',
-        documentation: 'all customer related information',
-        kind: CompletionItemKind.Variable,
-      },
-      {
-        label: 'returns',
-        detail: 'returns table',
-        documentation: 'all customer related information',
-        kind: CompletionItemKind.Variable,
-      },
-    ],
-
-    [AqlParser.RULE_column]: [
-      { label: 'id', kind: CompletionItemKind.Variable },
-      { label: 'description', kind: CompletionItemKind.Variable },
-      { label: 'value', kind: CompletionItemKind.Variable },
-      { label: 'name', kind: CompletionItemKind.Variable },
-      { label: 'contact_number', kind: CompletionItemKind.Variable },
-      { label: 'timestamp', kind: CompletionItemKind.Variable },
-    ],
-
-    [AqlParser.RULE_time]: [
-      { label: "'08:00'", kind: CompletionItemKind.Constant },
-      { label: "'12:00'", kind: CompletionItemKind.Constant },
-      { label: "'18:30'", kind: CompletionItemKind.Constant },
-    ],
-  };
-
-  Object.keys(autoCompletionMap).forEach((key) => {
+  preferredRules.forEach((key) => {
     core.preferredRules.add(Number(key));
   });
 
   core.ignoredTokens = new Set([
-    AqlLexer.DIVIDE,
-    AqlLexer.PLUS, AqlLexer.MINUS,
-    AqlLexer.OPEN_PAREN,
-    AqlLexer.IDENTIFIER, AqlLexer.INT, AqlLexer.STRING, AqlLexer.EOF,
+      AqlLexer.DIVIDE,
+      AqlLexer.PLUS, AqlLexer.MINUS,
+      AqlLexer.OPEN_PAREN,
+      AqlLexer.IDENTIFIER, AqlLexer.INT, AqlLexer.STRING, AqlLexer.EOF,
   ]);
 
   const candidates = core.collectCandidates(tokenCaretPosition);
 
   const keywords: string[] = [];
-  for (let candidate of candidates.tokens) {
-    // TODO Consider if we want to add rules for these characters instead
-    const suggestion = parser.vocabulary.getDisplayName(candidate[0]).toLowerCase();
+    for (let candidate of candidates.tokens) {
+        // TODO Consider if we want to add rules for these characters instead
+        const suggestion = parser.vocabulary.getDisplayName(candidate[0]).toLowerCase();
 
-    keywords.push(suggestion.split("'").join(''));
-  }
-
-  let domainSuggestions = [];
-
-  for (let candidate of candidates.rules) {
-    const parserRule = candidate[0];
-    const suggestions = autoCompletionMap[parserRule];
-    if (suggestions) {
-      domainSuggestions = domainSuggestions.concat(suggestions);
+        keywords.push(suggestion.split("'").join(''));
     }
-  }
 
   return {
     errors: errorAggregator.getErrors(),
-    keywords,
-    domainSuggestions,
+
+    candidates: {
+      keywords: keywords,
+      rules: candidates.rules,
+    },
   };
 }

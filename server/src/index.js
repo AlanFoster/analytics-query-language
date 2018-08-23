@@ -47,14 +47,15 @@ function createWebSocketServer(port) {
  * Creates a running connection for either a websocket connection for the monaco browser,
  * or an IPC connection for running with vscode
  */
-function createConnection() {
+async function createConnection() {
   const webSocketFlagIndex = process.argv.findIndex(value => value.startsWith('--web-socket='));
   const isWebSocket = webSocketFlagIndex !== -1;
   if (isWebSocket) {
+    console.log("Starting websocket interop");
     const port = Number(process.argv[webSocketFlagIndex].split('=')[1]);
     createWebSocketServer(port);
   } else {
-    console.log('starting other one');
+    console.log("Starting vscode interop");
     // Delegate responsibility to the default vscode connection implementation, and create
     // a connection for the server. The connection uses Node's IPC as a transport.
     // Also include all preview / proposed LSP features.

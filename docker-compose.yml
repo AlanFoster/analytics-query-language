@@ -1,12 +1,22 @@
 version: '3'
 
 services:
+  database:
+    image: postgres:10.5-alpine
+    volumes:
+      - ./server/db/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+
   server:
     build:
       context: ./server
     ports:
       - 5001:5001
+    depends_on:
+      - database
+    entrypoint: dockerize -wait tcp://database:5432 -timeout 30s
     command: yarn start --web-socket=5001
+    env_file:
+      - .env
     volumes:
       - ./server/src:/srv/aql/src
 
