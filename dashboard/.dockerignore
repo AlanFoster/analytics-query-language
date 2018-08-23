@@ -1,0 +1,9 @@
+# Ignore all files by default
+*
+
+# White list only the required files
+!public/
+!src/
+!config-overrides.js
+!package.json
+!yarn.lock

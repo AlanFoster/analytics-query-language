@@ -1,0 +1,12 @@
+# Ignore all files by default
+*
+
+# White list only the required files
+!src/
+!.eslintignore
+!.eslintrc.js
+!.neutrinorc.js
+!Aql.g4
+!package.json
+!tsconfig.json
+!yarn.lock

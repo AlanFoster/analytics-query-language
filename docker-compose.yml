@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  server:
+    build:
+      context: ./server
+    ports:
+      - 5001:5001
+    command: yarn start --web-socket=5001
+    volumes:
+      - ./server/src:/srv/aql/src
+
+  dashboard:
+    build:
+      context: ./dashboard
+    ports:
+      - 3000:3000
+    depends_on:
+      - server
+    command: yarn start
+    volumes:
+      - ./dashboard/src:/srv/aql/src
