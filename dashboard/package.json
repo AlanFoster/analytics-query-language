@@ -27,5 +27,10 @@
   "devDependencies": {
     "monaco-editor-webpack-plugin": "^1.5.1",
     "react-app-rewired": "^1.5.2"
+  },
+  "proxy": {
+    "/results": {
+      "target": "http://server:5001"
+    }
   }
 }

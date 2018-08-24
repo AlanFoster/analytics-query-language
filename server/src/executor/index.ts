@@ -41,6 +41,22 @@ interface ExecutorResult {
     rows: { [key: string]: any }[]
 }
 
+export const execute = async function (req, res) {
+    // TODO: Let's ignore pooling for now as part of this spike
+    const executor = new Executor({
+        connectionString: process.env.DATABASE_URL
+    });
+    await executor.start();
+
+    try {
+        const results = await executor.runQuery(req.body.query);
+        res.end(JSON.stringify(results, null, 4));
+    } catch (e) {
+        res.status(400);
+        res.end(JSON.stringify({ error: e }))
+    }
+};
+
 class Executor {
     private pool: Pool;
 
@@ -96,9 +112,7 @@ class Executor {
         // For now, assume that all queries are valid postgres queries
         const command = query;
 
-        const res: QueryResult<{ [key: string]: string }> = await this.pool.query(`
-            select * from products
-        `);
+        const res: QueryResult<{ [key: string]: string }> = await this.pool.query(command);
 
         return {
             command: command,

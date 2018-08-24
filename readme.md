@@ -11,6 +11,7 @@ Some lessons learnt from this spike
 - vscode and monaco have different APIs, and are [not compatible](https://github.com/Microsoft/monaco-editor/issues/430)
 - vscode uses text mate for syntax highlighting
 - monaco uses its own custom json format for syntax highlighting
+- With this approach, monaco connects to the language server via websockets. How would that impact deploys?
 
 # Useful Resources
 

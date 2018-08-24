@@ -5,33 +5,50 @@ import InformationTooltip from './information-tooltip';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Results = ({ results }) => {
-  if (!results.headings) return <div>Loading...</div>
+  if (!results) return <div>Run your query above</div>;
+  if (results.error) return <div>Error <pre>{JSON.stringify(results.error)}</pre></div>;
+  if (!results.rows) return <div>Loading...</div>;
+  if (results.rows.length === 0) return <div>No results</div>;
+
+  const headings = Object.keys(results.rows[0]);
 
   return (
-    <Table>
-      <thead>
-        <tr>
-          <th>#</th>
-          {results.headings.map(function (value) {
-            return <th key={value}>{value}</th>
-          })}
-        </tr>
-      </thead>
-
-      <tbody>
-      {results.values.map(function (values, index) {
-        return (
-          <tr key={index}>
-            <th scope="row">{index + 1}</th>
-            {values.map(function (value, index) {
-              return <td key={index}>{value}</td>
+    <div>
+      <Table>
+        <thead>
+          <tr>
+            <th>#</th>
+            {headings.map(function (value) {
+              return <th key={value}>{value}</th>
             })}
           </tr>
-        );
-      })}
-      </tbody>
-    </Table>
+        </thead>
+
+        <tbody>
+        {results.rows.map(function (row, index) {
+          return (
+            <tr key={index}>
+              <th scope="row">{index + 1}</th>
+              {Object.keys(row).map(function (key, index) {
+                return <td key={index}>{row[key]}</td>
+              })}
+            </tr>
+          );
+        })}
+        </tbody>
+      </Table>
+    </div>
   )
+};
+
+const ShowQuery = ({ results }) => {
+  if (!(results && results.command)) return null;
+
+  return (
+    <div>
+      Server executed query: <pre>{results.command}</pre>
+    </div>
+  );
 };
 
 class App extends React.Component {
@@ -39,26 +56,9 @@ class App extends React.Component {
     super(props);
 
     this.state = {
-      value: [
-        '-- Simple query to help you get started',
-        'select count(*)',
-        'from table',
-        'where id > 500',
-        'since monday at \'08:00\'',
-        'until wednesday at \'08:00\''
-      ].join("\n"),
+      value: "select * from products",
 
-      results: {
-        headings: [
-          'foo',
-          'bar'
-        ],
-
-        values: [
-          [10, 20],
-          [30, 40]
-        ]
-      }
+      results: undefined
     }
   }
 
@@ -69,21 +69,17 @@ class App extends React.Component {
   onFetchResults = () => {
     this.setState({ results: {} });
 
-    setTimeout(() => {
-      this.setState({
-        results: {
-          headings: [
-            'foo',
-            'bar'
-          ],
-
-          values: [
-            [10, 20],
-            [30, 40]
-          ]
-        }
-      })
-    }, 600)
+    fetch('/results', {
+      method: 'POST',
+      headers:{
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ query: this.state.value }),
+    })
+      .then(res => res.json())
+      .then((res) => {
+        this.setState({ results: res })
+      });
   };
 
   render() {
@@ -115,6 +111,7 @@ class App extends React.Component {
 
         <Card body style={{ margin: '2rem 0' }}>
           <CardTitle>Results</CardTitle>
+          <ShowQuery results={this.state.results} />
           <Results results={this.state.results}/>
         </Card>
       </div>

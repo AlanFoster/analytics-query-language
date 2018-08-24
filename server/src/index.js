@@ -1,7 +1,11 @@
 import * as rpc from 'vscode-ws-jsonrpc';
+import * as http from 'http';
+import * as express from 'express';
+import * as bodyParser from 'body-parser';
 import * as ws from 'ws';
 import * as vscode from 'vscode-languageserver';
 import * as languageServer from './language-server';
+import { execute } from './executor';
 
 function launchRpcWebSocket(webSocket) {
   const rpcWebSocket = {
@@ -25,10 +29,16 @@ function launchRpcWebSocket(webSocket) {
 }
 
 function createWebSocketServer(port) {
+  const app = express();
+  app.use(bodyParser.json());
+  const server = http.createServer(app);
+
   const webSocketServer = new ws.Server({
-    port,
+    server: server,
     perMessageDeflate: false,
   });
+
+  app.post('/results', (req, res) => execute(req, res));
 
   webSocketServer.on('connection', (webSocket, request) => {
     console.log(`received new connection ${request.connection.remoteAddress}`);
@@ -40,7 +50,9 @@ function createWebSocketServer(port) {
     }
   });
 
-  return webSocketServer;
+  server.listen(port, () => {
+    console.log(`Server started on port ${port}`);
+  });
 }
 
 /**
@@ -68,4 +80,5 @@ createConnection();
 
 if (module.hot) {
   module.hot.accept('./language-server');
+  module.hot.accept('./executor');
 }
