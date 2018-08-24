@@ -8,10 +8,17 @@ proof of concept language.
 
 Some lessons learnt from this spike
 
+## VSCode / Monaco
+
 - vscode and monaco have different APIs, and are [not compatible](https://github.com/Microsoft/monaco-editor/issues/430)
-- vscode uses text mate for syntax highlighting
-- monaco uses its own custom json format for syntax highlighting
-- With this approach, monaco connects to the language server via websockets. How would that impact deploys?
+- vscode uses text mate for syntax highlighting, whilst monaco uses its own custom json format for syntax highlighting
+- monaco currently connects to the language server via websockets. This would potentially impact deploy procedures.
+
+## Parsing / Error handling
+
+- ANTLR is pretty awesome, it can generate various clients
+- ANTLR doesn't support incremental parsing. That shouldn't be an issue for such a small query language though.
+- I'm still on the fence about a hand rolled parser for better error handling, or investigating [Menhir](http://gallium.inria.fr/~fpottier/menhir/)
 
 # Useful Resources
 
