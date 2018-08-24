@@ -20,20 +20,17 @@ const getTokenPosition = function (input: string, caretPosition: number): number
   const inputStream = new ANTLRInputStream(input);
   const lexer = new AqlLexer(inputStream);
 
-  let tokenCaretPosition = -1;
-
+  let tokenCaretPosition = 0;
   const allTokens = lexer.getAllTokens();
 
   for (let i = 0; i < allTokens.length; i++) {
     const token = allTokens[i];
 
     if (caretPosition >= token.startIndex && caretPosition <= token.stopIndex) {
-      tokenCaretPosition = i;
+        return tokenCaretPosition;
     }
-  }
 
-  if (tokenCaretPosition === -1) {
-    return allTokens.length - 1;
+    tokenCaretPosition = i;
   }
 
   return tokenCaretPosition;
