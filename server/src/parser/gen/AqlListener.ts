@@ -3,16 +3,23 @@
 
 import { ParseTreeListener } from 'antlr4ts/tree/ParseTreeListener';
 
-import { Since_branchContext } from './AqlParser';
-import { Predicate_branchContext } from './AqlParser';
-import { Until_branchContext } from './AqlParser';
+import { PredicateAtomContext } from './AqlParser';
+import { PredicateNestedContext } from './AqlParser';
+import { SelectionBinaryContext } from './AqlParser';
+import { SelectionTermAltContext } from './AqlParser';
+import { SelectionFunctionContext } from './AqlParser';
+import { SelectionAtomContext } from './AqlParser';
+import { SelectionNestedContext } from './AqlParser';
+import { PredicateTermAltContext } from './AqlParser';
+import { PredicateBinaryContext } from './AqlParser';
 import { ProgContext } from './AqlParser';
-import { Extra_thingContext } from './AqlParser';
+import { FiltersContext } from './AqlParser';
+import { FilterContext } from './AqlParser';
 import { SelectionContext } from './AqlParser';
 import { PredicateExprContext } from './AqlParser';
 import { PredicateTermContext } from './AqlParser';
 import { FuncContext } from './AqlParser';
-import { Func_nameContext } from './AqlParser';
+import { FuncNameContext } from './AqlParser';
 import { SelectionExprContext } from './AqlParser';
 import { SelectionTermContext } from './AqlParser';
 import { DateContext } from './AqlParser';
@@ -31,43 +38,121 @@ import { ColumnContext } from './AqlParser';
  */
 export interface AqlListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by the `since_branch`
-	 * labeled alternative in `AqlParser.extra_thing`.
+	 * Enter a parse tree produced by the `PredicateAtom`
+	 * labeled alternative in `AqlParser.predicateTerm`.
 	 * @param ctx the parse tree
 	 */
-	enterSince_branch?: (ctx: Since_branchContext) => void;
+	enterPredicateAtom?: (ctx: PredicateAtomContext) => void;
 	/**
-	 * Exit a parse tree produced by the `since_branch`
-	 * labeled alternative in `AqlParser.extra_thing`.
+	 * Exit a parse tree produced by the `PredicateAtom`
+	 * labeled alternative in `AqlParser.predicateTerm`.
 	 * @param ctx the parse tree
 	 */
-	exitSince_branch?: (ctx: Since_branchContext) => void;
+	exitPredicateAtom?: (ctx: PredicateAtomContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `predicate_branch`
-	 * labeled alternative in `AqlParser.extra_thing`.
+	 * Enter a parse tree produced by the `PredicateNested`
+	 * labeled alternative in `AqlParser.predicateTerm`.
 	 * @param ctx the parse tree
 	 */
-	enterPredicate_branch?: (ctx: Predicate_branchContext) => void;
+	enterPredicateNested?: (ctx: PredicateNestedContext) => void;
 	/**
-	 * Exit a parse tree produced by the `predicate_branch`
-	 * labeled alternative in `AqlParser.extra_thing`.
+	 * Exit a parse tree produced by the `PredicateNested`
+	 * labeled alternative in `AqlParser.predicateTerm`.
 	 * @param ctx the parse tree
 	 */
-	exitPredicate_branch?: (ctx: Predicate_branchContext) => void;
+	exitPredicateNested?: (ctx: PredicateNestedContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `until_branch`
-	 * labeled alternative in `AqlParser.extra_thing`.
+	 * Enter a parse tree produced by the `SelectionBinary`
+	 * labeled alternative in `AqlParser.selectionExpr`.
 	 * @param ctx the parse tree
 	 */
-	enterUntil_branch?: (ctx: Until_branchContext) => void;
+	enterSelectionBinary?: (ctx: SelectionBinaryContext) => void;
 	/**
-	 * Exit a parse tree produced by the `until_branch`
-	 * labeled alternative in `AqlParser.extra_thing`.
+	 * Exit a parse tree produced by the `SelectionBinary`
+	 * labeled alternative in `AqlParser.selectionExpr`.
 	 * @param ctx the parse tree
 	 */
-	exitUntil_branch?: (ctx: Until_branchContext) => void;
+	exitSelectionBinary?: (ctx: SelectionBinaryContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `SelectionTermAlt`
+	 * labeled alternative in `AqlParser.selectionExpr`.
+	 * @param ctx the parse tree
+	 */
+	enterSelectionTermAlt?: (ctx: SelectionTermAltContext) => void;
+	/**
+	 * Exit a parse tree produced by the `SelectionTermAlt`
+	 * labeled alternative in `AqlParser.selectionExpr`.
+	 * @param ctx the parse tree
+	 */
+	exitSelectionTermAlt?: (ctx: SelectionTermAltContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `SelectionFunction`
+	 * labeled alternative in `AqlParser.selectionTerm`.
+	 * @param ctx the parse tree
+	 */
+	enterSelectionFunction?: (ctx: SelectionFunctionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `SelectionFunction`
+	 * labeled alternative in `AqlParser.selectionTerm`.
+	 * @param ctx the parse tree
+	 */
+	exitSelectionFunction?: (ctx: SelectionFunctionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `SelectionAtom`
+	 * labeled alternative in `AqlParser.selectionTerm`.
+	 * @param ctx the parse tree
+	 */
+	enterSelectionAtom?: (ctx: SelectionAtomContext) => void;
+	/**
+	 * Exit a parse tree produced by the `SelectionAtom`
+	 * labeled alternative in `AqlParser.selectionTerm`.
+	 * @param ctx the parse tree
+	 */
+	exitSelectionAtom?: (ctx: SelectionAtomContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `SelectionNested`
+	 * labeled alternative in `AqlParser.selectionTerm`.
+	 * @param ctx the parse tree
+	 */
+	enterSelectionNested?: (ctx: SelectionNestedContext) => void;
+	/**
+	 * Exit a parse tree produced by the `SelectionNested`
+	 * labeled alternative in `AqlParser.selectionTerm`.
+	 * @param ctx the parse tree
+	 */
+	exitSelectionNested?: (ctx: SelectionNestedContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `PredicateTermAlt`
+	 * labeled alternative in `AqlParser.predicateExpr`.
+	 * @param ctx the parse tree
+	 */
+	enterPredicateTermAlt?: (ctx: PredicateTermAltContext) => void;
+	/**
+	 * Exit a parse tree produced by the `PredicateTermAlt`
+	 * labeled alternative in `AqlParser.predicateExpr`.
+	 * @param ctx the parse tree
+	 */
+	exitPredicateTermAlt?: (ctx: PredicateTermAltContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `PredicateBinary`
+	 * labeled alternative in `AqlParser.predicateExpr`.
+	 * @param ctx the parse tree
+	 */
+	enterPredicateBinary?: (ctx: PredicateBinaryContext) => void;
+	/**
+	 * Exit a parse tree produced by the `PredicateBinary`
+	 * labeled alternative in `AqlParser.predicateExpr`.
+	 * @param ctx the parse tree
+	 */
+	exitPredicateBinary?: (ctx: PredicateBinaryContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `AqlParser.prog`.
@@ -81,15 +166,26 @@ export interface AqlListener extends ParseTreeListener {
 	exitProg?: (ctx: ProgContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `AqlParser.extra_thing`.
+	 * Enter a parse tree produced by `AqlParser.filters`.
 	 * @param ctx the parse tree
 	 */
-	enterExtra_thing?: (ctx: Extra_thingContext) => void;
+	enterFilters?: (ctx: FiltersContext) => void;
 	/**
-	 * Exit a parse tree produced by `AqlParser.extra_thing`.
+	 * Exit a parse tree produced by `AqlParser.filters`.
 	 * @param ctx the parse tree
 	 */
-	exitExtra_thing?: (ctx: Extra_thingContext) => void;
+	exitFilters?: (ctx: FiltersContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `AqlParser.filter`.
+	 * @param ctx the parse tree
+	 */
+	enterFilter?: (ctx: FilterContext) => void;
+	/**
+	 * Exit a parse tree produced by `AqlParser.filter`.
+	 * @param ctx the parse tree
+	 */
+	exitFilter?: (ctx: FilterContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `AqlParser.selection`.
@@ -136,15 +232,15 @@ export interface AqlListener extends ParseTreeListener {
 	exitFunc?: (ctx: FuncContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `AqlParser.func_name`.
+	 * Enter a parse tree produced by `AqlParser.funcName`.
 	 * @param ctx the parse tree
 	 */
-	enterFunc_name?: (ctx: Func_nameContext) => void;
+	enterFuncName?: (ctx: FuncNameContext) => void;
 	/**
-	 * Exit a parse tree produced by `AqlParser.func_name`.
+	 * Exit a parse tree produced by `AqlParser.funcName`.
 	 * @param ctx the parse tree
 	 */
-	exitFunc_name?: (ctx: Func_nameContext) => void;
+	exitFuncName?: (ctx: FuncNameContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `AqlParser.selectionExpr`.

@@ -1,4 +1,6 @@
 import { Pool } from 'pg';
+import aqlToSql from './aql-to-sql';
+import * as moment from 'moment';
 
 // A simple type definition of pg-node's query call result
 interface QueryResult<T> {
@@ -39,6 +41,7 @@ interface ExecutorResult {
     command: string
     rowCount: number
     rows: { [key: string]: any }[]
+    errors: { message: string }[]
 }
 
 export const execute = async function (req, res) {
@@ -53,7 +56,7 @@ export const execute = async function (req, res) {
         res.end(JSON.stringify(results, null, 4));
     } catch (e) {
         res.status(400);
-        res.end(JSON.stringify({ error: e }))
+        res.end(JSON.stringify({ errors: [e] }))
     }
 };
 
@@ -109,15 +112,31 @@ class Executor {
     }
 
     async runQuery(query: string): Promise<ExecutorResult> {
-        // For now, assume that all queries are valid postgres queries
-        const command = query;
+        const { command, errors } = aqlToSql(query, moment().utc(false));
+        if (errors.length > 0) {
+            return {
+                command: command,
+                rowCount: 0,
+                rows: [],
+                errors: errors
+            }
+        }
 
-        const res: QueryResult<{ [key: string]: string }> = await this.pool.query(command);
-
-        return {
-            command: command,
-            rowCount: res.rowCount,
-            rows: res.rows,
+        try {
+            const res: QueryResult<{ [key: string]: string }> = await this.pool.query(command);
+            return {
+                command: command,
+                rowCount: res.rowCount,
+                rows: res.rows,
+                errors: []
+            }
+        } catch(e) {
+            return {
+                command: command,
+                rowCount: 0,
+                rows: [],
+                errors: [e]
+            }
         }
     }
 }

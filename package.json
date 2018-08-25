@@ -68,6 +68,7 @@
     }
   },
   "dependencies": {
-    "body-parser": "^1.18.3"
+    "body-parser": "^1.18.3",
+    "moment": "^2.22.2"
   }
 }

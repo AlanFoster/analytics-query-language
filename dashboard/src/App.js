@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Results = ({ results }) => {
   if (!results) return <div>Run your query above</div>;
-  if (results.error) return <div>Error <pre>{JSON.stringify(results.error)}</pre></div>;
+  if (results.errors && results.errors.length > 0) return <div>Errors <pre>{JSON.stringify(results.errors, null, 4)}</pre></div>;
   if (!results.rows) return <div>Loading...</div>;
   if (results.rows.length === 0) return <div>No results</div>;
 
@@ -56,13 +56,14 @@ class App extends React.Component {
     super(props);
 
     this.state = {
-      value: "select * from products",
+      value: window.sessionStorage.value || "select * from products",
 
       results: undefined
     }
   }
 
   onChange = (newValue) => {
+    window.sessionStorage.value = newValue;
     this.setState({ value: newValue });
   };
 

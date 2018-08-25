@@ -24,6 +24,8 @@ import { VocabularyImpl } from 'antlr4ts/VocabularyImpl';
 import * as Utils from 'antlr4ts/misc/Utils';
 
 import { AqlListener } from './AqlListener';
+import { AqlVisitor } from './AqlVisitor';
+
 
 export class AqlParser extends Parser {
 	public static readonly SELECT=1;
@@ -67,25 +69,26 @@ export class AqlParser extends Parser {
 	public static readonly COMMENT=39;
 	public static readonly WS=40;
 	public static readonly RULE_prog = 0;
-	public static readonly RULE_extra_thing = 1;
-	public static readonly RULE_selection = 2;
-	public static readonly RULE_predicateExpr = 3;
-	public static readonly RULE_predicateTerm = 4;
-	public static readonly RULE_func = 5;
-	public static readonly RULE_func_name = 6;
-	public static readonly RULE_selectionExpr = 7;
-	public static readonly RULE_selectionTerm = 8;
-	public static readonly RULE_date = 9;
-	public static readonly RULE_relativeDate = 10;
-	public static readonly RULE_absoluteDate = 11;
-	public static readonly RULE_day = 12;
-	public static readonly RULE_wildcard = 13;
-	public static readonly RULE_time = 14;
-	public static readonly RULE_table = 15;
-	public static readonly RULE_column = 16;
+	public static readonly RULE_filters = 1;
+	public static readonly RULE_filter = 2;
+	public static readonly RULE_selection = 3;
+	public static readonly RULE_predicateExpr = 4;
+	public static readonly RULE_predicateTerm = 5;
+	public static readonly RULE_func = 6;
+	public static readonly RULE_funcName = 7;
+	public static readonly RULE_selectionExpr = 8;
+	public static readonly RULE_selectionTerm = 9;
+	public static readonly RULE_date = 10;
+	public static readonly RULE_relativeDate = 11;
+	public static readonly RULE_absoluteDate = 12;
+	public static readonly RULE_day = 13;
+	public static readonly RULE_wildcard = 14;
+	public static readonly RULE_time = 15;
+	public static readonly RULE_table = 16;
+	public static readonly RULE_column = 17;
 	public static readonly ruleNames: string[] = [
-		"prog", "extra_thing", "selection", "predicateExpr", "predicateTerm", 
-		"func", "func_name", "selectionExpr", "selectionTerm", "date", "relativeDate", 
+		"prog", "filters", "filter", "selection", "predicateExpr", "predicateTerm", 
+		"func", "funcName", "selectionExpr", "selectionTerm", "date", "relativeDate", 
 		"absoluteDate", "day", "wildcard", "time", "table", "column"
 	];
 
@@ -129,33 +132,20 @@ export class AqlParser extends Parser {
 	public prog(): ProgContext {
 		let _localctx: ProgContext = new ProgContext(this._ctx, this.state);
 		this.enterRule(_localctx, 0, AqlParser.RULE_prog);
-		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 34;
-			this.match(AqlParser.SELECT);
-			this.state = 35;
-			this.selection();
 			this.state = 36;
-			this.match(AqlParser.FROM);
+			this.match(AqlParser.SELECT);
 			this.state = 37;
+			this.selection();
+			this.state = 38;
+			this.match(AqlParser.FROM);
+			this.state = 39;
 			this.table();
+			this.state = 40;
+			this.filters();
 			this.state = 41;
-			this._errHandler.sync(this);
-			_la = this._input.LA(1);
-			while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << AqlParser.SINCE) | (1 << AqlParser.UNTIL) | (1 << AqlParser.WHERE))) !== 0)) {
-				{
-				{
-				this.state = 38;
-				this.extra_thing();
-				}
-				}
-				this.state = 43;
-				this._errHandler.sync(this);
-				_la = this._input.LA(1);
-			}
-			this.state = 44;
 			this.match(AqlParser.EOF);
 			}
 		}
@@ -174,40 +164,75 @@ export class AqlParser extends Parser {
 		return _localctx;
 	}
 	@RuleVersion(0)
-	public extra_thing(): Extra_thingContext {
-		let _localctx: Extra_thingContext = new Extra_thingContext(this._ctx, this.state);
-		this.enterRule(_localctx, 2, AqlParser.RULE_extra_thing);
+	public filters(): FiltersContext {
+		let _localctx: FiltersContext = new FiltersContext(this._ctx, this.state);
+		this.enterRule(_localctx, 2, AqlParser.RULE_filters);
+		let _la: number;
 		try {
-			this.state = 52;
+			this.enterOuterAlt(_localctx, 1);
+			{
+			this.state = 46;
+			this._errHandler.sync(this);
+			_la = this._input.LA(1);
+			while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << AqlParser.SINCE) | (1 << AqlParser.UNTIL) | (1 << AqlParser.WHERE))) !== 0)) {
+				{
+				{
+				this.state = 43;
+				this.filter();
+				}
+				}
+				this.state = 48;
+				this._errHandler.sync(this);
+				_la = this._input.LA(1);
+			}
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	@RuleVersion(0)
+	public filter(): FilterContext {
+		let _localctx: FilterContext = new FilterContext(this._ctx, this.state);
+		this.enterRule(_localctx, 4, AqlParser.RULE_filter);
+		try {
+			this.state = 55;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case AqlParser.WHERE:
-				_localctx = new Predicate_branchContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 46;
+				this.state = 49;
 				this.match(AqlParser.WHERE);
-				this.state = 47;
+				this.state = 50;
 				this.predicateExpr(0);
 				}
 				break;
 			case AqlParser.SINCE:
-				_localctx = new Since_branchContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 48;
+				this.state = 51;
 				this.match(AqlParser.SINCE);
-				this.state = 49;
+				this.state = 52;
 				this.date();
 				}
 				break;
 			case AqlParser.UNTIL:
-				_localctx = new Until_branchContext(_localctx);
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 50;
+				this.state = 53;
 				this.match(AqlParser.UNTIL);
-				this.state = 51;
+				this.state = 54;
 				this.date();
 				}
 				break;
@@ -232,16 +257,16 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public selection(): SelectionContext {
 		let _localctx: SelectionContext = new SelectionContext(this._ctx, this.state);
-		this.enterRule(_localctx, 4, AqlParser.RULE_selection);
+		this.enterRule(_localctx, 6, AqlParser.RULE_selection);
 		let _la: number;
 		try {
-			this.state = 63;
+			this.state = 66;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case AqlParser.STAR:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 54;
+				this.state = 57;
 				this.wildcard();
 				}
 				break;
@@ -256,21 +281,21 @@ export class AqlParser extends Parser {
 			case AqlParser.OPEN_PAREN:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 55;
+				this.state = 58;
 				this.selectionExpr(0);
-				this.state = 60;
+				this.state = 63;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la===AqlParser.COMMA) {
 					{
 					{
-					this.state = 56;
+					this.state = 59;
 					this.match(AqlParser.COMMA);
-					this.state = 57;
+					this.state = 60;
 					this.selectionExpr(0);
 					}
 					}
-					this.state = 62;
+					this.state = 65;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
@@ -307,19 +332,23 @@ export class AqlParser extends Parser {
 		let _parentState: number = this.state;
 		let _localctx: PredicateExprContext = new PredicateExprContext(this._ctx, _parentState);
 		let _prevctx: PredicateExprContext = _localctx;
-		let _startState: number = 6;
-		this.enterRecursionRule(_localctx, 6, AqlParser.RULE_predicateExpr, _p);
+		let _startState: number = 8;
+		this.enterRecursionRule(_localctx, 8, AqlParser.RULE_predicateExpr, _p);
 		let _la: number;
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 66;
+			_localctx = new PredicateTermAltContext(_localctx);
+			this._ctx = _localctx;
+			_prevctx = _localctx;
+
+			this.state = 69;
 			this.predicateTerm();
 			}
 			this._ctx._stop = this._input.tryLT(-1);
-			this.state = 88;
+			this.state = 91;
 			this._errHandler.sync(this);
 			_alt = this.interpreter.adaptivePredict(this._input,5,this._ctx);
 			while ( _alt!==2 && _alt!==ATN.INVALID_ALT_NUMBER ) {
@@ -327,42 +356,21 @@ export class AqlParser extends Parser {
 					if ( this._parseListeners!=null ) this.triggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					this.state = 86;
+					this.state = 89;
 					this._errHandler.sync(this);
 					switch ( this.interpreter.adaptivePredict(this._input,4,this._ctx) ) {
 					case 1:
 						{
-						_localctx = new PredicateExprContext(_parentctx, _parentState);
-						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_predicateExpr);
-						this.state = 68;
-						if (!(this.precpred(this._ctx, 7))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 7)");
-						this.state = 69;
-						_la = this._input.LA(1);
-						if ( !(_la===AqlParser.STAR || _la===AqlParser.DIVIDE) ) {
-						this._errHandler.recoverInline(this);
-						} else {
-							if (this._input.LA(1) === Token.EOF) {
-								this.matchedEOF = true;
-							}
-
-							this._errHandler.reportMatch(this);
-							this.consume();
-						}
-						this.state = 70;
-						this.predicateExpr(8);
-						}
-						break;
-
-					case 2:
-						{
-						_localctx = new PredicateExprContext(_parentctx, _parentState);
+						_localctx = new PredicateBinaryContext(new PredicateExprContext(_parentctx, _parentState));
+						(_localctx as PredicateBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_predicateExpr);
 						this.state = 71;
-						if (!(this.precpred(this._ctx, 6))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 6)");
+						if (!(this.precpred(this._ctx, 7))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 7)");
 						this.state = 72;
+						(_localctx as PredicateBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
-						if ( !(_la===AqlParser.PLUS || _la===AqlParser.MINUS) ) {
-						this._errHandler.recoverInline(this);
+						if ( !(_la===AqlParser.STAR || _la===AqlParser.DIVIDE) ) {
+							(_localctx as PredicateBinaryContext)._operator = this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
 								this.matchedEOF = true;
@@ -372,20 +380,22 @@ export class AqlParser extends Parser {
 							this.consume();
 						}
 						this.state = 73;
-						this.predicateExpr(7);
+						(_localctx as PredicateBinaryContext)._right = this.predicateExpr(8);
 						}
 						break;
 
-					case 3:
+					case 2:
 						{
-						_localctx = new PredicateExprContext(_parentctx, _parentState);
+						_localctx = new PredicateBinaryContext(new PredicateExprContext(_parentctx, _parentState));
+						(_localctx as PredicateBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_predicateExpr);
 						this.state = 74;
-						if (!(this.precpred(this._ctx, 5))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 5)");
+						if (!(this.precpred(this._ctx, 6))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 6)");
 						this.state = 75;
+						(_localctx as PredicateBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
-						if ( !(((((_la - 34)) & ~0x1F) === 0 && ((1 << (_la - 34)) & ((1 << (AqlParser.GREATER_THAN - 34)) | (1 << (AqlParser.GREATER_THAN_EQUALS - 34)) | (1 << (AqlParser.LESS_THAN - 34)) | (1 << (AqlParser.LESS_THAN_EQUALS - 34)))) !== 0)) ) {
-						this._errHandler.recoverInline(this);
+						if ( !(_la===AqlParser.PLUS || _la===AqlParser.MINUS) ) {
+							(_localctx as PredicateBinaryContext)._operator = this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
 								this.matchedEOF = true;
@@ -395,20 +405,22 @@ export class AqlParser extends Parser {
 							this.consume();
 						}
 						this.state = 76;
-						this.predicateExpr(6);
+						(_localctx as PredicateBinaryContext)._right = this.predicateExpr(7);
 						}
 						break;
 
-					case 4:
+					case 3:
 						{
-						_localctx = new PredicateExprContext(_parentctx, _parentState);
+						_localctx = new PredicateBinaryContext(new PredicateExprContext(_parentctx, _parentState));
+						(_localctx as PredicateBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_predicateExpr);
 						this.state = 77;
-						if (!(this.precpred(this._ctx, 4))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 4)");
+						if (!(this.precpred(this._ctx, 5))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 5)");
 						this.state = 78;
+						(_localctx as PredicateBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
-						if ( !(_la===AqlParser.EQUAL || _la===AqlParser.NOT_EQUAL) ) {
-						this._errHandler.recoverInline(this);
+						if ( !(((((_la - 34)) & ~0x1F) === 0 && ((1 << (_la - 34)) & ((1 << (AqlParser.GREATER_THAN - 34)) | (1 << (AqlParser.GREATER_THAN_EQUALS - 34)) | (1 << (AqlParser.LESS_THAN - 34)) | (1 << (AqlParser.LESS_THAN_EQUALS - 34)))) !== 0)) ) {
+							(_localctx as PredicateBinaryContext)._operator = this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
 								this.matchedEOF = true;
@@ -418,39 +430,66 @@ export class AqlParser extends Parser {
 							this.consume();
 						}
 						this.state = 79;
-						this.predicateExpr(5);
+						(_localctx as PredicateBinaryContext)._right = this.predicateExpr(6);
+						}
+						break;
+
+					case 4:
+						{
+						_localctx = new PredicateBinaryContext(new PredicateExprContext(_parentctx, _parentState));
+						(_localctx as PredicateBinaryContext)._left = _prevctx;
+						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_predicateExpr);
+						this.state = 80;
+						if (!(this.precpred(this._ctx, 4))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 4)");
+						this.state = 81;
+						(_localctx as PredicateBinaryContext)._operator = this._input.LT(1);
+						_la = this._input.LA(1);
+						if ( !(_la===AqlParser.EQUAL || _la===AqlParser.NOT_EQUAL) ) {
+							(_localctx as PredicateBinaryContext)._operator = this._errHandler.recoverInline(this);
+						} else {
+							if (this._input.LA(1) === Token.EOF) {
+								this.matchedEOF = true;
+							}
+
+							this._errHandler.reportMatch(this);
+							this.consume();
+						}
+						this.state = 82;
+						(_localctx as PredicateBinaryContext)._right = this.predicateExpr(5);
 						}
 						break;
 
 					case 5:
 						{
-						_localctx = new PredicateExprContext(_parentctx, _parentState);
+						_localctx = new PredicateBinaryContext(new PredicateExprContext(_parentctx, _parentState));
+						(_localctx as PredicateBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_predicateExpr);
-						this.state = 80;
+						this.state = 83;
 						if (!(this.precpred(this._ctx, 3))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 3)");
-						this.state = 81;
-						this.match(AqlParser.AND);
-						this.state = 82;
-						this.predicateExpr(4);
+						this.state = 84;
+						(_localctx as PredicateBinaryContext)._operator = this.match(AqlParser.AND);
+						this.state = 85;
+						(_localctx as PredicateBinaryContext)._right = this.predicateExpr(4);
 						}
 						break;
 
 					case 6:
 						{
-						_localctx = new PredicateExprContext(_parentctx, _parentState);
+						_localctx = new PredicateBinaryContext(new PredicateExprContext(_parentctx, _parentState));
+						(_localctx as PredicateBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_predicateExpr);
-						this.state = 83;
+						this.state = 86;
 						if (!(this.precpred(this._ctx, 2))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 2)");
-						this.state = 84;
-						this.match(AqlParser.OR);
-						this.state = 85;
-						this.predicateExpr(3);
+						this.state = 87;
+						(_localctx as PredicateBinaryContext)._operator = this.match(AqlParser.OR);
+						this.state = 88;
+						(_localctx as PredicateBinaryContext)._right = this.predicateExpr(3);
 						}
 						break;
 					}
 					} 
 				}
-				this.state = 90;
+				this.state = 93;
 				this._errHandler.sync(this);
 				_alt = this.interpreter.adaptivePredict(this._input,5,this._ctx);
 			}
@@ -473,54 +512,60 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public predicateTerm(): PredicateTermContext {
 		let _localctx: PredicateTermContext = new PredicateTermContext(this._ctx, this.state);
-		this.enterRule(_localctx, 8, AqlParser.RULE_predicateTerm);
+		this.enterRule(_localctx, 10, AqlParser.RULE_predicateTerm);
 		try {
-			this.state = 100;
+			this.state = 103;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case AqlParser.IDENTIFIER:
+				_localctx = new PredicateAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 91;
+				this.state = 94;
 				this.column();
 				}
 				break;
 			case AqlParser.INT:
+				_localctx = new PredicateAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 92;
+				this.state = 95;
 				this.match(AqlParser.INT);
 				}
 				break;
 			case AqlParser.TRUE:
+				_localctx = new PredicateAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 93;
+				this.state = 96;
 				this.match(AqlParser.TRUE);
 				}
 				break;
 			case AqlParser.FALSE:
+				_localctx = new PredicateAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 94;
+				this.state = 97;
 				this.match(AqlParser.FALSE);
 				}
 				break;
 			case AqlParser.STRING:
+				_localctx = new PredicateAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 5);
 				{
-				this.state = 95;
+				this.state = 98;
 				this.match(AqlParser.STRING);
 				}
 				break;
 			case AqlParser.OPEN_PAREN:
+				_localctx = new PredicateNestedContext(_localctx);
 				this.enterOuterAlt(_localctx, 6);
 				{
-				this.state = 96;
+				this.state = 99;
 				this.match(AqlParser.OPEN_PAREN);
-				this.state = 97;
+				this.state = 100;
 				this.predicateExpr(0);
-				this.state = 98;
+				this.state = 101;
 				this.match(AqlParser.CLOSE_PAREN);
 				}
 				break;
@@ -545,20 +590,20 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public func(): FuncContext {
 		let _localctx: FuncContext = new FuncContext(this._ctx, this.state);
-		this.enterRule(_localctx, 10, AqlParser.RULE_func);
+		this.enterRule(_localctx, 12, AqlParser.RULE_func);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 102;
-			this.func_name();
-			this.state = 103;
-			this.match(AqlParser.OPEN_PAREN);
+			this.state = 105;
+			this.funcName();
 			this.state = 106;
+			this.match(AqlParser.OPEN_PAREN);
+			this.state = 109;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case AqlParser.STAR:
 				{
-				this.state = 104;
+				this.state = 107;
 				this.wildcard();
 				}
 				break;
@@ -572,14 +617,14 @@ export class AqlParser extends Parser {
 			case AqlParser.STRING:
 			case AqlParser.OPEN_PAREN:
 				{
-				this.state = 105;
+				this.state = 108;
 				this.selectionExpr(0);
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
-			this.state = 108;
+			this.state = 111;
 			this.match(AqlParser.CLOSE_PAREN);
 			}
 		}
@@ -598,14 +643,14 @@ export class AqlParser extends Parser {
 		return _localctx;
 	}
 	@RuleVersion(0)
-	public func_name(): Func_nameContext {
-		let _localctx: Func_nameContext = new Func_nameContext(this._ctx, this.state);
-		this.enterRule(_localctx, 12, AqlParser.RULE_func_name);
+	public funcName(): FuncNameContext {
+		let _localctx: FuncNameContext = new FuncNameContext(this._ctx, this.state);
+		this.enterRule(_localctx, 14, AqlParser.RULE_funcName);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 110;
+			this.state = 113;
 			_la = this._input.LA(1);
 			if ( !((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << AqlParser.COUNT) | (1 << AqlParser.MAX) | (1 << AqlParser.MIN))) !== 0)) ) {
 			this._errHandler.recoverInline(this);
@@ -646,19 +691,23 @@ export class AqlParser extends Parser {
 		let _parentState: number = this.state;
 		let _localctx: SelectionExprContext = new SelectionExprContext(this._ctx, _parentState);
 		let _prevctx: SelectionExprContext = _localctx;
-		let _startState: number = 14;
-		this.enterRecursionRule(_localctx, 14, AqlParser.RULE_selectionExpr, _p);
+		let _startState: number = 16;
+		this.enterRecursionRule(_localctx, 16, AqlParser.RULE_selectionExpr, _p);
 		let _la: number;
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 113;
+			_localctx = new SelectionTermAltContext(_localctx);
+			this._ctx = _localctx;
+			_prevctx = _localctx;
+
+			this.state = 116;
 			this.selectionTerm();
 			}
 			this._ctx._stop = this._input.tryLT(-1);
-			this.state = 123;
+			this.state = 126;
 			this._errHandler.sync(this);
 			_alt = this.interpreter.adaptivePredict(this._input,9,this._ctx);
 			while ( _alt!==2 && _alt!==ATN.INVALID_ALT_NUMBER ) {
@@ -666,42 +715,21 @@ export class AqlParser extends Parser {
 					if ( this._parseListeners!=null ) this.triggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					this.state = 121;
+					this.state = 124;
 					this._errHandler.sync(this);
 					switch ( this.interpreter.adaptivePredict(this._input,8,this._ctx) ) {
 					case 1:
 						{
-						_localctx = new SelectionExprContext(_parentctx, _parentState);
-						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_selectionExpr);
-						this.state = 115;
-						if (!(this.precpred(this._ctx, 3))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 3)");
-						this.state = 116;
-						_la = this._input.LA(1);
-						if ( !(_la===AqlParser.STAR || _la===AqlParser.DIVIDE) ) {
-						this._errHandler.recoverInline(this);
-						} else {
-							if (this._input.LA(1) === Token.EOF) {
-								this.matchedEOF = true;
-							}
-
-							this._errHandler.reportMatch(this);
-							this.consume();
-						}
-						this.state = 117;
-						this.selectionExpr(4);
-						}
-						break;
-
-					case 2:
-						{
-						_localctx = new SelectionExprContext(_parentctx, _parentState);
+						_localctx = new SelectionBinaryContext(new SelectionExprContext(_parentctx, _parentState));
+						(_localctx as SelectionBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_selectionExpr);
 						this.state = 118;
-						if (!(this.precpred(this._ctx, 2))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 2)");
+						if (!(this.precpred(this._ctx, 3))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 3)");
 						this.state = 119;
+						(_localctx as SelectionBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
-						if ( !(_la===AqlParser.PLUS || _la===AqlParser.MINUS) ) {
-						this._errHandler.recoverInline(this);
+						if ( !(_la===AqlParser.STAR || _la===AqlParser.DIVIDE) ) {
+							(_localctx as SelectionBinaryContext)._operator = this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
 								this.matchedEOF = true;
@@ -711,13 +739,38 @@ export class AqlParser extends Parser {
 							this.consume();
 						}
 						this.state = 120;
-						this.selectionExpr(3);
+						(_localctx as SelectionBinaryContext)._right = this.selectionExpr(4);
+						}
+						break;
+
+					case 2:
+						{
+						_localctx = new SelectionBinaryContext(new SelectionExprContext(_parentctx, _parentState));
+						(_localctx as SelectionBinaryContext)._left = _prevctx;
+						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_selectionExpr);
+						this.state = 121;
+						if (!(this.precpred(this._ctx, 2))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 2)");
+						this.state = 122;
+						(_localctx as SelectionBinaryContext)._operator = this._input.LT(1);
+						_la = this._input.LA(1);
+						if ( !(_la===AqlParser.PLUS || _la===AqlParser.MINUS) ) {
+							(_localctx as SelectionBinaryContext)._operator = this._errHandler.recoverInline(this);
+						} else {
+							if (this._input.LA(1) === Token.EOF) {
+								this.matchedEOF = true;
+							}
+
+							this._errHandler.reportMatch(this);
+							this.consume();
+						}
+						this.state = 123;
+						(_localctx as SelectionBinaryContext)._right = this.selectionExpr(3);
 						}
 						break;
 					}
 					} 
 				}
-				this.state = 125;
+				this.state = 128;
 				this._errHandler.sync(this);
 				_alt = this.interpreter.adaptivePredict(this._input,9,this._ctx);
 			}
@@ -740,63 +793,70 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public selectionTerm(): SelectionTermContext {
 		let _localctx: SelectionTermContext = new SelectionTermContext(this._ctx, this.state);
-		this.enterRule(_localctx, 16, AqlParser.RULE_selectionTerm);
+		this.enterRule(_localctx, 18, AqlParser.RULE_selectionTerm);
 		try {
-			this.state = 136;
+			this.state = 139;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case AqlParser.COUNT:
 			case AqlParser.MAX:
 			case AqlParser.MIN:
+				_localctx = new SelectionFunctionContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 126;
+				this.state = 129;
 				this.func();
 				}
 				break;
 			case AqlParser.IDENTIFIER:
+				_localctx = new SelectionAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 127;
+				this.state = 130;
 				this.column();
 				}
 				break;
 			case AqlParser.INT:
+				_localctx = new SelectionAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 128;
+				this.state = 131;
 				this.match(AqlParser.INT);
 				}
 				break;
 			case AqlParser.TRUE:
+				_localctx = new SelectionAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 129;
+				this.state = 132;
 				this.match(AqlParser.TRUE);
 				}
 				break;
 			case AqlParser.FALSE:
+				_localctx = new SelectionAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 5);
 				{
-				this.state = 130;
+				this.state = 133;
 				this.match(AqlParser.FALSE);
 				}
 				break;
 			case AqlParser.STRING:
+				_localctx = new SelectionAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 6);
 				{
-				this.state = 131;
+				this.state = 134;
 				this.match(AqlParser.STRING);
 				}
 				break;
 			case AqlParser.OPEN_PAREN:
+				_localctx = new SelectionNestedContext(_localctx);
 				this.enterOuterAlt(_localctx, 7);
 				{
-				this.state = 132;
+				this.state = 135;
 				this.match(AqlParser.OPEN_PAREN);
-				this.state = 133;
+				this.state = 136;
 				this.selectionExpr(0);
-				this.state = 134;
+				this.state = 137;
 				this.match(AqlParser.CLOSE_PAREN);
 				}
 				break;
@@ -821,9 +881,9 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public date(): DateContext {
 		let _localctx: DateContext = new DateContext(this._ctx, this.state);
-		this.enterRule(_localctx, 18, AqlParser.RULE_date);
+		this.enterRule(_localctx, 20, AqlParser.RULE_date);
 		try {
-			this.state = 140;
+			this.state = 143;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case AqlParser.TODAY:
@@ -837,14 +897,14 @@ export class AqlParser extends Parser {
 			case AqlParser.SUNDAY:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 138;
+				this.state = 141;
 				this.relativeDate();
 				}
 				break;
 			case AqlParser.STRING:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 139;
+				this.state = 142;
 				this.absoluteDate();
 				}
 				break;
@@ -869,21 +929,21 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public relativeDate(): RelativeDateContext {
 		let _localctx: RelativeDateContext = new RelativeDateContext(this._ctx, this.state);
-		this.enterRule(_localctx, 20, AqlParser.RULE_relativeDate);
+		this.enterRule(_localctx, 22, AqlParser.RULE_relativeDate);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 142;
-			this.day();
 			this.state = 145;
+			this.day();
+			this.state = 148;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la===AqlParser.AT) {
 				{
-				this.state = 143;
+				this.state = 146;
 				this.match(AqlParser.AT);
-				this.state = 144;
+				this.state = 147;
 				this.time();
 				}
 			}
@@ -907,11 +967,11 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public absoluteDate(): AbsoluteDateContext {
 		let _localctx: AbsoluteDateContext = new AbsoluteDateContext(this._ctx, this.state);
-		this.enterRule(_localctx, 22, AqlParser.RULE_absoluteDate);
+		this.enterRule(_localctx, 24, AqlParser.RULE_absoluteDate);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 147;
+			this.state = 150;
 			this.match(AqlParser.STRING);
 			}
 		}
@@ -932,12 +992,12 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public day(): DayContext {
 		let _localctx: DayContext = new DayContext(this._ctx, this.state);
-		this.enterRule(_localctx, 24, AqlParser.RULE_day);
+		this.enterRule(_localctx, 26, AqlParser.RULE_day);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 149;
+			this.state = 152;
 			_la = this._input.LA(1);
 			if ( !((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << AqlParser.TODAY) | (1 << AqlParser.YESTERDAY) | (1 << AqlParser.MONDAY) | (1 << AqlParser.TUESDAY) | (1 << AqlParser.WEDNESDAY) | (1 << AqlParser.THURSDAY) | (1 << AqlParser.FRIDAY) | (1 << AqlParser.SATURDAY) | (1 << AqlParser.SUNDAY))) !== 0)) ) {
 			this._errHandler.recoverInline(this);
@@ -968,11 +1028,11 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public wildcard(): WildcardContext {
 		let _localctx: WildcardContext = new WildcardContext(this._ctx, this.state);
-		this.enterRule(_localctx, 26, AqlParser.RULE_wildcard);
+		this.enterRule(_localctx, 28, AqlParser.RULE_wildcard);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 151;
+			this.state = 154;
 			this.match(AqlParser.STAR);
 			}
 		}
@@ -993,11 +1053,11 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public time(): TimeContext {
 		let _localctx: TimeContext = new TimeContext(this._ctx, this.state);
-		this.enterRule(_localctx, 28, AqlParser.RULE_time);
+		this.enterRule(_localctx, 30, AqlParser.RULE_time);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 153;
+			this.state = 156;
 			this.match(AqlParser.STRING);
 			}
 		}
@@ -1018,11 +1078,11 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public table(): TableContext {
 		let _localctx: TableContext = new TableContext(this._ctx, this.state);
-		this.enterRule(_localctx, 30, AqlParser.RULE_table);
+		this.enterRule(_localctx, 32, AqlParser.RULE_table);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 155;
+			this.state = 158;
 			this.match(AqlParser.IDENTIFIER);
 			}
 		}
@@ -1043,11 +1103,11 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public column(): ColumnContext {
 		let _localctx: ColumnContext = new ColumnContext(this._ctx, this.state);
-		this.enterRule(_localctx, 32, AqlParser.RULE_column);
+		this.enterRule(_localctx, 34, AqlParser.RULE_column);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 157;
+			this.state = 160;
 			this.match(AqlParser.IDENTIFIER);
 			}
 		}
@@ -1068,10 +1128,10 @@ export class AqlParser extends Parser {
 
 	public sempred(_localctx: RuleContext, ruleIndex: number, predIndex: number): boolean {
 		switch (ruleIndex) {
-		case 3:
+		case 4:
 			return this.predicateExpr_sempred(_localctx as PredicateExprContext, predIndex);
 
-		case 7:
+		case 8:
 			return this.selectionExpr_sempred(_localctx as SelectionExprContext, predIndex);
 		}
 		return true;
@@ -1110,73 +1170,74 @@ export class AqlParser extends Parser {
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uAF6F\u8320\u479D\uB75C\u4880\u1605\u191C\uAB37\x03*\xA2\x04\x02"+
+		"\x03\uAF6F\u8320\u479D\uB75C\u4880\u1605\u191C\uAB37\x03*\xA5\x04\x02"+
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07"+
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r\x04"+
-		"\x0E\t\x0E\x04\x0F\t\x0F\x04\x10\t\x10\x04\x11\t\x11\x04\x12\t\x12\x03"+
-		"\x02\x03\x02\x03\x02\x03\x02\x03\x02\x07\x02*\n\x02\f\x02\x0E\x02-\v\x02"+
-		"\x03\x02\x03\x02\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x05\x03"+
-		"7\n\x03\x03\x04\x03\x04\x03\x04\x03\x04\x07\x04=\n\x04\f\x04\x0E\x04@"+
-		"\v\x04\x05\x04B\n\x04\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05"+
-		"\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05"+
-		"\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x07\x05Y\n\x05\f\x05"+
-		"\x0E\x05\\\v\x05\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06"+
-		"\x03\x06\x03\x06\x05\x06g\n\x06\x03\x07\x03\x07\x03\x07\x03\x07\x05\x07"+
-		"m\n\x07\x03\x07\x03\x07\x03\b\x03\b\x03\t\x03\t\x03\t\x03\t\x03\t\x03"+
-		"\t\x03\t\x03\t\x03\t\x07\t|\n\t\f\t\x0E\t\x7F\v\t\x03\n\x03\n\x03\n\x03"+
-		"\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x05\n\x8B\n\n\x03\v\x03\v\x05\v"+
-		"\x8F\n\v\x03\f\x03\f\x03\f\x05\f\x94\n\f\x03\r\x03\r\x03\x0E\x03\x0E\x03"+
-		"\x0F\x03\x0F\x03\x10\x03\x10\x03\x11\x03\x11\x03\x12\x03\x12\x03\x12\x02"+
-		"\x02\x04\b\x10\x13\x02\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02\x0E\x02\x10"+
-		"\x02\x12\x02\x14\x02\x16\x02\x18\x02\x1A\x02\x1C\x02\x1E\x02 \x02\"\x02"+
-		"\x02\b\x03\x02\x1E\x1F\x03\x02 !\x03\x02$\'\x03\x02\"#\x03\x02\x14\x16"+
-		"\x03\x02\v\x13\xAB\x02$\x03\x02\x02\x02\x046\x03\x02\x02\x02\x06A\x03"+
-		"\x02\x02\x02\bC\x03\x02\x02\x02\nf\x03\x02\x02\x02\fh\x03\x02\x02\x02"+
-		"\x0Ep\x03\x02\x02\x02\x10r\x03\x02\x02\x02\x12\x8A\x03\x02\x02\x02\x14"+
-		"\x8E\x03\x02\x02\x02\x16\x90\x03\x02\x02\x02\x18\x95\x03\x02\x02\x02\x1A"+
-		"\x97\x03\x02\x02\x02\x1C\x99\x03\x02\x02\x02\x1E\x9B\x03\x02\x02\x02 "+
-		"\x9D\x03\x02\x02\x02\"\x9F\x03\x02\x02\x02$%\x07\x03\x02\x02%&\x05\x06"+
-		"\x04\x02&\'\x07\x04\x02\x02\'+\x05 \x11\x02(*\x05\x04\x03\x02)(\x03\x02"+
-		"\x02\x02*-\x03\x02\x02\x02+)\x03\x02\x02\x02+,\x03\x02\x02\x02,.\x03\x02"+
-		"\x02\x02-+\x03\x02\x02\x02./\x07\x02\x02\x03/\x03\x03\x02\x02\x0201\x07"+
-		"\b\x02\x0217\x05\b\x05\x0223\x07\x05\x02\x0237\x05\x14\v\x0245\x07\x06"+
-		"\x02\x0257\x05\x14\v\x0260\x03\x02\x02\x0262\x03\x02\x02\x0264\x03\x02"+
-		"\x02\x027\x05\x03\x02\x02\x028B\x05\x1C\x0F\x029>\x05\x10\t\x02:;\x07"+
-		"(\x02\x02;=\x05\x10\t\x02<:\x03\x02\x02\x02=@\x03\x02\x02\x02><\x03\x02"+
-		"\x02\x02>?\x03\x02\x02\x02?B\x03\x02\x02\x02@>\x03\x02\x02\x02A8\x03\x02"+
-		"\x02\x02A9\x03\x02\x02\x02B\x07\x03\x02\x02\x02CD\b\x05\x01\x02DE\x05"+
-		"\n\x06\x02EZ\x03\x02\x02\x02FG\f\t\x02\x02GH\t\x02\x02\x02HY\x05\b\x05"+
-		"\nIJ\f\b\x02\x02JK\t\x03\x02\x02KY\x05\b\x05\tLM\f\x07\x02\x02MN\t\x04"+
-		"\x02\x02NY\x05\b\x05\bOP\f\x06\x02\x02PQ\t\x05\x02\x02QY\x05\b\x05\x07"+
-		"RS\f\x05\x02\x02ST\x07\x17\x02\x02TY\x05\b\x05\x06UV\f\x04\x02\x02VW\x07"+
-		"\x18\x02\x02WY\x05\b\x05\x05XF\x03\x02\x02\x02XI\x03\x02\x02\x02XL\x03"+
-		"\x02\x02\x02XO\x03\x02\x02\x02XR\x03\x02\x02\x02XU\x03\x02\x02\x02Y\\"+
-		"\x03\x02\x02\x02ZX\x03\x02\x02\x02Z[\x03\x02\x02\x02[\t\x03\x02\x02\x02"+
-		"\\Z\x03\x02\x02\x02]g\x05\"\x12\x02^g\x07\x1A\x02\x02_g\x07\t\x02\x02"+
-		"`g\x07\n\x02\x02ag\x07\x1B\x02\x02bc\x07\x1C\x02\x02cd\x05\b\x05\x02d"+
-		"e\x07\x1D\x02\x02eg\x03\x02\x02\x02f]\x03\x02\x02\x02f^\x03\x02\x02\x02"+
-		"f_\x03\x02\x02\x02f`\x03\x02\x02\x02fa\x03\x02\x02\x02fb\x03\x02\x02\x02"+
-		"g\v\x03\x02\x02\x02hi\x05\x0E\b\x02il\x07\x1C\x02\x02jm\x05\x1C\x0F\x02"+
-		"km\x05\x10\t\x02lj\x03\x02\x02\x02lk\x03\x02\x02\x02mn\x03\x02\x02\x02"+
-		"no\x07\x1D\x02\x02o\r\x03\x02\x02\x02pq\t\x06\x02\x02q\x0F\x03\x02\x02"+
-		"\x02rs\b\t\x01\x02st\x05\x12\n\x02t}\x03\x02\x02\x02uv\f\x05\x02\x02v"+
-		"w\t\x02\x02\x02w|\x05\x10\t\x06xy\f\x04\x02\x02yz\t\x03\x02\x02z|\x05"+
-		"\x10\t\x05{u\x03\x02\x02\x02{x\x03\x02\x02\x02|\x7F\x03\x02\x02\x02}{"+
-		"\x03\x02\x02\x02}~\x03\x02\x02\x02~\x11\x03\x02\x02\x02\x7F}\x03\x02\x02"+
-		"\x02\x80\x8B\x05\f\x07\x02\x81\x8B\x05\"\x12\x02\x82\x8B\x07\x1A\x02\x02"+
-		"\x83\x8B\x07\t\x02\x02\x84\x8B\x07\n\x02\x02\x85\x8B\x07\x1B\x02\x02\x86"+
-		"\x87\x07\x1C\x02\x02\x87\x88\x05\x10\t\x02\x88\x89\x07\x1D\x02\x02\x89"+
-		"\x8B\x03\x02\x02\x02\x8A\x80\x03\x02\x02\x02\x8A\x81\x03\x02\x02\x02\x8A"+
-		"\x82\x03\x02\x02\x02\x8A\x83\x03\x02\x02\x02\x8A\x84\x03\x02\x02\x02\x8A"+
-		"\x85\x03\x02\x02\x02\x8A\x86\x03\x02\x02\x02\x8B\x13\x03\x02\x02\x02\x8C"+
-		"\x8F\x05\x16\f\x02\x8D\x8F\x05\x18\r\x02\x8E\x8C\x03\x02\x02\x02\x8E\x8D"+
-		"\x03\x02\x02\x02\x8F\x15\x03\x02\x02\x02\x90\x93\x05\x1A\x0E\x02\x91\x92"+
-		"\x07\x07\x02\x02\x92\x94\x05\x1E\x10\x02\x93\x91\x03\x02\x02\x02\x93\x94"+
-		"\x03\x02\x02\x02\x94\x17\x03\x02\x02\x02\x95\x96\x07\x1B\x02\x02\x96\x19"+
-		"\x03\x02\x02\x02\x97\x98\t\x07\x02\x02\x98\x1B\x03\x02\x02\x02\x99\x9A"+
-		"\x07\x1E\x02\x02\x9A\x1D\x03\x02\x02\x02\x9B\x9C\x07\x1B\x02\x02\x9C\x1F"+
-		"\x03\x02\x02\x02\x9D\x9E\x07\x19\x02\x02\x9E!\x03\x02\x02\x02\x9F\xA0"+
-		"\x07\x19\x02\x02\xA0#\x03\x02\x02\x02\x0F+6>AXZfl{}\x8A\x8E\x93";
+		"\x0E\t\x0E\x04\x0F\t\x0F\x04\x10\t\x10\x04\x11\t\x11\x04\x12\t\x12\x04"+
+		"\x13\t\x13\x03\x02\x03\x02\x03\x02\x03\x02\x03\x02\x03\x02\x03\x02\x03"+
+		"\x03\x07\x03/\n\x03\f\x03\x0E\x032\v\x03\x03\x04\x03\x04\x03\x04\x03\x04"+
+		"\x03\x04\x03\x04\x05\x04:\n\x04\x03\x05\x03\x05\x03\x05\x03\x05\x07\x05"+
+		"@\n\x05\f\x05\x0E\x05C\v\x05\x05\x05E\n\x05\x03\x06\x03\x06\x03\x06\x03"+
+		"\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03"+
+		"\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x07"+
+		"\x06\\\n\x06\f\x06\x0E\x06_\v\x06\x03\x07\x03\x07\x03\x07\x03\x07\x03"+
+		"\x07\x03\x07\x03\x07\x03\x07\x03\x07\x05\x07j\n\x07\x03\b\x03\b\x03\b"+
+		"\x03\b\x05\bp\n\b\x03\b\x03\b\x03\t\x03\t\x03\n\x03\n\x03\n\x03\n\x03"+
+		"\n\x03\n\x03\n\x03\n\x03\n\x07\n\x7F\n\n\f\n\x0E\n\x82\v\n\x03\v\x03\v"+
+		"\x03\v\x03\v\x03\v\x03\v\x03\v\x03\v\x03\v\x03\v\x05\v\x8E\n\v\x03\f\x03"+
+		"\f\x05\f\x92\n\f\x03\r\x03\r\x03\r\x05\r\x97\n\r\x03\x0E\x03\x0E\x03\x0F"+
+		"\x03\x0F\x03\x10\x03\x10\x03\x11\x03\x11\x03\x12\x03\x12\x03\x13\x03\x13"+
+		"\x03\x13\x02\x02\x04\n\x12\x14\x02\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02"+
+		"\x0E\x02\x10\x02\x12\x02\x14\x02\x16\x02\x18\x02\x1A\x02\x1C\x02\x1E\x02"+
+		" \x02\"\x02$\x02\x02\b\x03\x02\x1E\x1F\x03\x02 !\x03\x02$\'\x03\x02\""+
+		"#\x03\x02\x14\x16\x03\x02\v\x13\xAD\x02&\x03\x02\x02\x02\x040\x03\x02"+
+		"\x02\x02\x069\x03\x02\x02\x02\bD\x03\x02\x02\x02\nF\x03\x02\x02\x02\f"+
+		"i\x03\x02\x02\x02\x0Ek\x03\x02\x02\x02\x10s\x03\x02\x02\x02\x12u\x03\x02"+
+		"\x02\x02\x14\x8D\x03\x02\x02\x02\x16\x91\x03\x02\x02\x02\x18\x93\x03\x02"+
+		"\x02\x02\x1A\x98\x03\x02\x02\x02\x1C\x9A\x03\x02\x02\x02\x1E\x9C\x03\x02"+
+		"\x02\x02 \x9E\x03\x02\x02\x02\"\xA0\x03\x02\x02\x02$\xA2\x03\x02\x02\x02"+
+		"&\'\x07\x03\x02\x02\'(\x05\b\x05\x02()\x07\x04\x02\x02)*\x05\"\x12\x02"+
+		"*+\x05\x04\x03\x02+,\x07\x02\x02\x03,\x03\x03\x02\x02\x02-/\x05\x06\x04"+
+		"\x02.-\x03\x02\x02\x02/2\x03\x02\x02\x020.\x03\x02\x02\x0201\x03\x02\x02"+
+		"\x021\x05\x03\x02\x02\x0220\x03\x02\x02\x0234\x07\b\x02\x024:\x05\n\x06"+
+		"\x0256\x07\x05\x02\x026:\x05\x16\f\x0278\x07\x06\x02\x028:\x05\x16\f\x02"+
+		"93\x03\x02\x02\x0295\x03\x02\x02\x0297\x03\x02\x02\x02:\x07\x03\x02\x02"+
+		"\x02;E\x05\x1E\x10\x02<A\x05\x12\n\x02=>\x07(\x02\x02>@\x05\x12\n\x02"+
+		"?=\x03\x02\x02\x02@C\x03\x02\x02\x02A?\x03\x02\x02\x02AB\x03\x02\x02\x02"+
+		"BE\x03\x02\x02\x02CA\x03\x02\x02\x02D;\x03\x02\x02\x02D<\x03\x02\x02\x02"+
+		"E\t\x03\x02\x02\x02FG\b\x06\x01\x02GH\x05\f\x07\x02H]\x03\x02\x02\x02"+
+		"IJ\f\t\x02\x02JK\t\x02\x02\x02K\\\x05\n\x06\nLM\f\b\x02\x02MN\t\x03\x02"+
+		"\x02N\\\x05\n\x06\tOP\f\x07\x02\x02PQ\t\x04\x02\x02Q\\\x05\n\x06\bRS\f"+
+		"\x06\x02\x02ST\t\x05\x02\x02T\\\x05\n\x06\x07UV\f\x05\x02\x02VW\x07\x17"+
+		"\x02\x02W\\\x05\n\x06\x06XY\f\x04\x02\x02YZ\x07\x18\x02\x02Z\\\x05\n\x06"+
+		"\x05[I\x03\x02\x02\x02[L\x03\x02\x02\x02[O\x03\x02\x02\x02[R\x03\x02\x02"+
+		"\x02[U\x03\x02\x02\x02[X\x03\x02\x02\x02\\_\x03\x02\x02\x02][\x03\x02"+
+		"\x02\x02]^\x03\x02\x02\x02^\v\x03\x02\x02\x02_]\x03\x02\x02\x02`j\x05"+
+		"$\x13\x02aj\x07\x1A\x02\x02bj\x07\t\x02\x02cj\x07\n\x02\x02dj\x07\x1B"+
+		"\x02\x02ef\x07\x1C\x02\x02fg\x05\n\x06\x02gh\x07\x1D\x02\x02hj\x03\x02"+
+		"\x02\x02i`\x03\x02\x02\x02ia\x03\x02\x02\x02ib\x03\x02\x02\x02ic\x03\x02"+
+		"\x02\x02id\x03\x02\x02\x02ie\x03\x02\x02\x02j\r\x03\x02\x02\x02kl\x05"+
+		"\x10\t\x02lo\x07\x1C\x02\x02mp\x05\x1E\x10\x02np\x05\x12\n\x02om\x03\x02"+
+		"\x02\x02on\x03\x02\x02\x02pq\x03\x02\x02\x02qr\x07\x1D\x02\x02r\x0F\x03"+
+		"\x02\x02\x02st\t\x06\x02\x02t\x11\x03\x02\x02\x02uv\b\n\x01\x02vw\x05"+
+		"\x14\v\x02w\x80\x03\x02\x02\x02xy\f\x05\x02\x02yz\t\x02\x02\x02z\x7F\x05"+
+		"\x12\n\x06{|\f\x04\x02\x02|}\t\x03\x02\x02}\x7F\x05\x12\n\x05~x\x03\x02"+
+		"\x02\x02~{\x03\x02\x02\x02\x7F\x82\x03\x02\x02\x02\x80~\x03\x02\x02\x02"+
+		"\x80\x81\x03\x02\x02\x02\x81\x13\x03\x02\x02\x02\x82\x80\x03\x02\x02\x02"+
+		"\x83\x8E\x05\x0E\b\x02\x84\x8E\x05$\x13\x02\x85\x8E\x07\x1A\x02\x02\x86"+
+		"\x8E\x07\t\x02\x02\x87\x8E\x07\n\x02\x02\x88\x8E\x07\x1B\x02\x02\x89\x8A"+
+		"\x07\x1C\x02\x02\x8A\x8B\x05\x12\n\x02\x8B\x8C\x07\x1D\x02\x02\x8C\x8E"+
+		"\x03\x02\x02\x02\x8D\x83\x03\x02\x02\x02\x8D\x84\x03\x02\x02\x02\x8D\x85"+
+		"\x03\x02\x02\x02\x8D\x86\x03\x02\x02\x02\x8D\x87\x03\x02\x02\x02\x8D\x88"+
+		"\x03\x02\x02\x02\x8D\x89\x03\x02\x02\x02\x8E\x15\x03\x02\x02\x02\x8F\x92"+
+		"\x05\x18\r\x02\x90\x92\x05\x1A\x0E\x02\x91\x8F\x03\x02\x02\x02\x91\x90"+
+		"\x03\x02\x02\x02\x92\x17\x03\x02\x02\x02\x93\x96\x05\x1C\x0F\x02\x94\x95"+
+		"\x07\x07\x02\x02\x95\x97\x05 \x11\x02\x96\x94\x03\x02\x02\x02\x96\x97"+
+		"\x03\x02\x02\x02\x97\x19\x03\x02\x02\x02\x98\x99\x07\x1B\x02\x02\x99\x1B"+
+		"\x03\x02\x02\x02\x9A\x9B\t\x07\x02\x02\x9B\x1D\x03\x02\x02\x02\x9C\x9D"+
+		"\x07\x1E\x02\x02\x9D\x1F\x03\x02\x02\x02\x9E\x9F\x07\x1B\x02\x02\x9F!"+
+		"\x03\x02\x02\x02\xA0\xA1\x07\x19\x02\x02\xA1#\x03\x02\x02\x02\xA2\xA3"+
+		"\x07\x19\x02\x02\xA3%\x03\x02\x02\x02\x0F09AD[]io~\x80\x8D\x91\x96";
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {
 		if (!AqlParser.__ATN) {
@@ -1197,16 +1258,10 @@ export class ProgContext extends ParserRuleContext {
 	public table(): TableContext {
 		return this.getRuleContext(0, TableContext);
 	}
-	public EOF(): TerminalNode { return this.getToken(AqlParser.EOF, 0); }
-	public extra_thing(): Extra_thingContext[];
-	public extra_thing(i: number): Extra_thingContext;
-	public extra_thing(i?: number): Extra_thingContext | Extra_thingContext[] {
-		if (i === undefined) {
-			return this.getRuleContexts(Extra_thingContext);
-		} else {
-			return this.getRuleContext(i, Extra_thingContext);
-		}
+	public filters(): FiltersContext {
+		return this.getRuleContext(0, FiltersContext);
 	}
+	public EOF(): TerminalNode { return this.getToken(AqlParser.EOF, 0); }
 	constructor(parent: ParserRuleContext, invokingState: number);
 	constructor(parent: ParserRuleContext, invokingState: number) {
 		super(parent, invokingState);
@@ -1221,68 +1276,74 @@ export class ProgContext extends ParserRuleContext {
 	public exitRule(listener: AqlListener): void {
 		if (listener.exitProg) listener.exitProg(this);
 	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitProg) return visitor.visitProg(this);
+		else return visitor.visitChildren(this);
+	}
 }
 
 
-export class Extra_thingContext extends ParserRuleContext {
-	constructor();
-	constructor(parent: ParserRuleContext, invokingState: number);
-	constructor(parent?: ParserRuleContext, invokingState?: number) {
-		if (parent !== undefined && invokingState !== undefined) {
-			super(parent, invokingState);
+export class FiltersContext extends ParserRuleContext {
+	public filter(): FilterContext[];
+	public filter(i: number): FilterContext;
+	public filter(i?: number): FilterContext | FilterContext[] {
+		if (i === undefined) {
+			return this.getRuleContexts(FilterContext);
 		} else {
-			super();
+			return this.getRuleContext(i, FilterContext);
 		}
 	}
-	@Override public get ruleIndex(): number { return AqlParser.RULE_extra_thing; }
- 
-	public copyFrom(ctx: Extra_thingContext): void {
-		super.copyFrom(ctx);
+	constructor(parent: ParserRuleContext, invokingState: number);
+	constructor(parent: ParserRuleContext, invokingState: number) {
+		super(parent, invokingState);
+
 	}
-}
-export class Since_branchContext extends Extra_thingContext {
-	public SINCE(): TerminalNode { return this.getToken(AqlParser.SINCE, 0); }
-	public date(): DateContext {
-		return this.getRuleContext(0, DateContext);
-	}
-	constructor(ctx: Extra_thingContext) { super(); this.copyFrom(ctx); }
+	@Override public get ruleIndex(): number { return AqlParser.RULE_filters; }
 	@Override
 	public enterRule(listener: AqlListener): void {
-		if (listener.enterSince_branch) listener.enterSince_branch(this);
+		if (listener.enterFilters) listener.enterFilters(this);
 	}
 	@Override
 	public exitRule(listener: AqlListener): void {
-		if (listener.exitSince_branch) listener.exitSince_branch(this);
+		if (listener.exitFilters) listener.exitFilters(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitFilters) return visitor.visitFilters(this);
+		else return visitor.visitChildren(this);
 	}
 }
-export class Predicate_branchContext extends Extra_thingContext {
-	public WHERE(): TerminalNode { return this.getToken(AqlParser.WHERE, 0); }
-	public predicateExpr(): PredicateExprContext {
-		return this.getRuleContext(0, PredicateExprContext);
+
+
+export class FilterContext extends ParserRuleContext {
+	public WHERE(): TerminalNode | undefined { return this.tryGetToken(AqlParser.WHERE, 0); }
+	public predicateExpr(): PredicateExprContext | undefined {
+		return this.tryGetRuleContext(0, PredicateExprContext);
 	}
-	constructor(ctx: Extra_thingContext) { super(); this.copyFrom(ctx); }
+	public SINCE(): TerminalNode | undefined { return this.tryGetToken(AqlParser.SINCE, 0); }
+	public date(): DateContext | undefined {
+		return this.tryGetRuleContext(0, DateContext);
+	}
+	public UNTIL(): TerminalNode | undefined { return this.tryGetToken(AqlParser.UNTIL, 0); }
+	constructor(parent: ParserRuleContext, invokingState: number);
+	constructor(parent: ParserRuleContext, invokingState: number) {
+		super(parent, invokingState);
+
+	}
+	@Override public get ruleIndex(): number { return AqlParser.RULE_filter; }
 	@Override
 	public enterRule(listener: AqlListener): void {
-		if (listener.enterPredicate_branch) listener.enterPredicate_branch(this);
+		if (listener.enterFilter) listener.enterFilter(this);
 	}
 	@Override
 	public exitRule(listener: AqlListener): void {
-		if (listener.exitPredicate_branch) listener.exitPredicate_branch(this);
-	}
-}
-export class Until_branchContext extends Extra_thingContext {
-	public UNTIL(): TerminalNode { return this.getToken(AqlParser.UNTIL, 0); }
-	public date(): DateContext {
-		return this.getRuleContext(0, DateContext);
-	}
-	constructor(ctx: Extra_thingContext) { super(); this.copyFrom(ctx); }
-	@Override
-	public enterRule(listener: AqlListener): void {
-		if (listener.enterUntil_branch) listener.enterUntil_branch(this);
+		if (listener.exitFilter) listener.exitFilter(this);
 	}
 	@Override
-	public exitRule(listener: AqlListener): void {
-		if (listener.exitUntil_branch) listener.exitUntil_branch(this);
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitFilter) return visitor.visitFilter(this);
+		else return visitor.visitChildren(this);
 	}
 }
 
@@ -1323,10 +1384,53 @@ export class SelectionContext extends ParserRuleContext {
 	public exitRule(listener: AqlListener): void {
 		if (listener.exitSelection) listener.exitSelection(this);
 	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitSelection) return visitor.visitSelection(this);
+		else return visitor.visitChildren(this);
+	}
 }
 
 
 export class PredicateExprContext extends ParserRuleContext {
+	constructor();
+	constructor(parent: ParserRuleContext, invokingState: number);
+	constructor(parent?: ParserRuleContext, invokingState?: number) {
+		if (parent !== undefined && invokingState !== undefined) {
+			super(parent, invokingState);
+		} else {
+			super();
+		}
+	}
+	@Override public get ruleIndex(): number { return AqlParser.RULE_predicateExpr; }
+ 
+	public copyFrom(ctx: PredicateExprContext): void {
+		super.copyFrom(ctx);
+	}
+}
+export class PredicateTermAltContext extends PredicateExprContext {
+	public predicateTerm(): PredicateTermContext {
+		return this.getRuleContext(0, PredicateTermContext);
+	}
+	constructor(ctx: PredicateExprContext) { super(); this.copyFrom(ctx); }
+	@Override
+	public enterRule(listener: AqlListener): void {
+		if (listener.enterPredicateTermAlt) listener.enterPredicateTermAlt(this);
+	}
+	@Override
+	public exitRule(listener: AqlListener): void {
+		if (listener.exitPredicateTermAlt) listener.exitPredicateTermAlt(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitPredicateTermAlt) return visitor.visitPredicateTermAlt(this);
+		else return visitor.visitChildren(this);
+	}
+}
+export class PredicateBinaryContext extends PredicateExprContext {
+	public _left: PredicateExprContext;
+	public _operator: Token;
+	public _right: PredicateExprContext;
 	public predicateExpr(): PredicateExprContext[];
 	public predicateExpr(i: number): PredicateExprContext;
 	public predicateExpr(i?: number): PredicateExprContext | PredicateExprContext[] {
@@ -1348,27 +1452,40 @@ export class PredicateExprContext extends ParserRuleContext {
 	public NOT_EQUAL(): TerminalNode | undefined { return this.tryGetToken(AqlParser.NOT_EQUAL, 0); }
 	public AND(): TerminalNode | undefined { return this.tryGetToken(AqlParser.AND, 0); }
 	public OR(): TerminalNode | undefined { return this.tryGetToken(AqlParser.OR, 0); }
-	public predicateTerm(): PredicateTermContext | undefined {
-		return this.tryGetRuleContext(0, PredicateTermContext);
-	}
-	constructor(parent: ParserRuleContext, invokingState: number);
-	constructor(parent: ParserRuleContext, invokingState: number) {
-		super(parent, invokingState);
-
-	}
-	@Override public get ruleIndex(): number { return AqlParser.RULE_predicateExpr; }
+	constructor(ctx: PredicateExprContext) { super(); this.copyFrom(ctx); }
 	@Override
 	public enterRule(listener: AqlListener): void {
-		if (listener.enterPredicateExpr) listener.enterPredicateExpr(this);
+		if (listener.enterPredicateBinary) listener.enterPredicateBinary(this);
 	}
 	@Override
 	public exitRule(listener: AqlListener): void {
-		if (listener.exitPredicateExpr) listener.exitPredicateExpr(this);
+		if (listener.exitPredicateBinary) listener.exitPredicateBinary(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitPredicateBinary) return visitor.visitPredicateBinary(this);
+		else return visitor.visitChildren(this);
 	}
 }
 
 
 export class PredicateTermContext extends ParserRuleContext {
+	constructor();
+	constructor(parent: ParserRuleContext, invokingState: number);
+	constructor(parent?: ParserRuleContext, invokingState?: number) {
+		if (parent !== undefined && invokingState !== undefined) {
+			super(parent, invokingState);
+		} else {
+			super();
+		}
+	}
+	@Override public get ruleIndex(): number { return AqlParser.RULE_predicateTerm; }
+ 
+	public copyFrom(ctx: PredicateTermContext): void {
+		super.copyFrom(ctx);
+	}
+}
+export class PredicateAtomContext extends PredicateTermContext {
 	public column(): ColumnContext | undefined {
 		return this.tryGetRuleContext(0, ColumnContext);
 	}
@@ -1376,31 +1493,47 @@ export class PredicateTermContext extends ParserRuleContext {
 	public TRUE(): TerminalNode | undefined { return this.tryGetToken(AqlParser.TRUE, 0); }
 	public FALSE(): TerminalNode | undefined { return this.tryGetToken(AqlParser.FALSE, 0); }
 	public STRING(): TerminalNode | undefined { return this.tryGetToken(AqlParser.STRING, 0); }
-	public OPEN_PAREN(): TerminalNode | undefined { return this.tryGetToken(AqlParser.OPEN_PAREN, 0); }
-	public predicateExpr(): PredicateExprContext | undefined {
-		return this.tryGetRuleContext(0, PredicateExprContext);
-	}
-	public CLOSE_PAREN(): TerminalNode | undefined { return this.tryGetToken(AqlParser.CLOSE_PAREN, 0); }
-	constructor(parent: ParserRuleContext, invokingState: number);
-	constructor(parent: ParserRuleContext, invokingState: number) {
-		super(parent, invokingState);
-
-	}
-	@Override public get ruleIndex(): number { return AqlParser.RULE_predicateTerm; }
+	constructor(ctx: PredicateTermContext) { super(); this.copyFrom(ctx); }
 	@Override
 	public enterRule(listener: AqlListener): void {
-		if (listener.enterPredicateTerm) listener.enterPredicateTerm(this);
+		if (listener.enterPredicateAtom) listener.enterPredicateAtom(this);
 	}
 	@Override
 	public exitRule(listener: AqlListener): void {
-		if (listener.exitPredicateTerm) listener.exitPredicateTerm(this);
+		if (listener.exitPredicateAtom) listener.exitPredicateAtom(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitPredicateAtom) return visitor.visitPredicateAtom(this);
+		else return visitor.visitChildren(this);
+	}
+}
+export class PredicateNestedContext extends PredicateTermContext {
+	public OPEN_PAREN(): TerminalNode { return this.getToken(AqlParser.OPEN_PAREN, 0); }
+	public predicateExpr(): PredicateExprContext {
+		return this.getRuleContext(0, PredicateExprContext);
+	}
+	public CLOSE_PAREN(): TerminalNode { return this.getToken(AqlParser.CLOSE_PAREN, 0); }
+	constructor(ctx: PredicateTermContext) { super(); this.copyFrom(ctx); }
+	@Override
+	public enterRule(listener: AqlListener): void {
+		if (listener.enterPredicateNested) listener.enterPredicateNested(this);
+	}
+	@Override
+	public exitRule(listener: AqlListener): void {
+		if (listener.exitPredicateNested) listener.exitPredicateNested(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitPredicateNested) return visitor.visitPredicateNested(this);
+		else return visitor.visitChildren(this);
 	}
 }
 
 
 export class FuncContext extends ParserRuleContext {
-	public func_name(): Func_nameContext {
-		return this.getRuleContext(0, Func_nameContext);
+	public funcName(): FuncNameContext {
+		return this.getRuleContext(0, FuncNameContext);
 	}
 	public OPEN_PAREN(): TerminalNode { return this.getToken(AqlParser.OPEN_PAREN, 0); }
 	public CLOSE_PAREN(): TerminalNode { return this.getToken(AqlParser.CLOSE_PAREN, 0); }
@@ -1424,10 +1557,15 @@ export class FuncContext extends ParserRuleContext {
 	public exitRule(listener: AqlListener): void {
 		if (listener.exitFunc) listener.exitFunc(this);
 	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitFunc) return visitor.visitFunc(this);
+		else return visitor.visitChildren(this);
+	}
 }
 
 
-export class Func_nameContext extends ParserRuleContext {
+export class FuncNameContext extends ParserRuleContext {
 	public COUNT(): TerminalNode | undefined { return this.tryGetToken(AqlParser.COUNT, 0); }
 	public MAX(): TerminalNode | undefined { return this.tryGetToken(AqlParser.MAX, 0); }
 	public MIN(): TerminalNode | undefined { return this.tryGetToken(AqlParser.MIN, 0); }
@@ -1436,19 +1574,43 @@ export class Func_nameContext extends ParserRuleContext {
 		super(parent, invokingState);
 
 	}
-	@Override public get ruleIndex(): number { return AqlParser.RULE_func_name; }
+	@Override public get ruleIndex(): number { return AqlParser.RULE_funcName; }
 	@Override
 	public enterRule(listener: AqlListener): void {
-		if (listener.enterFunc_name) listener.enterFunc_name(this);
+		if (listener.enterFuncName) listener.enterFuncName(this);
 	}
 	@Override
 	public exitRule(listener: AqlListener): void {
-		if (listener.exitFunc_name) listener.exitFunc_name(this);
+		if (listener.exitFuncName) listener.exitFuncName(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitFuncName) return visitor.visitFuncName(this);
+		else return visitor.visitChildren(this);
 	}
 }
 
 
 export class SelectionExprContext extends ParserRuleContext {
+	constructor();
+	constructor(parent: ParserRuleContext, invokingState: number);
+	constructor(parent?: ParserRuleContext, invokingState?: number) {
+		if (parent !== undefined && invokingState !== undefined) {
+			super(parent, invokingState);
+		} else {
+			super();
+		}
+	}
+	@Override public get ruleIndex(): number { return AqlParser.RULE_selectionExpr; }
+ 
+	public copyFrom(ctx: SelectionExprContext): void {
+		super.copyFrom(ctx);
+	}
+}
+export class SelectionBinaryContext extends SelectionExprContext {
+	public _left: SelectionExprContext;
+	public _operator: Token;
+	public _right: SelectionExprContext;
 	public selectionExpr(): SelectionExprContext[];
 	public selectionExpr(i: number): SelectionExprContext;
 	public selectionExpr(i?: number): SelectionExprContext | SelectionExprContext[] {
@@ -1462,30 +1624,78 @@ export class SelectionExprContext extends ParserRuleContext {
 	public DIVIDE(): TerminalNode | undefined { return this.tryGetToken(AqlParser.DIVIDE, 0); }
 	public PLUS(): TerminalNode | undefined { return this.tryGetToken(AqlParser.PLUS, 0); }
 	public MINUS(): TerminalNode | undefined { return this.tryGetToken(AqlParser.MINUS, 0); }
-	public selectionTerm(): SelectionTermContext | undefined {
-		return this.tryGetRuleContext(0, SelectionTermContext);
-	}
-	constructor(parent: ParserRuleContext, invokingState: number);
-	constructor(parent: ParserRuleContext, invokingState: number) {
-		super(parent, invokingState);
-
-	}
-	@Override public get ruleIndex(): number { return AqlParser.RULE_selectionExpr; }
+	constructor(ctx: SelectionExprContext) { super(); this.copyFrom(ctx); }
 	@Override
 	public enterRule(listener: AqlListener): void {
-		if (listener.enterSelectionExpr) listener.enterSelectionExpr(this);
+		if (listener.enterSelectionBinary) listener.enterSelectionBinary(this);
 	}
 	@Override
 	public exitRule(listener: AqlListener): void {
-		if (listener.exitSelectionExpr) listener.exitSelectionExpr(this);
+		if (listener.exitSelectionBinary) listener.exitSelectionBinary(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitSelectionBinary) return visitor.visitSelectionBinary(this);
+		else return visitor.visitChildren(this);
+	}
+}
+export class SelectionTermAltContext extends SelectionExprContext {
+	public selectionTerm(): SelectionTermContext {
+		return this.getRuleContext(0, SelectionTermContext);
+	}
+	constructor(ctx: SelectionExprContext) { super(); this.copyFrom(ctx); }
+	@Override
+	public enterRule(listener: AqlListener): void {
+		if (listener.enterSelectionTermAlt) listener.enterSelectionTermAlt(this);
+	}
+	@Override
+	public exitRule(listener: AqlListener): void {
+		if (listener.exitSelectionTermAlt) listener.exitSelectionTermAlt(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitSelectionTermAlt) return visitor.visitSelectionTermAlt(this);
+		else return visitor.visitChildren(this);
 	}
 }
 
 
 export class SelectionTermContext extends ParserRuleContext {
-	public func(): FuncContext | undefined {
-		return this.tryGetRuleContext(0, FuncContext);
+	constructor();
+	constructor(parent: ParserRuleContext, invokingState: number);
+	constructor(parent?: ParserRuleContext, invokingState?: number) {
+		if (parent !== undefined && invokingState !== undefined) {
+			super(parent, invokingState);
+		} else {
+			super();
+		}
 	}
+	@Override public get ruleIndex(): number { return AqlParser.RULE_selectionTerm; }
+ 
+	public copyFrom(ctx: SelectionTermContext): void {
+		super.copyFrom(ctx);
+	}
+}
+export class SelectionFunctionContext extends SelectionTermContext {
+	public func(): FuncContext {
+		return this.getRuleContext(0, FuncContext);
+	}
+	constructor(ctx: SelectionTermContext) { super(); this.copyFrom(ctx); }
+	@Override
+	public enterRule(listener: AqlListener): void {
+		if (listener.enterSelectionFunction) listener.enterSelectionFunction(this);
+	}
+	@Override
+	public exitRule(listener: AqlListener): void {
+		if (listener.exitSelectionFunction) listener.exitSelectionFunction(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitSelectionFunction) return visitor.visitSelectionFunction(this);
+		else return visitor.visitChildren(this);
+	}
+}
+export class SelectionAtomContext extends SelectionTermContext {
 	public column(): ColumnContext | undefined {
 		return this.tryGetRuleContext(0, ColumnContext);
 	}
@@ -1493,24 +1703,40 @@ export class SelectionTermContext extends ParserRuleContext {
 	public TRUE(): TerminalNode | undefined { return this.tryGetToken(AqlParser.TRUE, 0); }
 	public FALSE(): TerminalNode | undefined { return this.tryGetToken(AqlParser.FALSE, 0); }
 	public STRING(): TerminalNode | undefined { return this.tryGetToken(AqlParser.STRING, 0); }
-	public OPEN_PAREN(): TerminalNode | undefined { return this.tryGetToken(AqlParser.OPEN_PAREN, 0); }
-	public selectionExpr(): SelectionExprContext | undefined {
-		return this.tryGetRuleContext(0, SelectionExprContext);
-	}
-	public CLOSE_PAREN(): TerminalNode | undefined { return this.tryGetToken(AqlParser.CLOSE_PAREN, 0); }
-	constructor(parent: ParserRuleContext, invokingState: number);
-	constructor(parent: ParserRuleContext, invokingState: number) {
-		super(parent, invokingState);
-
-	}
-	@Override public get ruleIndex(): number { return AqlParser.RULE_selectionTerm; }
+	constructor(ctx: SelectionTermContext) { super(); this.copyFrom(ctx); }
 	@Override
 	public enterRule(listener: AqlListener): void {
-		if (listener.enterSelectionTerm) listener.enterSelectionTerm(this);
+		if (listener.enterSelectionAtom) listener.enterSelectionAtom(this);
 	}
 	@Override
 	public exitRule(listener: AqlListener): void {
-		if (listener.exitSelectionTerm) listener.exitSelectionTerm(this);
+		if (listener.exitSelectionAtom) listener.exitSelectionAtom(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitSelectionAtom) return visitor.visitSelectionAtom(this);
+		else return visitor.visitChildren(this);
+	}
+}
+export class SelectionNestedContext extends SelectionTermContext {
+	public OPEN_PAREN(): TerminalNode { return this.getToken(AqlParser.OPEN_PAREN, 0); }
+	public selectionExpr(): SelectionExprContext {
+		return this.getRuleContext(0, SelectionExprContext);
+	}
+	public CLOSE_PAREN(): TerminalNode { return this.getToken(AqlParser.CLOSE_PAREN, 0); }
+	constructor(ctx: SelectionTermContext) { super(); this.copyFrom(ctx); }
+	@Override
+	public enterRule(listener: AqlListener): void {
+		if (listener.enterSelectionNested) listener.enterSelectionNested(this);
+	}
+	@Override
+	public exitRule(listener: AqlListener): void {
+		if (listener.exitSelectionNested) listener.exitSelectionNested(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitSelectionNested) return visitor.visitSelectionNested(this);
+		else return visitor.visitChildren(this);
 	}
 }
 
@@ -1535,6 +1761,11 @@ export class DateContext extends ParserRuleContext {
 	@Override
 	public exitRule(listener: AqlListener): void {
 		if (listener.exitDate) listener.exitDate(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitDate) return visitor.visitDate(this);
+		else return visitor.visitChildren(this);
 	}
 }
 
@@ -1561,6 +1792,11 @@ export class RelativeDateContext extends ParserRuleContext {
 	public exitRule(listener: AqlListener): void {
 		if (listener.exitRelativeDate) listener.exitRelativeDate(this);
 	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitRelativeDate) return visitor.visitRelativeDate(this);
+		else return visitor.visitChildren(this);
+	}
 }
 
 
@@ -1579,6 +1815,11 @@ export class AbsoluteDateContext extends ParserRuleContext {
 	@Override
 	public exitRule(listener: AqlListener): void {
 		if (listener.exitAbsoluteDate) listener.exitAbsoluteDate(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitAbsoluteDate) return visitor.visitAbsoluteDate(this);
+		else return visitor.visitChildren(this);
 	}
 }
 
@@ -1607,6 +1848,11 @@ export class DayContext extends ParserRuleContext {
 	public exitRule(listener: AqlListener): void {
 		if (listener.exitDay) listener.exitDay(this);
 	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitDay) return visitor.visitDay(this);
+		else return visitor.visitChildren(this);
+	}
 }
 
 
@@ -1625,6 +1871,11 @@ export class WildcardContext extends ParserRuleContext {
 	@Override
 	public exitRule(listener: AqlListener): void {
 		if (listener.exitWildcard) listener.exitWildcard(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitWildcard) return visitor.visitWildcard(this);
+		else return visitor.visitChildren(this);
 	}
 }
 
@@ -1645,6 +1896,11 @@ export class TimeContext extends ParserRuleContext {
 	public exitRule(listener: AqlListener): void {
 		if (listener.exitTime) listener.exitTime(this);
 	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitTime) return visitor.visitTime(this);
+		else return visitor.visitChildren(this);
+	}
 }
 
 
@@ -1664,6 +1920,11 @@ export class TableContext extends ParserRuleContext {
 	public exitRule(listener: AqlListener): void {
 		if (listener.exitTable) listener.exitTable(this);
 	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitTable) return visitor.visitTable(this);
+		else return visitor.visitChildren(this);
+	}
 }
 
 
@@ -1682,6 +1943,11 @@ export class ColumnContext extends ParserRuleContext {
 	@Override
 	public exitRule(listener: AqlListener): void {
 		if (listener.exitColumn) listener.exitColumn(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitColumn) return visitor.visitColumn(this);
+		else return visitor.visitChildren(this);
 	}
 }
 

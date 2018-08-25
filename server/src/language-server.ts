@@ -158,7 +158,7 @@ export const listen = async function (connection) {
                 },
             ],
 
-            [AqlParser.RULE_func_name]: [
+            [AqlParser.RULE_funcName]: [
                 {
                     label: 'count',
                     insertText: {

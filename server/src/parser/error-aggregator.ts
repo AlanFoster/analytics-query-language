@@ -7,6 +7,10 @@ class ErrorAggregator implements ANTLRErrorListener<Symbol> {
       this.errors = [];
     }
 
+    error(message: string) {
+        this.errors.push({ message: message })
+    }
+
     syntaxError(recognizer, offendingSymbol, line, charPositionInLine, msg) {
       const error = {
         message: msg,

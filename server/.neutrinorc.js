@@ -28,6 +28,31 @@ module.exports = {
     //     }
     //   }
     // ],
+
+    // Remove typescript from the default extension list before Jest runs,
+    // as it generates invalid configuration otherwise
+    (neutrino) => {
+      neutrino.options.extensions = [ 'js', 'jsx', 'vue', 'mjs' ];
+    },
+
+    [
+      '@neutrinojs/jest',
+      {
+        "transform": {
+          "^.+\\.tsx?$": "ts-jest"
+        },
+        "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+        "moduleFileExtensions": [
+          "ts",
+          "tsx",
+          "js",
+          "jsx",
+          "json",
+          "node"
+        ]
+      }
+    ],
+
     '@neutrinojs/node',
     (neutrino) => {
       const { config } = neutrino;
@@ -40,6 +65,5 @@ module.exports = {
           .use('ts')
             .loader(typescriptLoader);
     },
-    '@neutrinojs/jest',
   ]
 };
