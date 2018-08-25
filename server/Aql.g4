@@ -7,15 +7,19 @@ prog:
     SELECT
     selection
     FROM table
-    extra_thing*
+    filters
     EOF
     ;
 
-extra_thing:
-    WHERE predicateExpr  # predicate_branch
-    | SINCE date     # since_branch
-    | UNTIL date     # until_branch
-    ;
+filters:
+  filter*
+  ;
+
+filter:
+  WHERE predicateExpr
+  | SINCE date
+  | UNTIL date
+  ;
 
 selection:
     wildcard
@@ -23,46 +27,44 @@ selection:
     ;
 
 predicateExpr:
-    predicateExpr (STAR | DIVIDE) predicateExpr
-    | predicateExpr (PLUS | MINUS) predicateExpr
-    | predicateExpr (GREATER_THAN | GREATER_THAN_EQUALS | LESS_THAN | LESS_THAN_EQUALS) predicateExpr
-    | predicateExpr (EQUAL | NOT_EQUAL) predicateExpr
-    | predicateExpr AND predicateExpr
-    | predicateExpr OR predicateExpr
-    | predicateTerm
+    left=predicateExpr operator=(STAR | DIVIDE) right=predicateExpr # PredicateBinary
+    | left=predicateExpr operator=(PLUS | MINUS) right=predicateExpr # PredicateBinary
+    | left=predicateExpr operator=(GREATER_THAN | GREATER_THAN_EQUALS | LESS_THAN | LESS_THAN_EQUALS) right=predicateExpr # PredicateBinary
+    | left=predicateExpr operator=(EQUAL | NOT_EQUAL) right=predicateExpr # PredicateBinary
+    | left=predicateExpr operator=AND right=predicateExpr # PredicateBinary
+    | left=predicateExpr operator=OR right=predicateExpr # PredicateBinary
+    | predicateTerm # PredicateTermAlt
     ;
 
 predicateTerm:
-// there are no predicate funcs available
-//    func
-    column
-    | INT
-    | TRUE
-    | FALSE
-    | STRING
-    | OPEN_PAREN predicateExpr CLOSE_PAREN
+    column    # PredicateAtom
+    | INT     # PredicateAtom
+    | TRUE    # PredicateAtom
+    | FALSE   # PredicateAtom
+    | STRING  # PredicateAtom
+    | OPEN_PAREN predicateExpr CLOSE_PAREN # PredicateNested
     ;
 
 func:
-     func_name OPEN_PAREN (wildcard | selectionExpr) CLOSE_PAREN
+     funcName OPEN_PAREN (wildcard | selectionExpr) CLOSE_PAREN
     ;
 
-func_name: (COUNT | MAX | MIN) ;
+funcName: (COUNT | MAX | MIN) ;
 
 selectionExpr:
-    selectionExpr (STAR | DIVIDE) selectionExpr
-    | selectionExpr (PLUS | MINUS) selectionExpr
-    | selectionTerm
+    left=selectionExpr operator=(STAR | DIVIDE) right=selectionExpr # SelectionBinary
+    | left=selectionExpr operator=(PLUS | MINUS) right=selectionExpr # SelectionBinary
+    | selectionTerm # SelectionTermAlt
     ;
 
 selectionTerm:
-    func
-    | column
-    | INT
-    | TRUE
-    | FALSE
-    | STRING
-    | OPEN_PAREN selectionExpr CLOSE_PAREN
+    func      # SelectionFunction
+    | column  # SelectionAtom
+    | INT     # SelectionAtom
+    | TRUE    # SelectionAtom
+    | FALSE   # SelectionAtom
+    | STRING  # SelectionAtom
+    | OPEN_PAREN selectionExpr CLOSE_PAREN # SelectionNested
     ;
 
 date:

@@ -1,6 +1,5 @@
 import { ANTLRInputStream, CommonTokenStream } from 'antlr4ts';
 import * as c3 from 'antlr4-c3';
-import { CompletionItemKind } from 'vscode-languageserver';
 import { AqlLexer } from './gen/AqlLexer';
 import { AqlParser } from './gen/AqlParser';
 import ErrorAggregator from './error-aggregator';
@@ -71,12 +70,12 @@ export default function extract({ input, caretPosition = 0, preferredRules = [] 
   const candidates = core.collectCandidates(tokenCaretPosition);
 
   const keywords: string[] = [];
-    for (let candidate of candidates.tokens) {
-        // TODO Consider if we want to add rules for these characters instead
-        const suggestion = parser.vocabulary.getDisplayName(candidate[0]).toLowerCase();
+  for (let candidate of candidates.tokens) {
+    // TODO Consider if we want to add rules for these characters instead
+    const suggestion = parser.vocabulary.getDisplayName(candidate[0]).toLowerCase();
 
-        keywords.push(suggestion.split("'").join(''));
-    }
+    keywords.push(suggestion.split("'").join(''));
+  }
 
   return {
     errors: errorAggregator.getErrors(),
