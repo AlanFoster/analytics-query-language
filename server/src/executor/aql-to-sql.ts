@@ -379,11 +379,19 @@ export default function (input, today) {
     parser.addErrorListener(errorAggregator);
 
     const tree = parser.prog();
+    const errors = errorAggregator.getErrors();
+
+    if (errors.length > 0) {
+        return {
+            command: null,
+            errors: errors
+        }
+    }
 
     const aqlToSqlVisitor = new AqlToSqlVisitor(errorAggregator, new DateCalculator(today));
 
     return {
         command: aqlToSqlVisitor.visit(tree),
-        errors: errorAggregator.getErrors()
+        errors: errors
     };
 }
