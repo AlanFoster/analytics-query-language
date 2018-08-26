@@ -15,6 +15,7 @@ import { PredicateBinaryContext } from './AqlParser';
 import { ProgContext } from './AqlParser';
 import { FiltersContext } from './AqlParser';
 import { FilterContext } from './AqlParser';
+import { TimeseriesContext } from './AqlParser';
 import { SelectionContext } from './AqlParser';
 import { PredicateExprContext } from './AqlParser';
 import { PredicateTermContext } from './AqlParser';
@@ -132,6 +133,13 @@ export interface AqlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitFilter?: (ctx: FilterContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `AqlParser.timeseries`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTimeseries?: (ctx: TimeseriesContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `AqlParser.selection`.

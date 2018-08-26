@@ -9,8 +9,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 const getFormatterFor = function (heading) {
-  if (heading === 'created_at') {
-    return created_at => moment(created_at).fromNow();
+  if (heading === 'created_at' || heading === 'timeseries') {
+    return value => moment(value).fromNow();
   }
 
   // Identity

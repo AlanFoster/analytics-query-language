@@ -15,6 +15,7 @@ import { PredicateBinaryContext } from './AqlParser';
 import { ProgContext } from './AqlParser';
 import { FiltersContext } from './AqlParser';
 import { FilterContext } from './AqlParser';
+import { TimeseriesContext } from './AqlParser';
 import { SelectionContext } from './AqlParser';
 import { PredicateExprContext } from './AqlParser';
 import { PredicateTermContext } from './AqlParser';
@@ -186,6 +187,17 @@ export interface AqlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitFilter?: (ctx: FilterContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `AqlParser.timeseries`.
+	 * @param ctx the parse tree
+	 */
+	enterTimeseries?: (ctx: TimeseriesContext) => void;
+	/**
+	 * Exit a parse tree produced by `AqlParser.timeseries`.
+	 * @param ctx the parse tree
+	 */
+	exitTimeseries?: (ctx: TimeseriesContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `AqlParser.selection`.

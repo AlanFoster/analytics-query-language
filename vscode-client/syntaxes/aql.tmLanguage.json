@@ -27,7 +27,7 @@
       "patterns": [
         {
           "name": "keyword.other.aql",
-          "match": "\\b(select|from|where|since|until|at|and|or)\\b"
+          "match": "\\b(select|from|where|since|until|at|and|or|timeseries)\\b"
         },
         {
           "name": "keyword.other.aql",
@@ -56,7 +56,7 @@
       "patterns": [
         {
           "name": "support.function.aql",
-          "match": "\\b(count|max|min)\\b"
+          "match": "\\b(count|max|min|sum|avg)\\b"
         }
       ]
     },

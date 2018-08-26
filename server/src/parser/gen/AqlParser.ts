@@ -50,48 +50,51 @@ export class AqlParser extends Parser {
 	public static readonly MIN=20;
 	public static readonly SUM=21;
 	public static readonly AVG=22;
-	public static readonly AND=23;
-	public static readonly OR=24;
-	public static readonly IDENTIFIER=25;
-	public static readonly INT=26;
-	public static readonly STRING=27;
-	public static readonly OPEN_PAREN=28;
-	public static readonly CLOSE_PAREN=29;
-	public static readonly STAR=30;
-	public static readonly DIVIDE=31;
-	public static readonly PLUS=32;
-	public static readonly MINUS=33;
-	public static readonly EQUAL=34;
-	public static readonly NOT_EQUAL=35;
-	public static readonly GREATER_THAN=36;
-	public static readonly GREATER_THAN_EQUALS=37;
-	public static readonly LESS_THAN=38;
-	public static readonly LESS_THAN_EQUALS=39;
-	public static readonly COMMA=40;
-	public static readonly COMMENT=41;
-	public static readonly WS=42;
+	public static readonly TIMESERIES=23;
+	public static readonly AND=24;
+	public static readonly OR=25;
+	public static readonly IDENTIFIER=26;
+	public static readonly INT=27;
+	public static readonly STRING=28;
+	public static readonly OPEN_PAREN=29;
+	public static readonly CLOSE_PAREN=30;
+	public static readonly STAR=31;
+	public static readonly DIVIDE=32;
+	public static readonly PLUS=33;
+	public static readonly MINUS=34;
+	public static readonly EQUAL=35;
+	public static readonly NOT_EQUAL=36;
+	public static readonly GREATER_THAN=37;
+	public static readonly GREATER_THAN_EQUALS=38;
+	public static readonly LESS_THAN=39;
+	public static readonly LESS_THAN_EQUALS=40;
+	public static readonly COMMA=41;
+	public static readonly COMMENT=42;
+	public static readonly WS=43;
 	public static readonly RULE_prog = 0;
 	public static readonly RULE_filters = 1;
 	public static readonly RULE_filter = 2;
-	public static readonly RULE_selection = 3;
-	public static readonly RULE_predicateExpr = 4;
-	public static readonly RULE_predicateTerm = 5;
-	public static readonly RULE_func = 6;
-	public static readonly RULE_funcName = 7;
-	public static readonly RULE_selectionExpr = 8;
-	public static readonly RULE_selectionTerm = 9;
-	public static readonly RULE_date = 10;
-	public static readonly RULE_relativeDate = 11;
-	public static readonly RULE_absoluteDate = 12;
-	public static readonly RULE_day = 13;
-	public static readonly RULE_wildcard = 14;
-	public static readonly RULE_time = 15;
-	public static readonly RULE_table = 16;
-	public static readonly RULE_column = 17;
+	public static readonly RULE_timeseries = 3;
+	public static readonly RULE_selection = 4;
+	public static readonly RULE_predicateExpr = 5;
+	public static readonly RULE_predicateTerm = 6;
+	public static readonly RULE_func = 7;
+	public static readonly RULE_funcName = 8;
+	public static readonly RULE_selectionExpr = 9;
+	public static readonly RULE_selectionTerm = 10;
+	public static readonly RULE_date = 11;
+	public static readonly RULE_relativeDate = 12;
+	public static readonly RULE_absoluteDate = 13;
+	public static readonly RULE_day = 14;
+	public static readonly RULE_wildcard = 15;
+	public static readonly RULE_time = 16;
+	public static readonly RULE_table = 17;
+	public static readonly RULE_column = 18;
 	public static readonly ruleNames: string[] = [
-		"prog", "filters", "filter", "selection", "predicateExpr", "predicateTerm", 
-		"func", "funcName", "selectionExpr", "selectionTerm", "date", "relativeDate", 
-		"absoluteDate", "day", "wildcard", "time", "table", "column"
+		"prog", "filters", "filter", "timeseries", "selection", "predicateExpr", 
+		"predicateTerm", "func", "funcName", "selectionExpr", "selectionTerm", 
+		"date", "relativeDate", "absoluteDate", "day", "wildcard", "time", "table", 
+		"column"
 	];
 
 	private static readonly _LITERAL_NAMES: (string | undefined)[] = [
@@ -99,16 +102,17 @@ export class AqlParser extends Parser {
 		"'true'", "'false'", undefined, undefined, undefined, undefined, undefined, 
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
-		"'('", "')'", "'*'", "'/'", "'+'", "'-'", "'='", "'!='", "'>'", "'>='", 
-		"'<'", "'<='", "','"
+		undefined, "'('", "')'", "'*'", "'/'", "'+'", "'-'", "'='", "'!='", "'>'", 
+		"'>='", "'<'", "'<='", "','"
 	];
 	private static readonly _SYMBOLIC_NAMES: (string | undefined)[] = [
 		undefined, "SELECT", "FROM", "SINCE", "UNTIL", "AT", "WHERE", "TRUE", 
 		"FALSE", "TODAY", "YESTERDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", 
-		"FRIDAY", "SATURDAY", "SUNDAY", "COUNT", "MAX", "MIN", "SUM", "AVG", "AND", 
-		"OR", "IDENTIFIER", "INT", "STRING", "OPEN_PAREN", "CLOSE_PAREN", "STAR", 
-		"DIVIDE", "PLUS", "MINUS", "EQUAL", "NOT_EQUAL", "GREATER_THAN", "GREATER_THAN_EQUALS", 
-		"LESS_THAN", "LESS_THAN_EQUALS", "COMMA", "COMMENT", "WS"
+		"FRIDAY", "SATURDAY", "SUNDAY", "COUNT", "MAX", "MIN", "SUM", "AVG", "TIMESERIES", 
+		"AND", "OR", "IDENTIFIER", "INT", "STRING", "OPEN_PAREN", "CLOSE_PAREN", 
+		"STAR", "DIVIDE", "PLUS", "MINUS", "EQUAL", "NOT_EQUAL", "GREATER_THAN", 
+		"GREATER_THAN_EQUALS", "LESS_THAN", "LESS_THAN_EQUALS", "COMMA", "COMMENT", 
+		"WS"
 	];
 	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(AqlParser._LITERAL_NAMES, AqlParser._SYMBOLIC_NAMES, []);
 
@@ -138,17 +142,17 @@ export class AqlParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 36;
-			this.match(AqlParser.SELECT);
-			this.state = 37;
-			this.selection();
 			this.state = 38;
-			this.match(AqlParser.FROM);
+			this.match(AqlParser.SELECT);
 			this.state = 39;
-			this.table();
+			this.selection();
 			this.state = 40;
-			this.filters();
+			this.match(AqlParser.FROM);
 			this.state = 41;
+			this.table();
+			this.state = 42;
+			this.filters();
+			this.state = 43;
 			this.match(AqlParser.EOF);
 			}
 		}
@@ -174,17 +178,17 @@ export class AqlParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 46;
+			this.state = 48;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << AqlParser.SINCE) | (1 << AqlParser.UNTIL) | (1 << AqlParser.WHERE))) !== 0)) {
+			while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << AqlParser.SINCE) | (1 << AqlParser.UNTIL) | (1 << AqlParser.WHERE) | (1 << AqlParser.TIMESERIES))) !== 0)) {
 				{
 				{
-				this.state = 43;
+				this.state = 45;
 				this.filter();
 				}
 				}
-				this.state = 48;
+				this.state = 50;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -209,34 +213,41 @@ export class AqlParser extends Parser {
 		let _localctx: FilterContext = new FilterContext(this._ctx, this.state);
 		this.enterRule(_localctx, 4, AqlParser.RULE_filter);
 		try {
-			this.state = 55;
+			this.state = 58;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case AqlParser.WHERE:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 49;
+				this.state = 51;
 				this.match(AqlParser.WHERE);
-				this.state = 50;
+				this.state = 52;
 				this.predicateExpr(0);
 				}
 				break;
 			case AqlParser.SINCE:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 51;
+				this.state = 53;
 				this.match(AqlParser.SINCE);
-				this.state = 52;
+				this.state = 54;
 				this.date();
 				}
 				break;
 			case AqlParser.UNTIL:
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 53;
+				this.state = 55;
 				this.match(AqlParser.UNTIL);
-				this.state = 54;
+				this.state = 56;
 				this.date();
+				}
+				break;
+			case AqlParser.TIMESERIES:
+				this.enterOuterAlt(_localctx, 4);
+				{
+				this.state = 57;
+				this.timeseries();
 				}
 				break;
 			default:
@@ -258,18 +269,43 @@ export class AqlParser extends Parser {
 		return _localctx;
 	}
 	@RuleVersion(0)
+	public timeseries(): TimeseriesContext {
+		let _localctx: TimeseriesContext = new TimeseriesContext(this._ctx, this.state);
+		this.enterRule(_localctx, 6, AqlParser.RULE_timeseries);
+		try {
+			this.enterOuterAlt(_localctx, 1);
+			{
+			this.state = 60;
+			this.match(AqlParser.TIMESERIES);
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	@RuleVersion(0)
 	public selection(): SelectionContext {
 		let _localctx: SelectionContext = new SelectionContext(this._ctx, this.state);
-		this.enterRule(_localctx, 6, AqlParser.RULE_selection);
+		this.enterRule(_localctx, 8, AqlParser.RULE_selection);
 		let _la: number;
 		try {
-			this.state = 66;
+			this.state = 71;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case AqlParser.STAR:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 57;
+				this.state = 62;
 				this.wildcard();
 				}
 				break;
@@ -286,21 +322,21 @@ export class AqlParser extends Parser {
 			case AqlParser.OPEN_PAREN:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 58;
-				this.selectionExpr(0);
 				this.state = 63;
+				this.selectionExpr(0);
+				this.state = 68;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la===AqlParser.COMMA) {
 					{
 					{
-					this.state = 59;
+					this.state = 64;
 					this.match(AqlParser.COMMA);
-					this.state = 60;
+					this.state = 65;
 					this.selectionExpr(0);
 					}
 					}
-					this.state = 65;
+					this.state = 70;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
@@ -337,8 +373,8 @@ export class AqlParser extends Parser {
 		let _parentState: number = this.state;
 		let _localctx: PredicateExprContext = new PredicateExprContext(this._ctx, _parentState);
 		let _prevctx: PredicateExprContext = _localctx;
-		let _startState: number = 8;
-		this.enterRecursionRule(_localctx, 8, AqlParser.RULE_predicateExpr, _p);
+		let _startState: number = 10;
+		this.enterRecursionRule(_localctx, 10, AqlParser.RULE_predicateExpr, _p);
 		let _la: number;
 		try {
 			let _alt: number;
@@ -349,11 +385,11 @@ export class AqlParser extends Parser {
 			this._ctx = _localctx;
 			_prevctx = _localctx;
 
-			this.state = 69;
+			this.state = 74;
 			this.predicateTerm();
 			}
 			this._ctx._stop = this._input.tryLT(-1);
-			this.state = 91;
+			this.state = 96;
 			this._errHandler.sync(this);
 			_alt = this.interpreter.adaptivePredict(this._input,5,this._ctx);
 			while ( _alt!==2 && _alt!==ATN.INVALID_ALT_NUMBER ) {
@@ -361,7 +397,7 @@ export class AqlParser extends Parser {
 					if ( this._parseListeners!=null ) this.triggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					this.state = 89;
+					this.state = 94;
 					this._errHandler.sync(this);
 					switch ( this.interpreter.adaptivePredict(this._input,4,this._ctx) ) {
 					case 1:
@@ -369,9 +405,9 @@ export class AqlParser extends Parser {
 						_localctx = new PredicateBinaryContext(new PredicateExprContext(_parentctx, _parentState));
 						(_localctx as PredicateBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_predicateExpr);
-						this.state = 71;
+						this.state = 76;
 						if (!(this.precpred(this._ctx, 7))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 7)");
-						this.state = 72;
+						this.state = 77;
 						(_localctx as PredicateBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
 						if ( !(_la===AqlParser.STAR || _la===AqlParser.DIVIDE) ) {
@@ -384,7 +420,7 @@ export class AqlParser extends Parser {
 							this._errHandler.reportMatch(this);
 							this.consume();
 						}
-						this.state = 73;
+						this.state = 78;
 						(_localctx as PredicateBinaryContext)._right = this.predicateExpr(8);
 						}
 						break;
@@ -394,9 +430,9 @@ export class AqlParser extends Parser {
 						_localctx = new PredicateBinaryContext(new PredicateExprContext(_parentctx, _parentState));
 						(_localctx as PredicateBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_predicateExpr);
-						this.state = 74;
+						this.state = 79;
 						if (!(this.precpred(this._ctx, 6))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 6)");
-						this.state = 75;
+						this.state = 80;
 						(_localctx as PredicateBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
 						if ( !(_la===AqlParser.PLUS || _la===AqlParser.MINUS) ) {
@@ -409,7 +445,7 @@ export class AqlParser extends Parser {
 							this._errHandler.reportMatch(this);
 							this.consume();
 						}
-						this.state = 76;
+						this.state = 81;
 						(_localctx as PredicateBinaryContext)._right = this.predicateExpr(7);
 						}
 						break;
@@ -419,12 +455,12 @@ export class AqlParser extends Parser {
 						_localctx = new PredicateBinaryContext(new PredicateExprContext(_parentctx, _parentState));
 						(_localctx as PredicateBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_predicateExpr);
-						this.state = 77;
+						this.state = 82;
 						if (!(this.precpred(this._ctx, 5))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 5)");
-						this.state = 78;
+						this.state = 83;
 						(_localctx as PredicateBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
-						if ( !(((((_la - 36)) & ~0x1F) === 0 && ((1 << (_la - 36)) & ((1 << (AqlParser.GREATER_THAN - 36)) | (1 << (AqlParser.GREATER_THAN_EQUALS - 36)) | (1 << (AqlParser.LESS_THAN - 36)) | (1 << (AqlParser.LESS_THAN_EQUALS - 36)))) !== 0)) ) {
+						if ( !(((((_la - 37)) & ~0x1F) === 0 && ((1 << (_la - 37)) & ((1 << (AqlParser.GREATER_THAN - 37)) | (1 << (AqlParser.GREATER_THAN_EQUALS - 37)) | (1 << (AqlParser.LESS_THAN - 37)) | (1 << (AqlParser.LESS_THAN_EQUALS - 37)))) !== 0)) ) {
 							(_localctx as PredicateBinaryContext)._operator = this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -434,7 +470,7 @@ export class AqlParser extends Parser {
 							this._errHandler.reportMatch(this);
 							this.consume();
 						}
-						this.state = 79;
+						this.state = 84;
 						(_localctx as PredicateBinaryContext)._right = this.predicateExpr(6);
 						}
 						break;
@@ -444,9 +480,9 @@ export class AqlParser extends Parser {
 						_localctx = new PredicateBinaryContext(new PredicateExprContext(_parentctx, _parentState));
 						(_localctx as PredicateBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_predicateExpr);
-						this.state = 80;
+						this.state = 85;
 						if (!(this.precpred(this._ctx, 4))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 4)");
-						this.state = 81;
+						this.state = 86;
 						(_localctx as PredicateBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
 						if ( !(_la===AqlParser.EQUAL || _la===AqlParser.NOT_EQUAL) ) {
@@ -459,7 +495,7 @@ export class AqlParser extends Parser {
 							this._errHandler.reportMatch(this);
 							this.consume();
 						}
-						this.state = 82;
+						this.state = 87;
 						(_localctx as PredicateBinaryContext)._right = this.predicateExpr(5);
 						}
 						break;
@@ -469,11 +505,11 @@ export class AqlParser extends Parser {
 						_localctx = new PredicateBinaryContext(new PredicateExprContext(_parentctx, _parentState));
 						(_localctx as PredicateBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_predicateExpr);
-						this.state = 83;
+						this.state = 88;
 						if (!(this.precpred(this._ctx, 3))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 3)");
-						this.state = 84;
+						this.state = 89;
 						(_localctx as PredicateBinaryContext)._operator = this.match(AqlParser.AND);
-						this.state = 85;
+						this.state = 90;
 						(_localctx as PredicateBinaryContext)._right = this.predicateExpr(4);
 						}
 						break;
@@ -483,18 +519,18 @@ export class AqlParser extends Parser {
 						_localctx = new PredicateBinaryContext(new PredicateExprContext(_parentctx, _parentState));
 						(_localctx as PredicateBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_predicateExpr);
-						this.state = 86;
+						this.state = 91;
 						if (!(this.precpred(this._ctx, 2))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 2)");
-						this.state = 87;
+						this.state = 92;
 						(_localctx as PredicateBinaryContext)._operator = this.match(AqlParser.OR);
-						this.state = 88;
+						this.state = 93;
 						(_localctx as PredicateBinaryContext)._right = this.predicateExpr(3);
 						}
 						break;
 					}
 					} 
 				}
-				this.state = 93;
+				this.state = 98;
 				this._errHandler.sync(this);
 				_alt = this.interpreter.adaptivePredict(this._input,5,this._ctx);
 			}
@@ -517,16 +553,16 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public predicateTerm(): PredicateTermContext {
 		let _localctx: PredicateTermContext = new PredicateTermContext(this._ctx, this.state);
-		this.enterRule(_localctx, 10, AqlParser.RULE_predicateTerm);
+		this.enterRule(_localctx, 12, AqlParser.RULE_predicateTerm);
 		try {
-			this.state = 103;
+			this.state = 108;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case AqlParser.IDENTIFIER:
 				_localctx = new PredicateAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 94;
+				this.state = 99;
 				this.column();
 				}
 				break;
@@ -534,7 +570,7 @@ export class AqlParser extends Parser {
 				_localctx = new PredicateAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 95;
+				this.state = 100;
 				this.match(AqlParser.INT);
 				}
 				break;
@@ -542,7 +578,7 @@ export class AqlParser extends Parser {
 				_localctx = new PredicateAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 96;
+				this.state = 101;
 				this.match(AqlParser.TRUE);
 				}
 				break;
@@ -550,7 +586,7 @@ export class AqlParser extends Parser {
 				_localctx = new PredicateAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 97;
+				this.state = 102;
 				this.match(AqlParser.FALSE);
 				}
 				break;
@@ -558,7 +594,7 @@ export class AqlParser extends Parser {
 				_localctx = new PredicateAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 5);
 				{
-				this.state = 98;
+				this.state = 103;
 				this.match(AqlParser.STRING);
 				}
 				break;
@@ -566,11 +602,11 @@ export class AqlParser extends Parser {
 				_localctx = new PredicateNestedContext(_localctx);
 				this.enterOuterAlt(_localctx, 6);
 				{
-				this.state = 99;
+				this.state = 104;
 				this.match(AqlParser.OPEN_PAREN);
-				this.state = 100;
+				this.state = 105;
 				this.predicateExpr(0);
-				this.state = 101;
+				this.state = 106;
 				this.match(AqlParser.CLOSE_PAREN);
 				}
 				break;
@@ -595,20 +631,20 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public func(): FuncContext {
 		let _localctx: FuncContext = new FuncContext(this._ctx, this.state);
-		this.enterRule(_localctx, 12, AqlParser.RULE_func);
+		this.enterRule(_localctx, 14, AqlParser.RULE_func);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 105;
+			this.state = 110;
 			this.funcName();
-			this.state = 106;
+			this.state = 111;
 			this.match(AqlParser.OPEN_PAREN);
-			this.state = 109;
+			this.state = 114;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case AqlParser.STAR:
 				{
-				this.state = 107;
+				this.state = 112;
 				this.wildcard();
 				}
 				break;
@@ -624,14 +660,14 @@ export class AqlParser extends Parser {
 			case AqlParser.STRING:
 			case AqlParser.OPEN_PAREN:
 				{
-				this.state = 108;
+				this.state = 113;
 				this.selectionExpr(0);
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
-			this.state = 111;
+			this.state = 116;
 			this.match(AqlParser.CLOSE_PAREN);
 			}
 		}
@@ -652,12 +688,12 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public funcName(): FuncNameContext {
 		let _localctx: FuncNameContext = new FuncNameContext(this._ctx, this.state);
-		this.enterRule(_localctx, 14, AqlParser.RULE_funcName);
+		this.enterRule(_localctx, 16, AqlParser.RULE_funcName);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 113;
+			this.state = 118;
 			_la = this._input.LA(1);
 			if ( !((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << AqlParser.COUNT) | (1 << AqlParser.MAX) | (1 << AqlParser.MIN) | (1 << AqlParser.SUM) | (1 << AqlParser.AVG))) !== 0)) ) {
 			this._errHandler.recoverInline(this);
@@ -698,8 +734,8 @@ export class AqlParser extends Parser {
 		let _parentState: number = this.state;
 		let _localctx: SelectionExprContext = new SelectionExprContext(this._ctx, _parentState);
 		let _prevctx: SelectionExprContext = _localctx;
-		let _startState: number = 16;
-		this.enterRecursionRule(_localctx, 16, AqlParser.RULE_selectionExpr, _p);
+		let _startState: number = 18;
+		this.enterRecursionRule(_localctx, 18, AqlParser.RULE_selectionExpr, _p);
 		let _la: number;
 		try {
 			let _alt: number;
@@ -710,11 +746,11 @@ export class AqlParser extends Parser {
 			this._ctx = _localctx;
 			_prevctx = _localctx;
 
-			this.state = 116;
+			this.state = 121;
 			this.selectionTerm();
 			}
 			this._ctx._stop = this._input.tryLT(-1);
-			this.state = 126;
+			this.state = 131;
 			this._errHandler.sync(this);
 			_alt = this.interpreter.adaptivePredict(this._input,9,this._ctx);
 			while ( _alt!==2 && _alt!==ATN.INVALID_ALT_NUMBER ) {
@@ -722,7 +758,7 @@ export class AqlParser extends Parser {
 					if ( this._parseListeners!=null ) this.triggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					this.state = 124;
+					this.state = 129;
 					this._errHandler.sync(this);
 					switch ( this.interpreter.adaptivePredict(this._input,8,this._ctx) ) {
 					case 1:
@@ -730,9 +766,9 @@ export class AqlParser extends Parser {
 						_localctx = new SelectionBinaryContext(new SelectionExprContext(_parentctx, _parentState));
 						(_localctx as SelectionBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_selectionExpr);
-						this.state = 118;
+						this.state = 123;
 						if (!(this.precpred(this._ctx, 3))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 3)");
-						this.state = 119;
+						this.state = 124;
 						(_localctx as SelectionBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
 						if ( !(_la===AqlParser.STAR || _la===AqlParser.DIVIDE) ) {
@@ -745,7 +781,7 @@ export class AqlParser extends Parser {
 							this._errHandler.reportMatch(this);
 							this.consume();
 						}
-						this.state = 120;
+						this.state = 125;
 						(_localctx as SelectionBinaryContext)._right = this.selectionExpr(4);
 						}
 						break;
@@ -755,9 +791,9 @@ export class AqlParser extends Parser {
 						_localctx = new SelectionBinaryContext(new SelectionExprContext(_parentctx, _parentState));
 						(_localctx as SelectionBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, AqlParser.RULE_selectionExpr);
-						this.state = 121;
+						this.state = 126;
 						if (!(this.precpred(this._ctx, 2))) throw new FailedPredicateException(this, "this.precpred(this._ctx, 2)");
-						this.state = 122;
+						this.state = 127;
 						(_localctx as SelectionBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
 						if ( !(_la===AqlParser.PLUS || _la===AqlParser.MINUS) ) {
@@ -770,14 +806,14 @@ export class AqlParser extends Parser {
 							this._errHandler.reportMatch(this);
 							this.consume();
 						}
-						this.state = 123;
+						this.state = 128;
 						(_localctx as SelectionBinaryContext)._right = this.selectionExpr(3);
 						}
 						break;
 					}
 					} 
 				}
-				this.state = 128;
+				this.state = 133;
 				this._errHandler.sync(this);
 				_alt = this.interpreter.adaptivePredict(this._input,9,this._ctx);
 			}
@@ -800,9 +836,9 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public selectionTerm(): SelectionTermContext {
 		let _localctx: SelectionTermContext = new SelectionTermContext(this._ctx, this.state);
-		this.enterRule(_localctx, 18, AqlParser.RULE_selectionTerm);
+		this.enterRule(_localctx, 20, AqlParser.RULE_selectionTerm);
 		try {
-			this.state = 139;
+			this.state = 144;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case AqlParser.COUNT:
@@ -813,7 +849,7 @@ export class AqlParser extends Parser {
 				_localctx = new SelectionFunctionContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 129;
+				this.state = 134;
 				this.func();
 				}
 				break;
@@ -821,7 +857,7 @@ export class AqlParser extends Parser {
 				_localctx = new SelectionAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 130;
+				this.state = 135;
 				this.column();
 				}
 				break;
@@ -829,7 +865,7 @@ export class AqlParser extends Parser {
 				_localctx = new SelectionAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 131;
+				this.state = 136;
 				this.match(AqlParser.INT);
 				}
 				break;
@@ -837,7 +873,7 @@ export class AqlParser extends Parser {
 				_localctx = new SelectionAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 132;
+				this.state = 137;
 				this.match(AqlParser.TRUE);
 				}
 				break;
@@ -845,7 +881,7 @@ export class AqlParser extends Parser {
 				_localctx = new SelectionAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 5);
 				{
-				this.state = 133;
+				this.state = 138;
 				this.match(AqlParser.FALSE);
 				}
 				break;
@@ -853,7 +889,7 @@ export class AqlParser extends Parser {
 				_localctx = new SelectionAtomContext(_localctx);
 				this.enterOuterAlt(_localctx, 6);
 				{
-				this.state = 134;
+				this.state = 139;
 				this.match(AqlParser.STRING);
 				}
 				break;
@@ -861,11 +897,11 @@ export class AqlParser extends Parser {
 				_localctx = new SelectionNestedContext(_localctx);
 				this.enterOuterAlt(_localctx, 7);
 				{
-				this.state = 135;
+				this.state = 140;
 				this.match(AqlParser.OPEN_PAREN);
-				this.state = 136;
+				this.state = 141;
 				this.selectionExpr(0);
-				this.state = 137;
+				this.state = 142;
 				this.match(AqlParser.CLOSE_PAREN);
 				}
 				break;
@@ -890,9 +926,9 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public date(): DateContext {
 		let _localctx: DateContext = new DateContext(this._ctx, this.state);
-		this.enterRule(_localctx, 20, AqlParser.RULE_date);
+		this.enterRule(_localctx, 22, AqlParser.RULE_date);
 		try {
-			this.state = 143;
+			this.state = 148;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case AqlParser.TODAY:
@@ -906,14 +942,14 @@ export class AqlParser extends Parser {
 			case AqlParser.SUNDAY:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 141;
+				this.state = 146;
 				this.relativeDate();
 				}
 				break;
 			case AqlParser.STRING:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 142;
+				this.state = 147;
 				this.absoluteDate();
 				}
 				break;
@@ -938,21 +974,21 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public relativeDate(): RelativeDateContext {
 		let _localctx: RelativeDateContext = new RelativeDateContext(this._ctx, this.state);
-		this.enterRule(_localctx, 22, AqlParser.RULE_relativeDate);
+		this.enterRule(_localctx, 24, AqlParser.RULE_relativeDate);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 145;
+			this.state = 150;
 			this.day();
-			this.state = 148;
+			this.state = 153;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la===AqlParser.AT) {
 				{
-				this.state = 146;
+				this.state = 151;
 				this.match(AqlParser.AT);
-				this.state = 147;
+				this.state = 152;
 				this.time();
 				}
 			}
@@ -976,11 +1012,11 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public absoluteDate(): AbsoluteDateContext {
 		let _localctx: AbsoluteDateContext = new AbsoluteDateContext(this._ctx, this.state);
-		this.enterRule(_localctx, 24, AqlParser.RULE_absoluteDate);
+		this.enterRule(_localctx, 26, AqlParser.RULE_absoluteDate);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 150;
+			this.state = 155;
 			this.match(AqlParser.STRING);
 			}
 		}
@@ -1001,12 +1037,12 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public day(): DayContext {
 		let _localctx: DayContext = new DayContext(this._ctx, this.state);
-		this.enterRule(_localctx, 26, AqlParser.RULE_day);
+		this.enterRule(_localctx, 28, AqlParser.RULE_day);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 152;
+			this.state = 157;
 			_la = this._input.LA(1);
 			if ( !((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << AqlParser.TODAY) | (1 << AqlParser.YESTERDAY) | (1 << AqlParser.MONDAY) | (1 << AqlParser.TUESDAY) | (1 << AqlParser.WEDNESDAY) | (1 << AqlParser.THURSDAY) | (1 << AqlParser.FRIDAY) | (1 << AqlParser.SATURDAY) | (1 << AqlParser.SUNDAY))) !== 0)) ) {
 			this._errHandler.recoverInline(this);
@@ -1037,11 +1073,11 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public wildcard(): WildcardContext {
 		let _localctx: WildcardContext = new WildcardContext(this._ctx, this.state);
-		this.enterRule(_localctx, 28, AqlParser.RULE_wildcard);
+		this.enterRule(_localctx, 30, AqlParser.RULE_wildcard);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 154;
+			this.state = 159;
 			this.match(AqlParser.STAR);
 			}
 		}
@@ -1062,11 +1098,11 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public time(): TimeContext {
 		let _localctx: TimeContext = new TimeContext(this._ctx, this.state);
-		this.enterRule(_localctx, 30, AqlParser.RULE_time);
+		this.enterRule(_localctx, 32, AqlParser.RULE_time);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 156;
+			this.state = 161;
 			this.match(AqlParser.STRING);
 			}
 		}
@@ -1087,11 +1123,11 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public table(): TableContext {
 		let _localctx: TableContext = new TableContext(this._ctx, this.state);
-		this.enterRule(_localctx, 32, AqlParser.RULE_table);
+		this.enterRule(_localctx, 34, AqlParser.RULE_table);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 158;
+			this.state = 163;
 			this.match(AqlParser.IDENTIFIER);
 			}
 		}
@@ -1112,11 +1148,11 @@ export class AqlParser extends Parser {
 	@RuleVersion(0)
 	public column(): ColumnContext {
 		let _localctx: ColumnContext = new ColumnContext(this._ctx, this.state);
-		this.enterRule(_localctx, 34, AqlParser.RULE_column);
+		this.enterRule(_localctx, 36, AqlParser.RULE_column);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 160;
+			this.state = 165;
 			this.match(AqlParser.IDENTIFIER);
 			}
 		}
@@ -1137,10 +1173,10 @@ export class AqlParser extends Parser {
 
 	public sempred(_localctx: RuleContext, ruleIndex: number, predIndex: number): boolean {
 		switch (ruleIndex) {
-		case 4:
+		case 5:
 			return this.predicateExpr_sempred(_localctx as PredicateExprContext, predIndex);
 
-		case 8:
+		case 9:
 			return this.selectionExpr_sempred(_localctx as SelectionExprContext, predIndex);
 		}
 		return true;
@@ -1179,74 +1215,76 @@ export class AqlParser extends Parser {
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uAF6F\u8320\u479D\uB75C\u4880\u1605\u191C\uAB37\x03,\xA5\x04\x02"+
+		"\x03\uAF6F\u8320\u479D\uB75C\u4880\u1605\u191C\uAB37\x03-\xAA\x04\x02"+
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07"+
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r\x04"+
 		"\x0E\t\x0E\x04\x0F\t\x0F\x04\x10\t\x10\x04\x11\t\x11\x04\x12\t\x12\x04"+
-		"\x13\t\x13\x03\x02\x03\x02\x03\x02\x03\x02\x03\x02\x03\x02\x03\x02\x03"+
-		"\x03\x07\x03/\n\x03\f\x03\x0E\x032\v\x03\x03\x04\x03\x04\x03\x04\x03\x04"+
-		"\x03\x04\x03\x04\x05\x04:\n\x04\x03\x05\x03\x05\x03\x05\x03\x05\x07\x05"+
-		"@\n\x05\f\x05\x0E\x05C\v\x05\x05\x05E\n\x05\x03\x06\x03\x06\x03\x06\x03"+
-		"\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03"+
-		"\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x07"+
-		"\x06\\\n\x06\f\x06\x0E\x06_\v\x06\x03\x07\x03\x07\x03\x07\x03\x07\x03"+
-		"\x07\x03\x07\x03\x07\x03\x07\x03\x07\x05\x07j\n\x07\x03\b\x03\b\x03\b"+
-		"\x03\b\x05\bp\n\b\x03\b\x03\b\x03\t\x03\t\x03\n\x03\n\x03\n\x03\n\x03"+
-		"\n\x03\n\x03\n\x03\n\x03\n\x07\n\x7F\n\n\f\n\x0E\n\x82\v\n\x03\v\x03\v"+
-		"\x03\v\x03\v\x03\v\x03\v\x03\v\x03\v\x03\v\x03\v\x05\v\x8E\n\v\x03\f\x03"+
-		"\f\x05\f\x92\n\f\x03\r\x03\r\x03\r\x05\r\x97\n\r\x03\x0E\x03\x0E\x03\x0F"+
+		"\x13\t\x13\x04\x14\t\x14\x03\x02\x03\x02\x03\x02\x03\x02\x03\x02\x03\x02"+
+		"\x03\x02\x03\x03\x07\x031\n\x03\f\x03\x0E\x034\v\x03\x03\x04\x03\x04\x03"+
+		"\x04\x03\x04\x03\x04\x03\x04\x03\x04\x05\x04=\n\x04\x03\x05\x03\x05\x03"+
+		"\x06\x03\x06\x03\x06\x03\x06\x07\x06E\n\x06\f\x06\x0E\x06H\v\x06\x05\x06"+
+		"J\n\x06\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07"+
+		"\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07"+
+		"\x03\x07\x03\x07\x03\x07\x03\x07\x07\x07a\n\x07\f\x07\x0E\x07d\v\x07\x03"+
+		"\b\x03\b\x03\b\x03\b\x03\b\x03\b\x03\b\x03\b\x03\b\x05\bo\n\b\x03\t\x03"+
+		"\t\x03\t\x03\t\x05\tu\n\t\x03\t\x03\t\x03\n\x03\n\x03\v\x03\v\x03\v\x03"+
+		"\v\x03\v\x03\v\x03\v\x03\v\x03\v\x07\v\x84\n\v\f\v\x0E\v\x87\v\v\x03\f"+
+		"\x03\f\x03\f\x03\f\x03\f\x03\f\x03\f\x03\f\x03\f\x03\f\x05\f\x93\n\f\x03"+
+		"\r\x03\r\x05\r\x97\n\r\x03\x0E\x03\x0E\x03\x0E\x05\x0E\x9C\n\x0E\x03\x0F"+
 		"\x03\x0F\x03\x10\x03\x10\x03\x11\x03\x11\x03\x12\x03\x12\x03\x13\x03\x13"+
-		"\x03\x13\x02\x02\x04\n\x12\x14\x02\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02"+
-		"\x0E\x02\x10\x02\x12\x02\x14\x02\x16\x02\x18\x02\x1A\x02\x1C\x02\x1E\x02"+
-		" \x02\"\x02$\x02\x02\b\x03\x02 !\x03\x02\"#\x03\x02&)\x03\x02$%\x03\x02"+
-		"\x14\x18\x03\x02\v\x13\xAD\x02&\x03\x02\x02\x02\x040\x03\x02\x02\x02\x06"+
-		"9\x03\x02\x02\x02\bD\x03\x02\x02\x02\nF\x03\x02\x02\x02\fi\x03\x02\x02"+
-		"\x02\x0Ek\x03\x02\x02\x02\x10s\x03\x02\x02\x02\x12u\x03\x02\x02\x02\x14"+
-		"\x8D\x03\x02\x02\x02\x16\x91\x03\x02\x02\x02\x18\x93\x03\x02\x02\x02\x1A"+
-		"\x98\x03\x02\x02\x02\x1C\x9A\x03\x02\x02\x02\x1E\x9C\x03\x02\x02\x02 "+
-		"\x9E\x03\x02\x02\x02\"\xA0\x03\x02\x02\x02$\xA2\x03\x02\x02\x02&\'\x07"+
-		"\x03\x02\x02\'(\x05\b\x05\x02()\x07\x04\x02\x02)*\x05\"\x12\x02*+\x05"+
-		"\x04\x03\x02+,\x07\x02\x02\x03,\x03\x03\x02\x02\x02-/\x05\x06\x04\x02"+
-		".-\x03\x02\x02\x02/2\x03\x02\x02\x020.\x03\x02\x02\x0201\x03\x02\x02\x02"+
-		"1\x05\x03\x02\x02\x0220\x03\x02\x02\x0234\x07\b\x02\x024:\x05\n\x06\x02"+
-		"56\x07\x05\x02\x026:\x05\x16\f\x0278\x07\x06\x02\x028:\x05\x16\f\x029"+
-		"3\x03\x02\x02\x0295\x03\x02\x02\x0297\x03\x02\x02\x02:\x07\x03\x02\x02"+
-		"\x02;E\x05\x1E\x10\x02<A\x05\x12\n\x02=>\x07*\x02\x02>@\x05\x12\n\x02"+
-		"?=\x03\x02\x02\x02@C\x03\x02\x02\x02A?\x03\x02\x02\x02AB\x03\x02\x02\x02"+
-		"BE\x03\x02\x02\x02CA\x03\x02\x02\x02D;\x03\x02\x02\x02D<\x03\x02\x02\x02"+
-		"E\t\x03\x02\x02\x02FG\b\x06\x01\x02GH\x05\f\x07\x02H]\x03\x02\x02\x02"+
-		"IJ\f\t\x02\x02JK\t\x02\x02\x02K\\\x05\n\x06\nLM\f\b\x02\x02MN\t\x03\x02"+
-		"\x02N\\\x05\n\x06\tOP\f\x07\x02\x02PQ\t\x04\x02\x02Q\\\x05\n\x06\bRS\f"+
-		"\x06\x02\x02ST\t\x05\x02\x02T\\\x05\n\x06\x07UV\f\x05\x02\x02VW\x07\x19"+
-		"\x02\x02W\\\x05\n\x06\x06XY\f\x04\x02\x02YZ\x07\x1A\x02\x02Z\\\x05\n\x06"+
-		"\x05[I\x03\x02\x02\x02[L\x03\x02\x02\x02[O\x03\x02\x02\x02[R\x03\x02\x02"+
-		"\x02[U\x03\x02\x02\x02[X\x03\x02\x02\x02\\_\x03\x02\x02\x02][\x03\x02"+
-		"\x02\x02]^\x03\x02\x02\x02^\v\x03\x02\x02\x02_]\x03\x02\x02\x02`j\x05"+
-		"$\x13\x02aj\x07\x1C\x02\x02bj\x07\t\x02\x02cj\x07\n\x02\x02dj\x07\x1D"+
-		"\x02\x02ef\x07\x1E\x02\x02fg\x05\n\x06\x02gh\x07\x1F\x02\x02hj\x03\x02"+
-		"\x02\x02i`\x03\x02\x02\x02ia\x03\x02\x02\x02ib\x03\x02\x02\x02ic\x03\x02"+
-		"\x02\x02id\x03\x02\x02\x02ie\x03\x02\x02\x02j\r\x03\x02\x02\x02kl\x05"+
-		"\x10\t\x02lo\x07\x1E\x02\x02mp\x05\x1E\x10\x02np\x05\x12\n\x02om\x03\x02"+
-		"\x02\x02on\x03\x02\x02\x02pq\x03\x02\x02\x02qr\x07\x1F\x02\x02r\x0F\x03"+
-		"\x02\x02\x02st\t\x06\x02\x02t\x11\x03\x02\x02\x02uv\b\n\x01\x02vw\x05"+
-		"\x14\v\x02w\x80\x03\x02\x02\x02xy\f\x05\x02\x02yz\t\x02\x02\x02z\x7F\x05"+
-		"\x12\n\x06{|\f\x04\x02\x02|}\t\x03\x02\x02}\x7F\x05\x12\n\x05~x\x03\x02"+
-		"\x02\x02~{\x03\x02\x02\x02\x7F\x82\x03\x02\x02\x02\x80~\x03\x02\x02\x02"+
-		"\x80\x81\x03\x02\x02\x02\x81\x13\x03\x02\x02\x02\x82\x80\x03\x02\x02\x02"+
-		"\x83\x8E\x05\x0E\b\x02\x84\x8E\x05$\x13\x02\x85\x8E\x07\x1C\x02\x02\x86"+
-		"\x8E\x07\t\x02\x02\x87\x8E\x07\n\x02\x02\x88\x8E\x07\x1D\x02\x02\x89\x8A"+
-		"\x07\x1E\x02\x02\x8A\x8B\x05\x12\n\x02\x8B\x8C\x07\x1F\x02\x02\x8C\x8E"+
-		"\x03\x02\x02\x02\x8D\x83\x03\x02\x02\x02\x8D\x84\x03\x02\x02\x02\x8D\x85"+
-		"\x03\x02\x02\x02\x8D\x86\x03\x02\x02\x02\x8D\x87\x03\x02\x02\x02\x8D\x88"+
-		"\x03\x02\x02\x02\x8D\x89\x03\x02\x02\x02\x8E\x15\x03\x02\x02\x02\x8F\x92"+
-		"\x05\x18\r\x02\x90\x92\x05\x1A\x0E\x02\x91\x8F\x03\x02\x02\x02\x91\x90"+
-		"\x03\x02\x02\x02\x92\x17\x03\x02\x02\x02\x93\x96\x05\x1C\x0F\x02\x94\x95"+
-		"\x07\x07\x02\x02\x95\x97\x05 \x11\x02\x96\x94\x03\x02\x02\x02\x96\x97"+
-		"\x03\x02\x02\x02\x97\x19\x03\x02\x02\x02\x98\x99\x07\x1D\x02\x02\x99\x1B"+
-		"\x03\x02\x02\x02\x9A\x9B\t\x07\x02\x02\x9B\x1D\x03\x02\x02\x02\x9C\x9D"+
-		"\x07 \x02\x02\x9D\x1F\x03\x02\x02\x02\x9E\x9F\x07\x1D\x02\x02\x9F!\x03"+
-		"\x02\x02\x02\xA0\xA1\x07\x1B\x02\x02\xA1#\x03\x02\x02\x02\xA2\xA3\x07"+
-		"\x1B\x02\x02\xA3%\x03\x02\x02\x02\x0F09AD[]io~\x80\x8D\x91\x96";
+		"\x03\x14\x03\x14\x03\x14\x02\x02\x04\f\x14\x15\x02\x02\x04\x02\x06\x02"+
+		"\b\x02\n\x02\f\x02\x0E\x02\x10\x02\x12\x02\x14\x02\x16\x02\x18\x02\x1A"+
+		"\x02\x1C\x02\x1E\x02 \x02\"\x02$\x02&\x02\x02\b\x03\x02!\"\x03\x02#$\x03"+
+		"\x02\'*\x03\x02%&\x03\x02\x14\x18\x03\x02\v\x13\xB2\x02(\x03\x02\x02\x02"+
+		"\x042\x03\x02\x02\x02\x06<\x03\x02\x02\x02\b>\x03\x02\x02\x02\nI\x03\x02"+
+		"\x02\x02\fK\x03\x02\x02\x02\x0En\x03\x02\x02\x02\x10p\x03\x02\x02\x02"+
+		"\x12x\x03\x02\x02\x02\x14z\x03\x02\x02\x02\x16\x92\x03\x02\x02\x02\x18"+
+		"\x96\x03\x02\x02\x02\x1A\x98\x03\x02\x02\x02\x1C\x9D\x03\x02\x02\x02\x1E"+
+		"\x9F\x03\x02\x02\x02 \xA1\x03\x02\x02\x02\"\xA3\x03\x02\x02\x02$\xA5\x03"+
+		"\x02\x02\x02&\xA7\x03\x02\x02\x02()\x07\x03\x02\x02)*\x05\n\x06\x02*+"+
+		"\x07\x04\x02\x02+,\x05$\x13\x02,-\x05\x04\x03\x02-.\x07\x02\x02\x03.\x03"+
+		"\x03\x02\x02\x02/1\x05\x06\x04\x020/\x03\x02\x02\x0214\x03\x02\x02\x02"+
+		"20\x03\x02\x02\x0223\x03\x02\x02\x023\x05\x03\x02\x02\x0242\x03\x02\x02"+
+		"\x0256\x07\b\x02\x026=\x05\f\x07\x0278\x07\x05\x02\x028=\x05\x18\r\x02"+
+		"9:\x07\x06\x02\x02:=\x05\x18\r\x02;=\x05\b\x05\x02<5\x03\x02\x02\x02<"+
+		"7\x03\x02\x02\x02<9\x03\x02\x02\x02<;\x03\x02\x02\x02=\x07\x03\x02\x02"+
+		"\x02>?\x07\x19\x02\x02?\t\x03\x02\x02\x02@J\x05 \x11\x02AF\x05\x14\v\x02"+
+		"BC\x07+\x02\x02CE\x05\x14\v\x02DB\x03\x02\x02\x02EH\x03\x02\x02\x02FD"+
+		"\x03\x02\x02\x02FG\x03\x02\x02\x02GJ\x03\x02\x02\x02HF\x03\x02\x02\x02"+
+		"I@\x03\x02\x02\x02IA\x03\x02\x02\x02J\v\x03\x02\x02\x02KL\b\x07\x01\x02"+
+		"LM\x05\x0E\b\x02Mb\x03\x02\x02\x02NO\f\t\x02\x02OP\t\x02\x02\x02Pa\x05"+
+		"\f\x07\nQR\f\b\x02\x02RS\t\x03\x02\x02Sa\x05\f\x07\tTU\f\x07\x02\x02U"+
+		"V\t\x04\x02\x02Va\x05\f\x07\bWX\f\x06\x02\x02XY\t\x05\x02\x02Ya\x05\f"+
+		"\x07\x07Z[\f\x05\x02\x02[\\\x07\x1A\x02\x02\\a\x05\f\x07\x06]^\f\x04\x02"+
+		"\x02^_\x07\x1B\x02\x02_a\x05\f\x07\x05`N\x03\x02\x02\x02`Q\x03\x02\x02"+
+		"\x02`T\x03\x02\x02\x02`W\x03\x02\x02\x02`Z\x03\x02\x02\x02`]\x03\x02\x02"+
+		"\x02ad\x03\x02\x02\x02b`\x03\x02\x02\x02bc\x03\x02\x02\x02c\r\x03\x02"+
+		"\x02\x02db\x03\x02\x02\x02eo\x05&\x14\x02fo\x07\x1D\x02\x02go\x07\t\x02"+
+		"\x02ho\x07\n\x02\x02io\x07\x1E\x02\x02jk\x07\x1F\x02\x02kl\x05\f\x07\x02"+
+		"lm\x07 \x02\x02mo\x03\x02\x02\x02ne\x03\x02\x02\x02nf\x03\x02\x02\x02"+
+		"ng\x03\x02\x02\x02nh\x03\x02\x02\x02ni\x03\x02\x02\x02nj\x03\x02\x02\x02"+
+		"o\x0F\x03\x02\x02\x02pq\x05\x12\n\x02qt\x07\x1F\x02\x02ru\x05 \x11\x02"+
+		"su\x05\x14\v\x02tr\x03\x02\x02\x02ts\x03\x02\x02\x02uv\x03\x02\x02\x02"+
+		"vw\x07 \x02\x02w\x11\x03\x02\x02\x02xy\t\x06\x02\x02y\x13\x03\x02\x02"+
+		"\x02z{\b\v\x01\x02{|\x05\x16\f\x02|\x85\x03\x02\x02\x02}~\f\x05\x02\x02"+
+		"~\x7F\t\x02\x02\x02\x7F\x84\x05\x14\v\x06\x80\x81\f\x04\x02\x02\x81\x82"+
+		"\t\x03\x02\x02\x82\x84\x05\x14\v\x05\x83}\x03\x02\x02\x02\x83\x80\x03"+
+		"\x02\x02\x02\x84\x87\x03\x02\x02\x02\x85\x83\x03\x02\x02\x02\x85\x86\x03"+
+		"\x02\x02\x02\x86\x15\x03\x02\x02\x02\x87\x85\x03\x02\x02\x02\x88\x93\x05"+
+		"\x10\t\x02\x89\x93\x05&\x14\x02\x8A\x93\x07\x1D\x02\x02\x8B\x93\x07\t"+
+		"\x02\x02\x8C\x93\x07\n\x02\x02\x8D\x93\x07\x1E\x02\x02\x8E\x8F\x07\x1F"+
+		"\x02\x02\x8F\x90\x05\x14\v\x02\x90\x91\x07 \x02\x02\x91\x93\x03\x02\x02"+
+		"\x02\x92\x88\x03\x02\x02\x02\x92\x89\x03\x02\x02\x02\x92\x8A\x03\x02\x02"+
+		"\x02\x92\x8B\x03\x02\x02\x02\x92\x8C\x03\x02\x02\x02\x92\x8D\x03\x02\x02"+
+		"\x02\x92\x8E\x03\x02\x02\x02\x93\x17\x03\x02\x02\x02\x94\x97\x05\x1A\x0E"+
+		"\x02\x95\x97\x05\x1C\x0F\x02\x96\x94\x03\x02\x02\x02\x96\x95\x03\x02\x02"+
+		"\x02\x97\x19\x03\x02\x02\x02\x98\x9B\x05\x1E\x10\x02\x99\x9A\x07\x07\x02"+
+		"\x02\x9A\x9C\x05\"\x12\x02\x9B\x99\x03\x02\x02\x02\x9B\x9C\x03\x02\x02"+
+		"\x02\x9C\x1B\x03\x02\x02\x02\x9D\x9E\x07\x1E\x02\x02\x9E\x1D\x03\x02\x02"+
+		"\x02\x9F\xA0\t\x07\x02\x02\xA0\x1F\x03\x02\x02\x02\xA1\xA2\x07!\x02\x02"+
+		"\xA2!\x03\x02\x02\x02\xA3\xA4\x07\x1E\x02\x02\xA4#\x03\x02\x02\x02\xA5"+
+		"\xA6\x07\x1C\x02\x02\xA6%\x03\x02\x02\x02\xA7\xA8\x07\x1C\x02\x02\xA8"+
+		"\'\x03\x02\x02\x02\x0F2<FI`bnt\x83\x85\x92\x96\x9B";
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {
 		if (!AqlParser.__ATN) {
@@ -1335,6 +1373,9 @@ export class FilterContext extends ParserRuleContext {
 		return this.tryGetRuleContext(0, DateContext);
 	}
 	public UNTIL(): TerminalNode | undefined { return this.tryGetToken(AqlParser.UNTIL, 0); }
+	public timeseries(): TimeseriesContext | undefined {
+		return this.tryGetRuleContext(0, TimeseriesContext);
+	}
 	constructor(parent: ParserRuleContext, invokingState: number);
 	constructor(parent: ParserRuleContext, invokingState: number) {
 		super(parent, invokingState);
@@ -1352,6 +1393,30 @@ export class FilterContext extends ParserRuleContext {
 	@Override
 	public accept<Result>(visitor: AqlVisitor<Result>): Result {
 		if (visitor.visitFilter) return visitor.visitFilter(this);
+		else return visitor.visitChildren(this);
+	}
+}
+
+
+export class TimeseriesContext extends ParserRuleContext {
+	public TIMESERIES(): TerminalNode { return this.getToken(AqlParser.TIMESERIES, 0); }
+	constructor(parent: ParserRuleContext, invokingState: number);
+	constructor(parent: ParserRuleContext, invokingState: number) {
+		super(parent, invokingState);
+
+	}
+	@Override public get ruleIndex(): number { return AqlParser.RULE_timeseries; }
+	@Override
+	public enterRule(listener: AqlListener): void {
+		if (listener.enterTimeseries) listener.enterTimeseries(this);
+	}
+	@Override
+	public exitRule(listener: AqlListener): void {
+		if (listener.exitTimeseries) listener.exitTimeseries(this);
+	}
+	@Override
+	public accept<Result>(visitor: AqlVisitor<Result>): Result {
+		if (visitor.visitTimeseries) return visitor.visitTimeseries(this);
 		else return visitor.visitChildren(this);
 	}
 }

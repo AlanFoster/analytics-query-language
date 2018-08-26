@@ -69,6 +69,12 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
     private errorListener: ErrorAggregator;
     private dateCalculator: DateCalculator;
 
+    // Note, this is a workaround to track the fact of the original AQL having a timeseries value,
+    // which will impact the select generation. If there were multiple variables keeping track
+    // of this state, it's a suggestion that we should have our own intermediate representation
+    // that represents our own abstract syntax tree which could be converted directly into SQL
+    private isTimeseries: boolean = false;
+
     constructor(errorListener: ErrorAggregator, dateCalculator) {
         super();
         this.errorListener = errorListener;
@@ -198,12 +204,14 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
     visitProg(ctx: ProgContext) {
         let result = '';
 
-        result += 'select ';
-        result += this.visitSelection!(ctx.selection()) + " ";
-        result += this.visitTable!(ctx.table()) + " ";
-        result += this.visitFilters(ctx.filters());
+        const selection = this.visitSelection!(ctx.selection()) + " ";
+        const table = this.visitTable!(ctx.table()) + " ";
+        const filters = this.visitFilters(ctx.filters());
 
-        return result;
+        const timeSeriesSelection = this.isTimeseries ? ", date_trunc('day', created_at) as timeseries" : "";
+        const query = `select ${selection}${timeSeriesSelection} from ${table} ${filters}`;
+
+        return query;
     }
 
     /**
@@ -236,6 +244,10 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
                     return this.defaultResult();
                 }
                 until = filter.date();
+            }
+
+            if (filter.timeseries()) {
+                this.isTimeseries = true
             }
         }
 
@@ -272,8 +284,12 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
             result += `where ${datePredicate}`
         }
 
+        if (this.isTimeseries) {
+            result += " group by timeseries order by timeseries desc"
+        }
+
         // TODO: We can expose limit through out grammar
-        result += ' limit 100 ';
+        result += ' limit 100';
 
         return result;
     }
@@ -349,7 +365,7 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
      * @return the visitor result
      */
     visitTable(ctx: TableContext) {
-        return 'from ' + ctx.IDENTIFIER().text;
+        return ctx.IDENTIFIER().text;
     }
 
     /**

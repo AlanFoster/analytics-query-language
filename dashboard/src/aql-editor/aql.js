@@ -42,13 +42,16 @@ export const language = {
         'and',
         'or',
         'true',
-        'false'
+        'false',
+        'timeseries'
     ],
 
     builtInFunctions: [
         'count',
         'max',
-        'min'
+        'min',
+        'sum',
+        'avg'
     ],
 
     brackets: [

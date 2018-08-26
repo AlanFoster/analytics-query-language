@@ -19,6 +19,11 @@ filter:
   WHERE predicateExpr
   | SINCE date
   | UNTIL date
+  | timeseries
+  ;
+
+timeseries:
+  TIMESERIES
   ;
 
 selection:
@@ -124,6 +129,7 @@ MAX : M A X ;
 MIN : M I N ;
 SUM : S U M ;
 AVG : A V G ;
+TIMESERIES: T I M E S E R I E S ;
 
 AND: A N D ;
 OR: O R ;
