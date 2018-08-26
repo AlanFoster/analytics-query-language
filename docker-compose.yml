@@ -4,7 +4,7 @@ services:
   database:
     image: postgres:10.5-alpine
     volumes:
-      - ./server/db/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+      - ./server/db:/docker-entrypoint-initdb.d
     ports:
       - 5432:5432
 

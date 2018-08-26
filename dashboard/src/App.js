@@ -10,7 +10,8 @@ const Results = ({ results }) => {
   if (!results.rows) return <div>Loading...</div>;
   if (results.rows.length === 0) return <div>No results</div>;
 
-  const headings = Object.keys(results.rows[0]);
+  // The server should expand wildcard to select only the fields we care about, let's cheat for now.
+  const headings = Object.keys(results.rows[0]).filter(heading => !(heading === 'id' || heading === 'deleted_at'));
 
   return (
     <div>
@@ -29,8 +30,8 @@ const Results = ({ results }) => {
           return (
             <tr key={index}>
               <th scope="row">{index + 1}</th>
-              {Object.keys(row).map(function (key, index) {
-                return <td key={index}>{row[key]}</td>
+              {headings.map(function (heading, index) {
+                return <td key={heading}>{row[heading]}</td>
               })}
             </tr>
           );
