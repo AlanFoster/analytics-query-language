@@ -183,6 +183,22 @@ export const listen = async function (connection) {
                     detail: 'count the minimum value',
                     kind: CompletionItemKind.Function,
                 },
+                {
+                    label: 'avg',
+                    insertText: {
+                        value: 'sum(${1:})',
+                    },
+                    detail: 'calculate the average for the given field',
+                    kind: CompletionItemKind.Function,
+                },
+                {
+                    label: 'sum',
+                    insertText: {
+                        value: 'sum(${1:})',
+                    },
+                    detail: 'calculate the sum for the given field',
+                    kind: CompletionItemKind.Function,
+                },
             ],
 
             [AqlParser.RULE_table]: schema.map(function (table) {

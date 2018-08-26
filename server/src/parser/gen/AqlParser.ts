@@ -48,26 +48,28 @@ export class AqlParser extends Parser {
 	public static readonly COUNT=18;
 	public static readonly MAX=19;
 	public static readonly MIN=20;
-	public static readonly AND=21;
-	public static readonly OR=22;
-	public static readonly IDENTIFIER=23;
-	public static readonly INT=24;
-	public static readonly STRING=25;
-	public static readonly OPEN_PAREN=26;
-	public static readonly CLOSE_PAREN=27;
-	public static readonly STAR=28;
-	public static readonly DIVIDE=29;
-	public static readonly PLUS=30;
-	public static readonly MINUS=31;
-	public static readonly EQUAL=32;
-	public static readonly NOT_EQUAL=33;
-	public static readonly GREATER_THAN=34;
-	public static readonly GREATER_THAN_EQUALS=35;
-	public static readonly LESS_THAN=36;
-	public static readonly LESS_THAN_EQUALS=37;
-	public static readonly COMMA=38;
-	public static readonly COMMENT=39;
-	public static readonly WS=40;
+	public static readonly SUM=21;
+	public static readonly AVG=22;
+	public static readonly AND=23;
+	public static readonly OR=24;
+	public static readonly IDENTIFIER=25;
+	public static readonly INT=26;
+	public static readonly STRING=27;
+	public static readonly OPEN_PAREN=28;
+	public static readonly CLOSE_PAREN=29;
+	public static readonly STAR=30;
+	public static readonly DIVIDE=31;
+	public static readonly PLUS=32;
+	public static readonly MINUS=33;
+	public static readonly EQUAL=34;
+	public static readonly NOT_EQUAL=35;
+	public static readonly GREATER_THAN=36;
+	public static readonly GREATER_THAN_EQUALS=37;
+	public static readonly LESS_THAN=38;
+	public static readonly LESS_THAN_EQUALS=39;
+	public static readonly COMMA=40;
+	public static readonly COMMENT=41;
+	public static readonly WS=42;
 	public static readonly RULE_prog = 0;
 	public static readonly RULE_filters = 1;
 	public static readonly RULE_filter = 2;
@@ -96,15 +98,16 @@ export class AqlParser extends Parser {
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
 		"'true'", "'false'", undefined, undefined, undefined, undefined, undefined, 
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
-		undefined, undefined, undefined, undefined, undefined, "'('", "')'", "'*'", 
-		"'/'", "'+'", "'-'", "'='", "'!='", "'>'", "'>='", "'<'", "'<='", "','"
+		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
+		"'('", "')'", "'*'", "'/'", "'+'", "'-'", "'='", "'!='", "'>'", "'>='", 
+		"'<'", "'<='", "','"
 	];
 	private static readonly _SYMBOLIC_NAMES: (string | undefined)[] = [
 		undefined, "SELECT", "FROM", "SINCE", "UNTIL", "AT", "WHERE", "TRUE", 
 		"FALSE", "TODAY", "YESTERDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", 
-		"FRIDAY", "SATURDAY", "SUNDAY", "COUNT", "MAX", "MIN", "AND", "OR", "IDENTIFIER", 
-		"INT", "STRING", "OPEN_PAREN", "CLOSE_PAREN", "STAR", "DIVIDE", "PLUS", 
-		"MINUS", "EQUAL", "NOT_EQUAL", "GREATER_THAN", "GREATER_THAN_EQUALS", 
+		"FRIDAY", "SATURDAY", "SUNDAY", "COUNT", "MAX", "MIN", "SUM", "AVG", "AND", 
+		"OR", "IDENTIFIER", "INT", "STRING", "OPEN_PAREN", "CLOSE_PAREN", "STAR", 
+		"DIVIDE", "PLUS", "MINUS", "EQUAL", "NOT_EQUAL", "GREATER_THAN", "GREATER_THAN_EQUALS", 
 		"LESS_THAN", "LESS_THAN_EQUALS", "COMMA", "COMMENT", "WS"
 	];
 	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(AqlParser._LITERAL_NAMES, AqlParser._SYMBOLIC_NAMES, []);
@@ -275,6 +278,8 @@ export class AqlParser extends Parser {
 			case AqlParser.COUNT:
 			case AqlParser.MAX:
 			case AqlParser.MIN:
+			case AqlParser.SUM:
+			case AqlParser.AVG:
 			case AqlParser.IDENTIFIER:
 			case AqlParser.INT:
 			case AqlParser.STRING:
@@ -419,7 +424,7 @@ export class AqlParser extends Parser {
 						this.state = 78;
 						(_localctx as PredicateBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
-						if ( !(((((_la - 34)) & ~0x1F) === 0 && ((1 << (_la - 34)) & ((1 << (AqlParser.GREATER_THAN - 34)) | (1 << (AqlParser.GREATER_THAN_EQUALS - 34)) | (1 << (AqlParser.LESS_THAN - 34)) | (1 << (AqlParser.LESS_THAN_EQUALS - 34)))) !== 0)) ) {
+						if ( !(((((_la - 36)) & ~0x1F) === 0 && ((1 << (_la - 36)) & ((1 << (AqlParser.GREATER_THAN - 36)) | (1 << (AqlParser.GREATER_THAN_EQUALS - 36)) | (1 << (AqlParser.LESS_THAN - 36)) | (1 << (AqlParser.LESS_THAN_EQUALS - 36)))) !== 0)) ) {
 							(_localctx as PredicateBinaryContext)._operator = this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -612,6 +617,8 @@ export class AqlParser extends Parser {
 			case AqlParser.COUNT:
 			case AqlParser.MAX:
 			case AqlParser.MIN:
+			case AqlParser.SUM:
+			case AqlParser.AVG:
 			case AqlParser.IDENTIFIER:
 			case AqlParser.INT:
 			case AqlParser.STRING:
@@ -652,7 +659,7 @@ export class AqlParser extends Parser {
 			{
 			this.state = 113;
 			_la = this._input.LA(1);
-			if ( !((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << AqlParser.COUNT) | (1 << AqlParser.MAX) | (1 << AqlParser.MIN))) !== 0)) ) {
+			if ( !((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << AqlParser.COUNT) | (1 << AqlParser.MAX) | (1 << AqlParser.MIN) | (1 << AqlParser.SUM) | (1 << AqlParser.AVG))) !== 0)) ) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -801,6 +808,8 @@ export class AqlParser extends Parser {
 			case AqlParser.COUNT:
 			case AqlParser.MAX:
 			case AqlParser.MIN:
+			case AqlParser.SUM:
+			case AqlParser.AVG:
 				_localctx = new SelectionFunctionContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
@@ -1170,7 +1179,7 @@ export class AqlParser extends Parser {
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uAF6F\u8320\u479D\uB75C\u4880\u1605\u191C\uAB37\x03*\xA5\x04\x02"+
+		"\x03\uAF6F\u8320\u479D\uB75C\u4880\u1605\u191C\uAB37\x03,\xA5\x04\x02"+
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07"+
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r\x04"+
 		"\x0E\t\x0E\x04\x0F\t\x0F\x04\x10\t\x10\x04\x11\t\x11\x04\x12\t\x12\x04"+
@@ -1189,55 +1198,55 @@ export class AqlParser extends Parser {
 		"\x03\x0F\x03\x10\x03\x10\x03\x11\x03\x11\x03\x12\x03\x12\x03\x13\x03\x13"+
 		"\x03\x13\x02\x02\x04\n\x12\x14\x02\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02"+
 		"\x0E\x02\x10\x02\x12\x02\x14\x02\x16\x02\x18\x02\x1A\x02\x1C\x02\x1E\x02"+
-		" \x02\"\x02$\x02\x02\b\x03\x02\x1E\x1F\x03\x02 !\x03\x02$\'\x03\x02\""+
-		"#\x03\x02\x14\x16\x03\x02\v\x13\xAD\x02&\x03\x02\x02\x02\x040\x03\x02"+
-		"\x02\x02\x069\x03\x02\x02\x02\bD\x03\x02\x02\x02\nF\x03\x02\x02\x02\f"+
-		"i\x03\x02\x02\x02\x0Ek\x03\x02\x02\x02\x10s\x03\x02\x02\x02\x12u\x03\x02"+
-		"\x02\x02\x14\x8D\x03\x02\x02\x02\x16\x91\x03\x02\x02\x02\x18\x93\x03\x02"+
-		"\x02\x02\x1A\x98\x03\x02\x02\x02\x1C\x9A\x03\x02\x02\x02\x1E\x9C\x03\x02"+
-		"\x02\x02 \x9E\x03\x02\x02\x02\"\xA0\x03\x02\x02\x02$\xA2\x03\x02\x02\x02"+
-		"&\'\x07\x03\x02\x02\'(\x05\b\x05\x02()\x07\x04\x02\x02)*\x05\"\x12\x02"+
-		"*+\x05\x04\x03\x02+,\x07\x02\x02\x03,\x03\x03\x02\x02\x02-/\x05\x06\x04"+
-		"\x02.-\x03\x02\x02\x02/2\x03\x02\x02\x020.\x03\x02\x02\x0201\x03\x02\x02"+
-		"\x021\x05\x03\x02\x02\x0220\x03\x02\x02\x0234\x07\b\x02\x024:\x05\n\x06"+
-		"\x0256\x07\x05\x02\x026:\x05\x16\f\x0278\x07\x06\x02\x028:\x05\x16\f\x02"+
-		"93\x03\x02\x02\x0295\x03\x02\x02\x0297\x03\x02\x02\x02:\x07\x03\x02\x02"+
-		"\x02;E\x05\x1E\x10\x02<A\x05\x12\n\x02=>\x07(\x02\x02>@\x05\x12\n\x02"+
+		" \x02\"\x02$\x02\x02\b\x03\x02 !\x03\x02\"#\x03\x02&)\x03\x02$%\x03\x02"+
+		"\x14\x18\x03\x02\v\x13\xAD\x02&\x03\x02\x02\x02\x040\x03\x02\x02\x02\x06"+
+		"9\x03\x02\x02\x02\bD\x03\x02\x02\x02\nF\x03\x02\x02\x02\fi\x03\x02\x02"+
+		"\x02\x0Ek\x03\x02\x02\x02\x10s\x03\x02\x02\x02\x12u\x03\x02\x02\x02\x14"+
+		"\x8D\x03\x02\x02\x02\x16\x91\x03\x02\x02\x02\x18\x93\x03\x02\x02\x02\x1A"+
+		"\x98\x03\x02\x02\x02\x1C\x9A\x03\x02\x02\x02\x1E\x9C\x03\x02\x02\x02 "+
+		"\x9E\x03\x02\x02\x02\"\xA0\x03\x02\x02\x02$\xA2\x03\x02\x02\x02&\'\x07"+
+		"\x03\x02\x02\'(\x05\b\x05\x02()\x07\x04\x02\x02)*\x05\"\x12\x02*+\x05"+
+		"\x04\x03\x02+,\x07\x02\x02\x03,\x03\x03\x02\x02\x02-/\x05\x06\x04\x02"+
+		".-\x03\x02\x02\x02/2\x03\x02\x02\x020.\x03\x02\x02\x0201\x03\x02\x02\x02"+
+		"1\x05\x03\x02\x02\x0220\x03\x02\x02\x0234\x07\b\x02\x024:\x05\n\x06\x02"+
+		"56\x07\x05\x02\x026:\x05\x16\f\x0278\x07\x06\x02\x028:\x05\x16\f\x029"+
+		"3\x03\x02\x02\x0295\x03\x02\x02\x0297\x03\x02\x02\x02:\x07\x03\x02\x02"+
+		"\x02;E\x05\x1E\x10\x02<A\x05\x12\n\x02=>\x07*\x02\x02>@\x05\x12\n\x02"+
 		"?=\x03\x02\x02\x02@C\x03\x02\x02\x02A?\x03\x02\x02\x02AB\x03\x02\x02\x02"+
 		"BE\x03\x02\x02\x02CA\x03\x02\x02\x02D;\x03\x02\x02\x02D<\x03\x02\x02\x02"+
 		"E\t\x03\x02\x02\x02FG\b\x06\x01\x02GH\x05\f\x07\x02H]\x03\x02\x02\x02"+
 		"IJ\f\t\x02\x02JK\t\x02\x02\x02K\\\x05\n\x06\nLM\f\b\x02\x02MN\t\x03\x02"+
 		"\x02N\\\x05\n\x06\tOP\f\x07\x02\x02PQ\t\x04\x02\x02Q\\\x05\n\x06\bRS\f"+
-		"\x06\x02\x02ST\t\x05\x02\x02T\\\x05\n\x06\x07UV\f\x05\x02\x02VW\x07\x17"+
-		"\x02\x02W\\\x05\n\x06\x06XY\f\x04\x02\x02YZ\x07\x18\x02\x02Z\\\x05\n\x06"+
+		"\x06\x02\x02ST\t\x05\x02\x02T\\\x05\n\x06\x07UV\f\x05\x02\x02VW\x07\x19"+
+		"\x02\x02W\\\x05\n\x06\x06XY\f\x04\x02\x02YZ\x07\x1A\x02\x02Z\\\x05\n\x06"+
 		"\x05[I\x03\x02\x02\x02[L\x03\x02\x02\x02[O\x03\x02\x02\x02[R\x03\x02\x02"+
 		"\x02[U\x03\x02\x02\x02[X\x03\x02\x02\x02\\_\x03\x02\x02\x02][\x03\x02"+
 		"\x02\x02]^\x03\x02\x02\x02^\v\x03\x02\x02\x02_]\x03\x02\x02\x02`j\x05"+
-		"$\x13\x02aj\x07\x1A\x02\x02bj\x07\t\x02\x02cj\x07\n\x02\x02dj\x07\x1B"+
-		"\x02\x02ef\x07\x1C\x02\x02fg\x05\n\x06\x02gh\x07\x1D\x02\x02hj\x03\x02"+
+		"$\x13\x02aj\x07\x1C\x02\x02bj\x07\t\x02\x02cj\x07\n\x02\x02dj\x07\x1D"+
+		"\x02\x02ef\x07\x1E\x02\x02fg\x05\n\x06\x02gh\x07\x1F\x02\x02hj\x03\x02"+
 		"\x02\x02i`\x03\x02\x02\x02ia\x03\x02\x02\x02ib\x03\x02\x02\x02ic\x03\x02"+
 		"\x02\x02id\x03\x02\x02\x02ie\x03\x02\x02\x02j\r\x03\x02\x02\x02kl\x05"+
-		"\x10\t\x02lo\x07\x1C\x02\x02mp\x05\x1E\x10\x02np\x05\x12\n\x02om\x03\x02"+
-		"\x02\x02on\x03\x02\x02\x02pq\x03\x02\x02\x02qr\x07\x1D\x02\x02r\x0F\x03"+
+		"\x10\t\x02lo\x07\x1E\x02\x02mp\x05\x1E\x10\x02np\x05\x12\n\x02om\x03\x02"+
+		"\x02\x02on\x03\x02\x02\x02pq\x03\x02\x02\x02qr\x07\x1F\x02\x02r\x0F\x03"+
 		"\x02\x02\x02st\t\x06\x02\x02t\x11\x03\x02\x02\x02uv\b\n\x01\x02vw\x05"+
 		"\x14\v\x02w\x80\x03\x02\x02\x02xy\f\x05\x02\x02yz\t\x02\x02\x02z\x7F\x05"+
 		"\x12\n\x06{|\f\x04\x02\x02|}\t\x03\x02\x02}\x7F\x05\x12\n\x05~x\x03\x02"+
 		"\x02\x02~{\x03\x02\x02\x02\x7F\x82\x03\x02\x02\x02\x80~\x03\x02\x02\x02"+
 		"\x80\x81\x03\x02\x02\x02\x81\x13\x03\x02\x02\x02\x82\x80\x03\x02\x02\x02"+
-		"\x83\x8E\x05\x0E\b\x02\x84\x8E\x05$\x13\x02\x85\x8E\x07\x1A\x02\x02\x86"+
-		"\x8E\x07\t\x02\x02\x87\x8E\x07\n\x02\x02\x88\x8E\x07\x1B\x02\x02\x89\x8A"+
-		"\x07\x1C\x02\x02\x8A\x8B\x05\x12\n\x02\x8B\x8C\x07\x1D\x02\x02\x8C\x8E"+
+		"\x83\x8E\x05\x0E\b\x02\x84\x8E\x05$\x13\x02\x85\x8E\x07\x1C\x02\x02\x86"+
+		"\x8E\x07\t\x02\x02\x87\x8E\x07\n\x02\x02\x88\x8E\x07\x1D\x02\x02\x89\x8A"+
+		"\x07\x1E\x02\x02\x8A\x8B\x05\x12\n\x02\x8B\x8C\x07\x1F\x02\x02\x8C\x8E"+
 		"\x03\x02\x02\x02\x8D\x83\x03\x02\x02\x02\x8D\x84\x03\x02\x02\x02\x8D\x85"+
 		"\x03\x02\x02\x02\x8D\x86\x03\x02\x02\x02\x8D\x87\x03\x02\x02\x02\x8D\x88"+
 		"\x03\x02\x02\x02\x8D\x89\x03\x02\x02\x02\x8E\x15\x03\x02\x02\x02\x8F\x92"+
 		"\x05\x18\r\x02\x90\x92\x05\x1A\x0E\x02\x91\x8F\x03\x02\x02\x02\x91\x90"+
 		"\x03\x02\x02\x02\x92\x17\x03\x02\x02\x02\x93\x96\x05\x1C\x0F\x02\x94\x95"+
 		"\x07\x07\x02\x02\x95\x97\x05 \x11\x02\x96\x94\x03\x02\x02\x02\x96\x97"+
-		"\x03\x02\x02\x02\x97\x19\x03\x02\x02\x02\x98\x99\x07\x1B\x02\x02\x99\x1B"+
+		"\x03\x02\x02\x02\x97\x19\x03\x02\x02\x02\x98\x99\x07\x1D\x02\x02\x99\x1B"+
 		"\x03\x02\x02\x02\x9A\x9B\t\x07\x02\x02\x9B\x1D\x03\x02\x02\x02\x9C\x9D"+
-		"\x07\x1E\x02\x02\x9D\x1F\x03\x02\x02\x02\x9E\x9F\x07\x1B\x02\x02\x9F!"+
-		"\x03\x02\x02\x02\xA0\xA1\x07\x19\x02\x02\xA1#\x03\x02\x02\x02\xA2\xA3"+
-		"\x07\x19\x02\x02\xA3%\x03\x02\x02\x02\x0F09AD[]io~\x80\x8D\x91\x96";
+		"\x07 \x02\x02\x9D\x1F\x03\x02\x02\x02\x9E\x9F\x07\x1D\x02\x02\x9F!\x03"+
+		"\x02\x02\x02\xA0\xA1\x07\x1B\x02\x02\xA1#\x03\x02\x02\x02\xA2\xA3\x07"+
+		"\x1B\x02\x02\xA3%\x03\x02\x02\x02\x0F09AD[]io~\x80\x8D\x91\x96";
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {
 		if (!AqlParser.__ATN) {
@@ -1569,6 +1578,8 @@ export class FuncNameContext extends ParserRuleContext {
 	public COUNT(): TerminalNode | undefined { return this.tryGetToken(AqlParser.COUNT, 0); }
 	public MAX(): TerminalNode | undefined { return this.tryGetToken(AqlParser.MAX, 0); }
 	public MIN(): TerminalNode | undefined { return this.tryGetToken(AqlParser.MIN, 0); }
+	public AVG(): TerminalNode | undefined { return this.tryGetToken(AqlParser.AVG, 0); }
+	public SUM(): TerminalNode | undefined { return this.tryGetToken(AqlParser.SUM, 0); }
 	constructor(parent: ParserRuleContext, invokingState: number);
 	constructor(parent: ParserRuleContext, invokingState: number) {
 		super(parent, invokingState);

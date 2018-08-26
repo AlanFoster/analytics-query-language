@@ -16,7 +16,7 @@
       "outFiles": [
         "${workspaceFolder}/client/out/**/*.js"
       ],
-      "preLaunchTask": "npm: compile:vscode-client"
+      "preLaunchTask": "npm: compile:vscode-clien"
     },
     {
       "type": "node",

@@ -14,7 +14,8 @@
     "vscode:prepublish": "cd vscode-client && npm run update-vscode && cd .. && npm run compile",
     "watch:client": "cd vscode-client && npm run watch",
     "compile:vscode-client": "cd vscode-client && npm run compile",
-    "compile": "npm run compile:vscode-client",
+    "compile:server": "cd server && npm run compile",
+    "compile": "npm run compile:vscode-client && npm run compile:server",
     "start": "cd dashboard && yarn start",
     "postinstall": "cd vscode-client && npm postinstall"
   },

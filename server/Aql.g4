@@ -49,7 +49,7 @@ func:
      funcName OPEN_PAREN (wildcard | selectionExpr) CLOSE_PAREN
     ;
 
-funcName: (COUNT | MAX | MIN) ;
+funcName: (COUNT | MAX | MIN | AVG | SUM) ;
 
 selectionExpr:
     left=selectionExpr operator=(STAR | DIVIDE) right=selectionExpr # SelectionBinary
@@ -122,6 +122,8 @@ SUNDAY: S U N D A Y ;
 COUNT : C O U N T;
 MAX : M A X ;
 MIN : M I N ;
+SUM : S U M ;
+AVG : A V G ;
 
 AND: A N D ;
 OR: O R ;
