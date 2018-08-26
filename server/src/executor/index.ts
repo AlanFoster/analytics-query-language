@@ -74,16 +74,15 @@ class Executor {
     }
 
     async extractSchema(): Promise<Schema> {
+        // Return all views in the public namespace, including columns and data types
         const res: QueryResult<SchemaResponse> = await this.pool.query(`
-            select
-                information_schema.tables.table_schema,
-                information_schema.tables.table_name,
-                information_schema.columns.column_name,
-                information_schema.columns.data_type
-              from information_schema.tables
-              left join information_schema.columns
-              on information_schema.tables.table_name = information_schema.columns.table_name
-              where information_schema.tables.table_schema = 'public'
+            SELECT relname as table_name, attname as column_name, format_type(atttypid, atttypmod) as data_type
+            FROM pg_attribute
+            LEFT JOIN pg_class on pg_attribute.attrelid = pg_class.oid
+            LEFT JOIN pg_namespace on pg_class.relnamespace = pg_namespace.oid
+            where pg_namespace.nspname = 'public'
+            and relkind = 'view'
+            AND attstattarget <> 0;
         `);
 
         const tableNameToColumns: { [key: string]: ColumnDefinition[] }  = res.rows.reduce(function (acc, row) {

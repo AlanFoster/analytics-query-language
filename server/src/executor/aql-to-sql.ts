@@ -36,18 +36,20 @@ class DateCalculator {
 
         const relativeDate = expr.relativeDate();
         if (relativeDate) {
-            const day = relativeDate.day().text;
             const newDate = this.today.clone();
+            const day = relativeDate.day().text;
 
-            const dayIndex = moment.weekdays().findIndex(value => value.toLowerCase() == day.toLowerCase());
-            if (dayIndex !== -1) {
-                newDate.set("day", dayIndex);
+            if (day != "today") {
+                if (newDate.day() === 0) {
+                    newDate.subtract(1, 'week');
+                }
+                newDate.day(day);
             }
 
             const time = relativeDate.time();
             if (time) {
                 // Note: This is pretty naive, we could enforce iso8601 in our parser
-                const timeWithoutQuotes = time.text.slice(1, -1)
+                const timeWithoutQuotes = time.text.slice(1, -1);
                 const [hours, minutes] = timeWithoutQuotes.split(':');
 
                 newDate.set('hours', Number(hours));
@@ -249,17 +251,14 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
 
         if (startDate.isAfter(endDate)) {
             this.errorListener.error("Start date is after end date");
-            return this.defaultResult();
         }
 
         if (!startDate.isValid()) {
             this.errorListener.error(`Start date ${startDate} not valid`);
-            return this.defaultResult();
         }
 
         if (!endDate.isValid()) {
             this.errorListener.error(`End date ${startDate} not valid`);
-            return this.defaultResult();
         }
 
         const datePredicate = `created_at > '${startDate.toISOString()}' and created_at <= '${endDate.toISOString()}'`;
@@ -381,11 +380,10 @@ export default function (input, today) {
 
     const tree = parser.prog();
 
-    const visitorErrorAggregator = new ErrorAggregator();
-    const aqlToSqlVisitor = new AqlToSqlVisitor(visitorErrorAggregator, new DateCalculator(today));
+    const aqlToSqlVisitor = new AqlToSqlVisitor(errorAggregator, new DateCalculator(today));
 
     return {
         command: aqlToSqlVisitor.visit(tree),
-        errors: visitorErrorAggregator.getErrors()
+        errors: errorAggregator.getErrors()
     };
 }

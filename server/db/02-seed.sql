@@ -19,7 +19,10 @@ $$ LANGUAGE plpgsql;
 -- Seeds
 --------------------------------------------------------------------
 
--- Ceate Product names
+-- Force a consistent seed for deterministic randomness
+select setseed(0.567);
+
+-- Create Product names
 --
 -- original coffee names and descriptions generated with the Faker gem
 --   (1..20).map do |id|
@@ -63,9 +66,10 @@ ON CONFLICT DO NOTHING;
 INSERT INTO
   sales (customer_id, total, created_at, deleted_at)
 SELECT
-  1, -- customer_id
+	trunc(random() * (select count(id) from customers)), -- customer_id
   (2 + (random() * 20))::decimal::money, -- total
   randomTimeduringBusinessHours(sale_id, trunc(15 + (random() * 10))::integer), -- created_at
   null -- deleted_at
 FROM generate_series(1, 200) as sale_id
 ON CONFLICT DO NOTHING;
+

@@ -2,7 +2,17 @@ import React from 'react';
 import AqlEditor from './aql-editor';
 import {Button, Table, Card, CardTitle } from 'reactstrap';
 import InformationTooltip from './information-tooltip';
+import * as moment from 'moment';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+const getFormatterFor = function (heading) {
+  if (heading === 'created_at') {
+    return created_at => moment(created_at).fromNow();
+  }
+
+  // Identity
+  return x => x;
+};
 
 const Results = ({ results }) => {
   if (!results) return <div>Run your query above</div>;
@@ -12,6 +22,9 @@ const Results = ({ results }) => {
 
   // The server should expand wildcard to select only the fields we care about, let's cheat for now.
   const headings = Object.keys(results.rows[0]).filter(heading => !(heading === 'id' || heading === 'deleted_at'));
+  const formatters = {
+    created_at: (value) => moment(value)
+  };
 
   return (
     <div>
@@ -30,8 +43,11 @@ const Results = ({ results }) => {
           return (
             <tr key={index}>
               <th scope="row">{index + 1}</th>
-              {headings.map(function (heading, index) {
-                return <td key={heading}>{row[heading]}</td>
+              {headings.map(function (heading) {
+                const formatter = getFormatterFor(heading);
+                const value = formatter(row[heading]);
+
+                return <td key={heading}>{value}</td>
               })}
             </tr>
           );
@@ -57,7 +73,7 @@ class App extends React.Component {
     super(props);
 
     this.state = {
-      value: window.sessionStorage.value || "select * from products",
+      value: window.sessionStorage.value || "select * from products_view",
 
       results: undefined
     }

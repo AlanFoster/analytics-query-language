@@ -33,3 +33,27 @@ CREATE TABLE IF NOT EXISTS sales (
   created_at  TIMESTAMP WITHOUT TIME ZONE,
   deleted_at  TIMESTAMP WITHOUT TIME ZONE
 );
+
+-- Views that will be exposed for the user to make use of
+
+DROP VIEW IF EXISTS sales_view;
+CREATE VIEW
+	sales_view
+AS
+	select customers.name as customer_name, sales.total, sales.created_at
+	from sales
+	left join customers on customers.id = sales.customer_id;
+
+DROP VIEW IF EXISTS products_view;
+CREATE VIEW
+	products_view
+AS
+	select *
+	from products;
+
+DROP VIEW IF EXISTS customers_view;
+CREATE VIEW
+	customers_view
+AS
+	select *
+	from customers;
