@@ -1,9 +1,10 @@
 import React from 'react';
 import AqlEditor from './aql-editor';
-import {Button, Table, Card, CardBody, CardTitle, TabContent, TabPane, Nav, NavItem, NavLink, Row, Col } from 'reactstrap';
+import {Button, Table, TabContent, TabPane, Nav, NavItem, NavLink} from 'reactstrap';
 import InformationTooltip from './information-tooltip';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faListAlt, faFileCode } from '@fortawesome/free-regular-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {faListAlt, faFileCode, faChartBar} from '@fortawesome/free-regular-svg-icons';
+import {ResponsiveContainer,BarChart, Bar, LineChart, Tooltip, CartesianGrid, XAxis, YAxis, Legend, Line} from 'recharts';
 import * as moment from 'moment';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -55,6 +56,49 @@ const ListView = ({ results }) => {
   );
 };
 
+const ChartView = ({ results }) => {
+  if (results.rows.length === 0) {
+    return <div>There is no data to plot</div>
+  }
+
+  // TODO: Guess the key blindly for now. The best way to handle this might be the server returning
+  // the data directly in a usable format by our charts, rather than the client guessing what to aggregate on
+  const possibleAggregations = ['count', 'sum', 'avg', 'min', 'max'];
+  const key = possibleAggregations.find(function (key) {
+    if (key in results.rows[0]) {
+      return key;
+    }
+  });
+
+  const data = results.rows.map(function (row) {
+    return {
+      name: moment(row.timeseries).fromNow(),
+      raw: row[key],
+      [key]: Number(row[key].match(/^\$?(.*)/)[1])
+    }
+  }).reverse();
+
+  return (
+    <ResponsiveContainer width='100%' height={400}>
+      <BarChart
+        data={data}
+        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+      >
+        <CartesianGrid strokeDasharray="3 3"/>
+        <XAxis dataKey='name'/>
+        <YAxis
+          label={{ value: key, angle: -90, position: 'insideLeft' }}
+        />
+        <Tooltip
+          formatter={(value, name, props) => props.payload.raw}
+        />
+        <Legend/>
+        <Bar isAnimationActive={false} type="monotone" dataKey={key} fill="#8884d8"/>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+};
+
 const DataView = ({ results }) => {
   return (
     <div style={{ backgroundColor: '#F6F6F6', border: '1px solid #dee2e6', padding: '1rem' }}>
@@ -67,7 +111,8 @@ const DataView = ({ results }) => {
 
 const resultsView = {
   listView: 'list-view',
-  dataView: 'data-view'
+  dataView: 'data-view',
+  chartView: 'chart-view',
 };
 
 const ToggleView = ({ onClick, value, isActive, icon }) => {
@@ -75,9 +120,11 @@ const ToggleView = ({ onClick, value, isActive, icon }) => {
     <NavItem>
       <NavLink
         className={isActive ? 'active' : ''}
-        onClick={() => { onClick(value); }}
+        onClick={() => {
+          onClick(value);
+        }}
       >
-        <FontAwesomeIcon icon={icon} color={isActive ? '#333' : '#AAA'} />
+        <FontAwesomeIcon icon={icon} color={isActive ? '#333' : '#AAA'}/>
       </NavLink>
     </NavItem>
   )
@@ -90,14 +137,13 @@ const Results = ({ results, view }) => {
     <div style={{ background: '#FFFFFF', padding: '1rem' }}>
       <TabContent activeTab={view}>
         <TabPane tabId={resultsView.listView}>
-          <Row>
-            <Col sm="12">
-              <ListView results={results} />
-            </Col>
-          </Row>
+          <ListView results={results}/>
         </TabPane>
         <TabPane tabId={resultsView.dataView}>
-          <DataView results={results} />
+          <DataView results={results}/>
+        </TabPane>
+        <TabPane tabId={resultsView.chartView}>
+          <ChartView results={results}/>
         </TabPane>
       </TabContent>
     </div>
@@ -125,7 +171,11 @@ class App extends React.Component {
     this.state = {
       value: window.sessionStorage.value || "select * from products_view",
       results: undefined
-    }
+    };
+  }
+
+  componentDidMount() {
+    this.onFetchResults();
   }
 
   onChange = (newValue) => {
@@ -138,7 +188,7 @@ class App extends React.Component {
 
     fetch('/results', {
       method: 'POST',
-      headers:{
+      headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ query: this.state.value }),
@@ -147,7 +197,7 @@ class App extends React.Component {
       .then((res) => {
         this.setState({
           results: res,
-          view: resultsView.listView
+          view: resultsView.chartView
         })
       });
   };
@@ -161,14 +211,21 @@ class App extends React.Component {
 
     return (
       <div style={{ padding: '2rem' }}>
-        <div style={{ display: 'flex', backgroundColor: '#1e1e1e', padding: '0.8rem', borderRadius: '.25rem', marginBottom: '1rem' }}>
+        <div style={{
+          display: 'flex',
+          backgroundColor: '#1e1e1e',
+          padding: '0.8rem',
+          borderRadius: '.25rem',
+          marginBottom: '1rem'
+        }}>
           <AqlEditor
             value={this.state.value}
             onChange={this.onChange}
             onFetchResults={this.onFetchResults}
           />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 0 0 0.5rem'}}>
-            <div style={{ display: 'flex', alignItems: 'center'}}>
+          <div
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 0 0 0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
               <Button onClick={this.onFetchResults}>
                 Run
               </Button>
@@ -176,16 +233,16 @@ class App extends React.Component {
 
               </div>
               <InformationTooltip>
-                  <div>
-                    <div><a href='#help'>Full SQL explanation</a></div>
-                    <div>Run with Ctrl/Cmd + Enter</div>
-                  </div>
+                <div>
+                  <div><a href='#help'>Full SQL explanation</a></div>
+                  <div>Run with Ctrl/Cmd + Enter</div>
+                </div>
               </InformationTooltip>
             </div>
           </div>
         </div>
 
-        {(results && results.errors && results.errors.length > 0) &&(
+        {(results && results.errors && results.errors.length > 0) && (
           <div className="alert alert-danger" role="alert">
             <pre>
               {JSON.stringify(results.errors, null, 4)}
@@ -193,7 +250,7 @@ class App extends React.Component {
           </div>
         )}
 
-        <ShowQuery results={results} />
+        <ShowQuery results={results}/>
 
         {results && results.rows && (
           <Nav tabs>
@@ -201,6 +258,12 @@ class App extends React.Component {
               isActive={view === resultsView.listView}
               icon={faListAlt}
               value={resultsView.listView}
+              onClick={this.onToggleView}
+            />
+            <ToggleView
+              isActive={view === resultsView.chartView}
+              icon={faChartBar}
+              value={resultsView.chartView}
               onClick={this.onToggleView}
             />
             <ToggleView
@@ -213,7 +276,11 @@ class App extends React.Component {
         )}
 
         {results && (
-          <div style={{ borderLeft: '1px solid #dee2e6', borderRight: '1px solid #dee2e6', borderBottom: '1px solid #dee2e6', }}>
+          <div style={{
+            borderLeft: '1px solid #dee2e6',
+            borderRight: '1px solid #dee2e6',
+            borderBottom: '1px solid #dee2e6',
+          }}>
             <Results
               results={results}
               view={view}
@@ -224,6 +291,5 @@ class App extends React.Component {
     )
   }
 }
-
 
 export default App;
