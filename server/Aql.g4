@@ -23,7 +23,22 @@ filter:
   ;
 
 timeseries:
-  TIMESERIES
+  TIMESERIES duration?
+  ;
+
+duration:
+  timeDuration timeUnit
+  ;
+
+timeDuration:
+  INT
+  ;
+
+timeUnit:
+  MINUTES
+  | HOURS
+  | DAYS
+  | WEEKS
   ;
 
 selection:
@@ -122,6 +137,12 @@ THURSDAY: T H U R S D A Y ;
 FRIDAY: F R I D A Y ;
 SATURDAY: S A T U R D A Y ;
 SUNDAY: S U N D A Y ;
+
+// Time units - Note that the trailing S is optional
+MINUTES: M I N U T E S? ;
+HOURS: H O U R S? ;
+DAYS: D A Y S? ;
+WEEKS: W E E K S? ;
 
 // Function Names
 COUNT : C O U N T;

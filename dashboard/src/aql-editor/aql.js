@@ -46,6 +46,17 @@ export const language = {
         'timeseries'
     ],
 
+    durations: [
+      'minute',
+      'minutes',
+      'hour',
+      'hours',
+      'day',
+      'days',
+      'week',
+      'weeks'
+    ],
+
     builtInFunctions: [
         'count',
         'max',
@@ -66,6 +77,7 @@ export const language = {
                 cases: {
                     '@builtInFunctions': 'predefined',
                     '@keywords': 'keyword',
+                    '@durations': 'number',
                     '@default': 'identifier'
                 }
             }],

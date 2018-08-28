@@ -5,6 +5,7 @@ import InformationTooltip from './information-tooltip';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faListAlt, faFileCode, faChartBar} from '@fortawesome/free-regular-svg-icons';
 import {ResponsiveContainer,BarChart, Bar, LineChart, Tooltip, CartesianGrid, XAxis, YAxis, Legend, Line} from 'recharts';
+import { pure } from 'recompose';
 import * as moment from 'moment';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -18,7 +19,7 @@ const getFormatterFor = function (heading) {
   return x => x;
 };
 
-const ListView = ({ results }) => {
+const ListView = pure(({ results }) => {
   if (results.rows.length === 0) return <div>No results</div>;
 
   // The server should expand wildcard to select only the fields we care about, let's cheat for now.
@@ -54,27 +55,29 @@ const ListView = ({ results }) => {
       </Table>
     </div>
   );
-};
+});
 
-const ChartView = ({ results }) => {
+const ChartView = pure(({ results }) => {
   if (results.rows.length === 0) {
     return <div>There is no data to plot</div>
   }
 
   // TODO: Guess the key blindly for now. The best way to handle this might be the server returning
   // the data directly in a usable format by our charts, rather than the client guessing what to aggregate on
-  const possibleAggregations = ['count', 'sum', 'avg', 'min', 'max'];
+  const possibleAggregations = ['count', 'sum', 'avg', 'min', 'max', 'coalesce'];
   const key = possibleAggregations.find(function (key) {
     if (key in results.rows[0]) {
       return key;
     }
   });
 
+  if (!key) return <div>Only Aggregate functions can be plotted</div>
+
   const data = results.rows.map(function (row) {
     return {
       name: moment(row.timeseries).fromNow(),
-      raw: row[key],
-      [key]: Number(row[key].match(/^\$?(.*)/)[1])
+      raw: (key in row) ? row[key] : 'Missing',
+      [key]: (key in row) ? Number(row[key].match(/^\$?(.*)/)[1]) : 0
     }
   }).reverse();
 
@@ -97,9 +100,9 @@ const ChartView = ({ results }) => {
       </BarChart>
     </ResponsiveContainer>
   );
-};
+});
 
-const DataView = ({ results }) => {
+const DataView = pure(({ results }) => {
   return (
     <div style={{ backgroundColor: '#F6F6F6', border: '1px solid #dee2e6', padding: '1rem' }}>
       <pre>
@@ -107,7 +110,7 @@ const DataView = ({ results }) => {
       </pre>
     </div>
   );
-};
+});
 
 const resultsView = {
   listView: 'list-view',
@@ -150,7 +153,7 @@ const Results = ({ results, view }) => {
   )
 };
 
-const ShowQuery = ({ results }) => {
+const ShowQuery = pure(({ results }) => {
   const hasExecuted = (results && results.command);
   if (!hasExecuted) return null;
 
@@ -162,7 +165,7 @@ const ShowQuery = ({ results }) => {
       </pre>
     </div>
   );
-};
+});
 
 class App extends React.Component {
   constructor(props) {

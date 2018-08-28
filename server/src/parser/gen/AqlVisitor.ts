@@ -16,6 +16,9 @@ import { ProgContext } from './AqlParser';
 import { FiltersContext } from './AqlParser';
 import { FilterContext } from './AqlParser';
 import { TimeseriesContext } from './AqlParser';
+import { DurationContext } from './AqlParser';
+import { TimeDurationContext } from './AqlParser';
+import { TimeUnitContext } from './AqlParser';
 import { SelectionContext } from './AqlParser';
 import { PredicateExprContext } from './AqlParser';
 import { PredicateTermContext } from './AqlParser';
@@ -140,6 +143,27 @@ export interface AqlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitTimeseries?: (ctx: TimeseriesContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `AqlParser.duration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitDuration?: (ctx: DurationContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `AqlParser.timeDuration`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTimeDuration?: (ctx: TimeDurationContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `AqlParser.timeUnit`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTimeUnit?: (ctx: TimeUnitContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `AqlParser.selection`.

@@ -6,7 +6,7 @@ import {
     PredicateBinaryContext, PredicateNestedContext,
     PredicateExprContext, ProgContext, SelectionAtomContext, SelectionBinaryContext,
     SelectionContext, SelectionExprContext, SelectionNestedContext, TableContext,
-    WildcardContext, AqlParser
+    WildcardContext, AqlParser, TimeseriesContext
 } from '../parser/gen/AqlParser';
 import {ANTLRInputStream, CommonTokenStream} from "antlr4ts";
 import {AqlLexer} from "../parser/gen/AqlLexer";
@@ -29,7 +29,7 @@ class DateCalculator {
         return this.today.clone();
     }
 
-    getDate(expr: DateContext): Moment {
+    getDate(expr: DateContext, anchor: 'start' | 'end'): Moment {
         if (expr.absoluteDate()) {
             return moment(expr.absoluteDate()!.text);
         }
@@ -47,6 +47,7 @@ class DateCalculator {
             }
 
             const time = relativeDate.time();
+
             if (time) {
                 // Note: This is pretty naive, we could enforce iso8601 in our parser
                 const timeWithoutQuotes = time.text.slice(1, -1);
@@ -56,6 +57,12 @@ class DateCalculator {
                 newDate.set('minutes', Number(minutes));
                 newDate.set('seconds', 0);
                 newDate.set('milliseconds', 0);
+            } else if (!time && day != "day") {
+                if (anchor === 'start') {
+                    newDate.startOf('day');
+                } else {
+                    newDate.endOf('day')
+                }
             }
 
             return newDate;
@@ -65,15 +72,50 @@ class DateCalculator {
     }
 }
 
+/**
+ * Translates a parsed duration into a moment duration
+ */
+class DurationCalculator {
+    asSeconds(expr: TimeseriesContext): number {
+        const unitToSeconds = {
+            minute: 60,
+            minutes: 60,
+
+            hour: 3600,
+            hours: 3600,
+
+            day: 86400,
+            days: 86400,
+
+            week: 604800,
+            weeks: 604800
+        };
+
+        if (!expr.duration()) {
+            return unitToSeconds.hour;
+        }
+
+        const duration = Number(expr.duration().timeDuration().text);
+        const unit = expr.duration().timeUnit().text.toLowerCase();
+        const unitAsSeconds = unitToSeconds[unit];
+
+        return duration * unitAsSeconds;
+    }
+}
+
+
 class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVisitor<string> {
     private errorListener: ErrorAggregator;
     private dateCalculator: DateCalculator;
 
-    // Note, this is a workaround to track the fact of the original AQL having a timeseries value,
-    // which will impact the select generation. If there were multiple variables keeping track
-    // of this state, it's a suggestion that we should have our own intermediate representation
-    // that represents our own abstract syntax tree which could be converted directly into SQL
+    // Note, the below state is a workaround to track the fact of the original AQL having a timeseries value,
+    // which will impact the select generation. If this state becomes too much, it's a good indication that we
+    // should have our own intermediate representation that represents our own abstract syntax tree which could
+    // be converted directly into SQL
     private isTimeseries: boolean = false;
+    private startDate: Moment | undefined;
+    private endDate: Moment | undefined;
+    private timeSeries: TimeseriesContext | undefined;
 
     constructor(errorListener: ErrorAggregator, dateCalculator) {
         super();
@@ -202,16 +244,22 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
      * @return the visitor result
      */
     visitProg(ctx: ProgContext) {
-        let result = '';
-
-        const selection = this.visitSelection!(ctx.selection()) + " ";
-        const table = this.visitTable!(ctx.table()) + " ";
+        const selection = this.visitSelection!(ctx.selection());
+        const table = this.visitTable!(ctx.table());
         const filters = this.visitFilters(ctx.filters());
 
-        const timeSeriesSelection = this.isTimeseries ? ", date_trunc('day', created_at) as timeseries" : "";
-        const query = `select ${selection}${timeSeriesSelection} from ${table} ${filters}`;
+        if (this.isTimeseries) {
+            const durationInSeconds = new DurationCalculator().asSeconds(this.timeSeries);
 
-        return query;
+            return `with full_dates as (select generate_series(TIMESTAMP WITHOUT TIME ZONE '${this.startDate.toISOString()}', TIMESTAMP WITHOUT TIME ZONE '${this.endDate.toISOString()}', interval '${durationInSeconds} seconds') timeseries)
+select timeseries, ${selection}
+from full_dates
+left outer join sales_view on timeseries = TIMESTAMP WITH TIME ZONE 'epoch' + INTERVAL '1 second' * (floor(extract('epoch' from created_at) / ${durationInSeconds}) * ${durationInSeconds})
+group by timeseries
+order by full_dates.timeseries desc`.trim();
+        } else {
+            return `select ${selection} from ${table} ${filters}`;
+        }
     }
 
     /**
@@ -247,33 +295,34 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
             }
 
             if (filter.timeseries()) {
-                this.isTimeseries = true
+                this.isTimeseries = true;
+                this.timeSeries = filter.timeseries();
             }
         }
 
-        const startDate =
+        this.startDate =
             since
-                ? this.dateCalculator.getDate(since)
-                : this.dateCalculator.getToday().subtract(1, 'week');
+                ? this.dateCalculator.getDate(since, 'start')
+                : this.dateCalculator.getToday().subtract(1, 'week').startOf('day');
 
-        const endDate =
+        this.endDate =
             until
-                ? this.dateCalculator.getDate(until)
+                ? this.dateCalculator.getDate(until, 'end')
                 : this.dateCalculator.getToday();
 
-        if (startDate.isAfter(endDate)) {
+        if (this.startDate.isAfter(this.endDate)) {
             this.errorListener.error("Start date is after end date");
         }
 
-        if (!startDate.isValid()) {
-            this.errorListener.error(`Start date ${startDate} not valid`);
+        if (!this.startDate.isValid()) {
+            this.errorListener.error(`Start date ${this.startDate} not valid`);
         }
 
-        if (!endDate.isValid()) {
-            this.errorListener.error(`End date ${startDate} not valid`);
+        if (!this.endDate.isValid()) {
+            this.errorListener.error(`End date ${this.startDate} not valid`);
         }
 
-        const datePredicate = `created_at > '${startDate.toISOString()}' and created_at <= '${endDate.toISOString()}'`;
+        const datePredicate = `created_at > '${this.startDate.toISOString()}' and created_at <= '${this.endDate.toISOString()}'`;
 
         let result = "";
         if (whereStatements.length > 0) {
@@ -338,6 +387,7 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
             return this.defaultResult();
         }
 
+        // return `coalesce(${ctx.funcName().text}(${expression}), 0) as ${ctx.funcName().text}`;
         return `${ctx.funcName().text}(${expression})`;
     }
 

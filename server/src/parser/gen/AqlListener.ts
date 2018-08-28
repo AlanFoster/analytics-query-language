@@ -16,6 +16,9 @@ import { ProgContext } from './AqlParser';
 import { FiltersContext } from './AqlParser';
 import { FilterContext } from './AqlParser';
 import { TimeseriesContext } from './AqlParser';
+import { DurationContext } from './AqlParser';
+import { TimeDurationContext } from './AqlParser';
+import { TimeUnitContext } from './AqlParser';
 import { SelectionContext } from './AqlParser';
 import { PredicateExprContext } from './AqlParser';
 import { PredicateTermContext } from './AqlParser';
@@ -198,6 +201,39 @@ export interface AqlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitTimeseries?: (ctx: TimeseriesContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `AqlParser.duration`.
+	 * @param ctx the parse tree
+	 */
+	enterDuration?: (ctx: DurationContext) => void;
+	/**
+	 * Exit a parse tree produced by `AqlParser.duration`.
+	 * @param ctx the parse tree
+	 */
+	exitDuration?: (ctx: DurationContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `AqlParser.timeDuration`.
+	 * @param ctx the parse tree
+	 */
+	enterTimeDuration?: (ctx: TimeDurationContext) => void;
+	/**
+	 * Exit a parse tree produced by `AqlParser.timeDuration`.
+	 * @param ctx the parse tree
+	 */
+	exitTimeDuration?: (ctx: TimeDurationContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `AqlParser.timeUnit`.
+	 * @param ctx the parse tree
+	 */
+	enterTimeUnit?: (ctx: TimeUnitContext) => void;
+	/**
+	 * Exit a parse tree produced by `AqlParser.timeUnit`.
+	 * @param ctx the parse tree
+	 */
+	exitTimeUnit?: (ctx: TimeUnitContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `AqlParser.selection`.
