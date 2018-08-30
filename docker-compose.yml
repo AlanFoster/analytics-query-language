@@ -2,9 +2,10 @@ version: '3'
 
 services:
   database:
-    image: postgres:10.5-alpine
+    build:
+      context: ./database
     volumes:
-      - ./server/db:/docker-entrypoint-initdb.d
+      - ./database/init:/docker-entrypoint-initdb.d
     ports:
       - 5432:5432
 

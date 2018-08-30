@@ -251,10 +251,11 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
         if (this.isTimeseries) {
             const durationInSeconds = new DurationCalculator().asSeconds(this.timeSeries);
 
+            // TODO: Apply filters
             return `with full_dates as (select generate_series(TIMESTAMP WITHOUT TIME ZONE '${this.startDate.toISOString()}', TIMESTAMP WITHOUT TIME ZONE '${this.endDate.toISOString()}', interval '${durationInSeconds} seconds') timeseries)
 select timeseries, ${selection}
 from full_dates
-left outer join sales_view on timeseries = TIMESTAMP WITH TIME ZONE 'epoch' + INTERVAL '1 second' * (floor(extract('epoch' from created_at) / ${durationInSeconds}) * ${durationInSeconds})
+left outer join ${table} on timeseries = TIMESTAMP WITH TIME ZONE 'epoch' + INTERVAL '1 second' * (floor(extract('epoch' from created_at) / ${durationInSeconds}) * ${durationInSeconds})
 group by timeseries
 order by full_dates.timeseries desc`.trim();
         } else {
