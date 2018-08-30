@@ -71,13 +71,16 @@ const ChartView = pure(({ results }) => {
     }
   });
 
-  if (!key) return <div>Only Aggregate functions can be plotted</div>
+  if (!key) return <div>Only Aggregate functions can be plotted</div>;
 
   const data = results.rows.map(function (row) {
+    const hasValue = (key in row);
+    const value = hasValue ? row[key] : null;
+
     return {
-      name: moment(row.timeseries).fromNow(),
-      raw: (key in row) ? row[key] : 'Missing',
-      [key]: (key in row) ? Number(row[key].match(/^\$?(.*)/)[1]) : 0
+      name: moment(row.timeseries).format('dddd'),
+      raw: hasValue ? value : 'Missing',
+      [key]: hasValue ? Number((value && value.match(/^\$?(.*)/)[1]) || 0) : 0
     }
   }).reverse();
 
