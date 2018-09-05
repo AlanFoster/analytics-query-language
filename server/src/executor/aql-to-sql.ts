@@ -6,7 +6,7 @@ import {
     PredicateBinaryContext, PredicateNestedContext,
     PredicateExprContext, ProgContext, SelectionAtomContext, SelectionBinaryContext,
     SelectionContext, SelectionExprContext, SelectionNestedContext, TableContext,
-    WildcardContext, AqlParser, TimeseriesContext
+    WildcardContext, AqlParser, TimeseriesContext, FacetContext
 } from '../parser/gen/AqlParser';
 import {ANTLRInputStream, CommonTokenStream} from "antlr4ts";
 import {AqlLexer} from "../parser/gen/AqlLexer";
@@ -40,10 +40,13 @@ class DateCalculator {
             const day = relativeDate.day().text;
 
             if (day != "today") {
-                if (newDate.day() === 0) {
-                    newDate.subtract(1, 'week');
-                }
                 newDate.day(day);
+            }
+
+            // Note: This is naive, and won't be 'right' for all cases.
+            // For instance, on a sunday which day does 'last tuesday' refer to?
+            if (relativeDate.LAST()) {
+                newDate.subtract(1, 'week');
             }
 
             const time = relativeDate.time();
@@ -116,6 +119,7 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
     private startDate: Moment | undefined;
     private endDate: Moment | undefined;
     private timeSeries: TimeseriesContext | undefined;
+    private facet: FacetContext | undefined
 
     constructor(errorListener: ErrorAggregator, dateCalculator) {
         super();
@@ -250,13 +254,14 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
 
         if (this.isTimeseries) {
             const durationInSeconds = new DurationCalculator().asSeconds(this.timeSeries);
+            const facet = this.facet.column().text;
 
             // TODO: Apply filters
             return `with full_dates as (select generate_series(TIMESTAMP WITHOUT TIME ZONE '${this.startDate.toISOString()}', TIMESTAMP WITHOUT TIME ZONE '${this.endDate.toISOString()}', interval '${durationInSeconds} seconds') timeseries)
-select timeseries, ${selection}
+select timeseries, ${facet}, ${selection}
 from full_dates
 left outer join ${table} on timeseries = TIMESTAMP WITH TIME ZONE 'epoch' + INTERVAL '1 second' * (floor(extract('epoch' from created_at) / ${durationInSeconds}) * ${durationInSeconds})
-group by timeseries
+group by timeseries, ${facet}
 order by full_dates.timeseries desc`.trim();
         } else {
             return `select ${selection} from ${table} ${filters}`;
@@ -298,6 +303,10 @@ order by full_dates.timeseries desc`.trim();
             if (filter.timeseries()) {
                 this.isTimeseries = true;
                 this.timeSeries = filter.timeseries();
+            }
+
+            if (filter.facet()) {
+                this.facet = filter.facet();
             }
         }
 
@@ -456,9 +465,15 @@ export default function (input, today) {
     }
 
     const aqlToSqlVisitor = new AqlToSqlVisitor(errorAggregator, new DateCalculator(today));
+    let command;
+    try {
+        command = aqlToSqlVisitor.visit(tree);
+    } catch (e) {
+        errorAggregator.error(e.toString());
+    }
 
     return {
-        command: aqlToSqlVisitor.visit(tree),
+        command: command,
         errors: errors
     };
 }

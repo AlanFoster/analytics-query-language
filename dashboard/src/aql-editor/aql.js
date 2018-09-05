@@ -43,7 +43,8 @@ export const language = {
         'or',
         'true',
         'false',
-        'timeseries'
+        'timeseries',
+        'facet',
     ],
 
     durations: [
@@ -54,7 +55,17 @@ export const language = {
       'day',
       'days',
       'week',
-      'weeks'
+      'weeks',
+
+      'today',
+      'last',
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+      'sunday'
     ],
 
     builtInFunctions: [

@@ -19,6 +19,20 @@ const getFormatterFor = function (heading) {
   return x => x;
 };
 
+const stringToColor = function(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  let color = '#';
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xFF;
+    color += ('00' + value.toString(16)).substr(-2);
+  }
+  console.log(color);
+  return color;
+};
+
 const ListView = pure(({ results }) => {
   if (results.rows.length === 0) return <div>No results</div>;
 
@@ -73,20 +87,107 @@ const ChartView = pure(({ results }) => {
 
   if (!key) return <div>Only Aggregate functions can be plotted</div>;
 
-  const data = results.rows.map(function (row) {
+  // {
+  //   "timeseries": "2018-08-31T15:00:00.000Z",
+  //   "customer_name": "Linda Smith",
+  //   "sum": "$7.65"
+  // },
+  // {
+  //   "timeseries": "2018-08-31T15:00:00.000Z",
+  //   "customer_name": "Jonathan Forbes",
+  //   "sum": "$7.19"
+  // },
+  // {
+  //   "timeseries": "2018-08-31T15:00:00.000Z",
+  //   "customer_name": "James Spence",
+  //   "sum": "$6.01"
+  // },
+  // {
+  //   "timeseries": "2018-08-31T15:00:00.000Z",
+  //   "customer_name": "Erica Nguyen",
+  //   "sum": "$5.21"
+  // },
+  // {
+  //   "timeseries": "2018-08-31T15:00:00.000Z",
+  //   "customer_name": "Christopher Ward",
+  //   "sum": "$119.02"
+  // },
+  // {
+  //   "timeseries": "2018-08-31T15:00:00.000Z",
+  //   "customer_name": "Alex Page",
+  //   "sum": "$4.29"
+  // },
+
+  const availableNamesMap = {};
+  results.rows.forEach(function (row) {
+    availableNamesMap[row.customer_name] = true;
+  });
+  const availableNames = Object.keys(availableNamesMap);
+
+  // const data = results.rows.map(function (row) {
+  //   const hasValue = (key in row);
+  //   const value = hasValue ? row[key] : null;
+  //
+  //   return {
+  //     name: moment(row.timeseries).format('dddd'),
+  //     raw: hasValue ? value : 'Missing',
+  //     [key]: hasValue ? Number((value && value.match(/^\$?(.*)/)[1]) || 0) : 0
+  //   }
+  // }).reverse();
+
+  const data = Object.values(results.rows.reduce(function (acc, row) {
+    acc[row.timeseries] = acc[row.timeseries] || {};
+    acc[row.timeseries].name = moment(row.timeseries).format('dddd');
+
     const hasValue = (key in row);
     const value = hasValue ? row[key] : null;
 
-    return {
-      name: moment(row.timeseries).format('dddd'),
-      raw: hasValue ? value : 'Missing',
-      [key]: hasValue ? Number((value && value.match(/^\$?(.*)/)[1]) || 0) : 0
-    }
-  }).reverse();
+    acc[row.timeseries].timeseries = row.timeseries;
+    acc[row.timeseries][row.customer_name] = hasValue ? Number((value && value.match(/^\$?(.*)/)[1]) || 0) : 0;
+
+    acc[row.timeseries].raw = acc[row.timeseries].raw || {};
+    acc[row.timeseries].raw[row.customer_name] = hasValue ? value : 'Missing';
+
+    return acc;
+  }, {}));
+
+  console.log(JSON.stringify(data, null, 4));
+
+  //
+  // const data = [
+  //   {
+  //     "timeseries": "2018-08-31T15:00:00.000Z",
+  //     "Linda Smith": 7.65,
+  //     "Alex Page": 3.23,
+  //     raw: {
+  //       "Linda Smith": "$7.65",
+  //       "Alex Page": "$3.23",
+  //     }
+  //   },
+  //   {
+  //     "timeseries": "2018-09-31T15:00:00.000Z",
+  //     "Linda Smith": 7.65,
+  //     "Alex Page": 4.23,
+  //     raw: {
+  //       "Linda Smith": "$7.65",
+  //       "Alex Page": "$4.23",
+  //     }
+  //   },
+  //   {
+  //     "timeseries": "2018-09-31T15:00:00.000Z",
+  //     "customer_name": "Linda Smith",
+  //     "Linda Smith": 7.65,
+  //     "Alex Page": 5.23,
+  //     raw: {
+  //       "Linda Smith": "$7.65",
+  //       "Alex Page": "$5.23",
+  //     }
+  //   },
+  // ];
 
   return (
     <ResponsiveContainer width='100%' height={400}>
-      <BarChart
+      <LineChart
         data={data}
         margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
       >
@@ -96,13 +197,58 @@ const ChartView = pure(({ results }) => {
           label={{ value: key, angle: -90, position: 'insideLeft' }}
         />
         <Tooltip
-          formatter={(value, name, props) => props.payload.raw}
+          formatter={(value, name, props) => props.payload.raw[name]}
         />
         <Legend/>
-        <Bar isAnimationActive={false} type="monotone" dataKey={key} fill="#8884d8"/>
-      </BarChart>
+
+        {availableNames.map((name) => {
+          return (
+            <Line
+              key={name}
+              isAnimationActive={false}
+              type="monotone"
+              dataKey={name}
+              fill={stringToColor(name)}
+              stroke={stringToColor(name)}
+            />
+          )
+        })}
+      </LineChart>
     </ResponsiveContainer>
   );
+
+
+  //
+  // const data = results.rows.map(function (row) {
+  //   const hasValue = (key in row);
+  //   const value = hasValue ? row[key] : null;
+  //
+  //   return {
+  //     name: moment(row.timeseries).format('dddd'),
+  //     raw: hasValue ? value : 'Missing',
+  //     [key]: hasValue ? Number((value && value.match(/^\$?(.*)/)[1]) || 0) : 0
+  //   }
+  // }).reverse();
+  //
+  // return (
+  //   <ResponsiveContainer width='100%' height={400}>
+  //     <BarChart
+  //       data={data}
+  //       margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+  //     >
+  //       <CartesianGrid strokeDasharray="3 3"/>
+  //       <XAxis dataKey='name'/>
+  //       <YAxis
+  //         label={{ value: key, angle: -90, position: 'insideLeft' }}
+  //       />
+  //       <Tooltip
+  //         formatter={(value, name, props) => props.payload.raw}
+  //       />
+  //       <Legend/>
+  //       <Bar isAnimationActive={false} type="monotone" dataKey={key} fill="#8884d8"/>
+  //     </BarChart>
+  //   </ResponsiveContainer>
+  // );
 });
 
 const DataView = pure(({ results }) => {

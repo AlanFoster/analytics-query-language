@@ -20,6 +20,11 @@ filter:
   | SINCE date
   | UNTIL date
   | timeseries
+  | facet
+  ;
+
+facet:
+  FACET column
   ;
 
 timeseries:
@@ -93,7 +98,7 @@ date:
     ;
 
 relativeDate:
-    day ( AT  time)?
+    LAST? day ( AT  time)?
     ;
 
 absoluteDate:
@@ -123,6 +128,7 @@ SINCE : S I N C E ;
 UNTIL : U N T I L ;
 AT: A T ;
 WHERE: W H E R E ;
+LAST : L A S T ;
 
 TRUE: 'true' ;
 FALSE: 'false' ;
@@ -151,6 +157,7 @@ MIN : M I N ;
 SUM : S U M ;
 AVG : A V G ;
 TIMESERIES: T I M E S E R I E S ;
+FACET: F A C E T ;
 
 AND: A N D ;
 OR: O R ;
