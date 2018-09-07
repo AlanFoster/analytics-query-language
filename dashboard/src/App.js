@@ -1,444 +1,213 @@
 import React from 'react';
-import AqlEditor from './aql-editor';
-import {Button, Table, TabContent, TabPane, Nav, NavItem, NavLink} from 'reactstrap';
-import InformationTooltip from './information-tooltip';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faListAlt, faFileCode, faChartBar} from '@fortawesome/free-regular-svg-icons';
-import {ResponsiveContainer,BarChart, Bar, LineChart, Tooltip, CartesianGrid, XAxis, YAxis, Legend, Line} from 'recharts';
-import { pure } from 'recompose';
-import * as moment from 'moment';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.css';
+import {
+  Charts,
+  ChartContainer,
+  ChartRow,
+  YAxis,
+  LineChart,
+  BarChart,
+  Resizable,
+  Legend,
+  styler,
+  TimeMarker,
+  EventMarker
+} from "react-timeseries-charts";
+import {TimeSeries, Index} from "pondjs";
+import {format} from "d3-format";
+import _ from 'lodash';
 
-const getFormatterFor = function (heading) {
-  if (heading === 'created_at' || heading === 'timeseries') {
-    return value => moment(value).fromNow();
-  }
-
-  // Identity
-  return x => x;
-};
-
-const stringToColor = function(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  let color = '#';
-  for (let i = 0; i < 3; i++) {
-    const value = (hash >> (i * 8)) & 0xFF;
-    color += ('00' + value.toString(16)).substr(-2);
-  }
-  console.log(color);
-  return color;
-};
-
-const ListView = pure(({ results }) => {
-  if (results.rows.length === 0) return <div>No results</div>;
-
-  // The server should expand wildcard to select only the fields we care about, let's cheat for now.
-  const headings = Object.keys(results.rows[0]).filter(heading => !(heading === 'id' || heading === 'deleted_at'));
-
-  return (
-    <div>
-      <Table>
-        <thead>
-        <tr>
-          <th>#</th>
-          {headings.map(function (value) {
-            return <th key={value}>{value}</th>
-          })}
-        </tr>
-        </thead>
-
-        <tbody>
-        {results.rows.map(function (row, index) {
-          return (
-            <tr key={index}>
-              <th scope="row">{index + 1}</th>
-              {headings.map(function (heading) {
-                const formatter = getFormatterFor(heading);
-                const value = formatter(row[heading]);
-
-                return <td key={heading}>{value}</td>
-              })}
-            </tr>
-          );
-        })}
-        </tbody>
-      </Table>
-    </div>
-  );
-});
-
-const ChartView = pure(({ results }) => {
-  if (results.rows.length === 0) {
-    return <div>There is no data to plot</div>
-  }
-
-  // TODO: Guess the key blindly for now. The best way to handle this might be the server returning
-  // the data directly in a usable format by our charts, rather than the client guessing what to aggregate on
-  const possibleAggregations = ['count', 'sum', 'avg', 'min', 'max', 'coalesce'];
-  const key = possibleAggregations.find(function (key) {
-    if (key in results.rows[0]) {
-      return key;
+class CrossHairs extends React.Component {
+  render() {
+    const { x, y } = this.props;
+    const style = { pointerEvents: "none", stroke: "#ccc" };
+    if (!_.isNull(x) && !_.isNull(y)) {
+      return (
+        <g>
+          <line style={style} x1={0} y1={y} x2={this.props.width} y2={y}/>
+          <line style={style} x1={x} y1={0} x2={x} y2={this.props.height}/>
+        </g>
+      );
+    } else {
+      return <g/>;
     }
+  }
+}
+
+const data = {
+  name: "traffic",
+  columns: ["time", "customer 1", "customer 2"],
+  points: [
+    [14004259470000, 52, 100],
+    [14004259480000, 18, 90],
+    [14004259490000, 26, 120,],
+    [14004259500000, 200, 512]
+  ]
+};
+
+const series = new TimeSeries(data);
+
+
+const calculateBestHighlight = function (series, e) {
+  const bestLine = series.columns().reduce((_previous, column) => {
+    return column;
   });
 
-  if (!key) return <div>Only Aggregate functions can be plotted</div>;
-
-  // {
-  //   "timeseries": "2018-08-31T15:00:00.000Z",
-  //   "customer_name": "Linda Smith",
-  //   "sum": "$7.65"
-  // },
-  // {
-  //   "timeseries": "2018-08-31T15:00:00.000Z",
-  //   "customer_name": "Jonathan Forbes",
-  //   "sum": "$7.19"
-  // },
-  // {
-  //   "timeseries": "2018-08-31T15:00:00.000Z",
-  //   "customer_name": "James Spence",
-  //   "sum": "$6.01"
-  // },
-  // {
-  //   "timeseries": "2018-08-31T15:00:00.000Z",
-  //   "customer_name": "Erica Nguyen",
-  //   "sum": "$5.21"
-  // },
-  // {
-  //   "timeseries": "2018-08-31T15:00:00.000Z",
-  //   "customer_name": "Christopher Ward",
-  //   "sum": "$119.02"
-  // },
-  // {
-  //   "timeseries": "2018-08-31T15:00:00.000Z",
-  //   "customer_name": "Alex Page",
-  //   "sum": "$4.29"
-  // },
-
-  const availableNamesMap = {};
-  results.rows.forEach(function (row) {
-    availableNamesMap[row.customer_name] = true;
-  });
-  const availableNames = Object.keys(availableNamesMap);
-
-  // const data = results.rows.map(function (row) {
-  //   const hasValue = (key in row);
-  //   const value = hasValue ? row[key] : null;
-  //
-  //   return {
-  //     name: moment(row.timeseries).format('dddd'),
-  //     raw: hasValue ? value : 'Missing',
-  //     [key]: hasValue ? Number((value && value.match(/^\$?(.*)/)[1]) || 0) : 0
-  //   }
-  // }).reverse();
-
-  const data = Object.values(results.rows.reduce(function (acc, row) {
-    acc[row.timeseries] = acc[row.timeseries] || {};
-    acc[row.timeseries].name = moment(row.timeseries).format('dddd');
-
-    const hasValue = (key in row);
-    const value = hasValue ? row[key] : null;
-
-    acc[row.timeseries].timeseries = row.timeseries;
-    acc[row.timeseries][row.customer_name] = hasValue ? Number((value && value.match(/^\$?(.*)/)[1]) || 0) : 0;
-
-    acc[row.timeseries].raw = acc[row.timeseries].raw || {};
-    acc[row.timeseries].raw[row.customer_name] = hasValue ? value : 'Missing';
-
-    return acc;
-  }, {}));
-
-  console.log(JSON.stringify(data, null, 4));
-
-  //
-  // const data = [
-  //   {
-  //     "timeseries": "2018-08-31T15:00:00.000Z",
-  //     "Linda Smith": 7.65,
-  //     "Alex Page": 3.23,
-  //     raw: {
-  //       "Linda Smith": "$7.65",
-  //       "Alex Page": "$3.23",
-  //     }
-  //   },
-  //   {
-  //     "timeseries": "2018-09-31T15:00:00.000Z",
-  //     "Linda Smith": 7.65,
-  //     "Alex Page": 4.23,
-  //     raw: {
-  //       "Linda Smith": "$7.65",
-  //       "Alex Page": "$4.23",
-  //     }
-  //   },
-  //   {
-  //     "timeseries": "2018-09-31T15:00:00.000Z",
-  //     "customer_name": "Linda Smith",
-  //     "Linda Smith": 7.65,
-  //     "Alex Page": 5.23,
-  //     raw: {
-  //       "Linda Smith": "$7.65",
-  //       "Alex Page": "$5.23",
-  //     }
-  //   },
-  // ];
-
-  return (
-    <ResponsiveContainer width='100%' height={400}>
-      <LineChart
-        data={data}
-        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-      >
-        <CartesianGrid strokeDasharray="3 3"/>
-        <XAxis dataKey='name'/>
-        <YAxis
-          label={{ value: key, angle: -90, position: 'insideLeft' }}
-        />
-        <Tooltip
-          formatter={(value, name, props) => props.payload.raw[name]}
-        />
-        <Legend/>
-
-        {availableNames.map((name) => {
-          return (
-            <Line
-              key={name}
-              isAnimationActive={false}
-              type="monotone"
-              dataKey={name}
-              fill={stringToColor(name)}
-              stroke={stringToColor(name)}
-            />
-          )
-        })}
-      </LineChart>
-    </ResponsiveContainer>
-  );
-
-
-  //
-  // const data = results.rows.map(function (row) {
-  //   const hasValue = (key in row);
-  //   const value = hasValue ? row[key] : null;
-  //
-  //   return {
-  //     name: moment(row.timeseries).format('dddd'),
-  //     raw: hasValue ? value : 'Missing',
-  //     [key]: hasValue ? Number((value && value.match(/^\$?(.*)/)[1]) || 0) : 0
-  //   }
-  // }).reverse();
-  //
-  // return (
-  //   <ResponsiveContainer width='100%' height={400}>
-  //     <BarChart
-  //       data={data}
-  //       margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-  //     >
-  //       <CartesianGrid strokeDasharray="3 3"/>
-  //       <XAxis dataKey='name'/>
-  //       <YAxis
-  //         label={{ value: key, angle: -90, position: 'insideLeft' }}
-  //       />
-  //       <Tooltip
-  //         formatter={(value, name, props) => props.payload.raw}
-  //       />
-  //       <Legend/>
-  //       <Bar isAnimationActive={false} type="monotone" dataKey={key} fill="#8884d8"/>
-  //     </BarChart>
-  //   </ResponsiveContainer>
-  // );
-});
-
-const DataView = pure(({ results }) => {
-  return (
-    <div style={{ backgroundColor: '#F6F6F6', border: '1px solid #dee2e6', padding: '1rem' }}>
-      <pre>
-        {JSON.stringify(results, null, 4)}
-      </pre>
-    </div>
-  );
-});
-
-const resultsView = {
-  listView: 'list-view',
-  dataView: 'data-view',
-  chartView: 'chart-view',
+  return bestLine;
 };
-
-const ToggleView = ({ onClick, value, isActive, icon }) => {
-  return (
-    <NavItem>
-      <NavLink
-        className={isActive ? 'active' : ''}
-        onClick={() => {
-          onClick(value);
-        }}
-      >
-        <FontAwesomeIcon icon={icon} color={isActive ? '#333' : '#AAA'}/>
-      </NavLink>
-    </NavItem>
-  )
-};
-
-const Results = ({ results, view }) => {
-  if (!results.rows) return null;
-
-  return (
-    <div style={{ background: '#FFFFFF', padding: '1rem' }}>
-      <TabContent activeTab={view}>
-        <TabPane tabId={resultsView.listView}>
-          <ListView results={results}/>
-        </TabPane>
-        <TabPane tabId={resultsView.dataView}>
-          <DataView results={results}/>
-        </TabPane>
-        <TabPane tabId={resultsView.chartView}>
-          <ChartView results={results}/>
-        </TabPane>
-      </TabContent>
-    </div>
-  )
-};
-
-const ShowQuery = pure(({ results }) => {
-  const hasExecuted = (results && results.command);
-  if (!hasExecuted) return null;
-
-  return (
-    <div className="alert alert-primary" role="alert">
-      Server executed query:
-      <pre style={{ margin: '0' }}>
-        {results.command}
-      </pre>
-    </div>
-  );
-});
 
 class App extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      value: window.sessionStorage.value || "select * from products_view",
-      results: undefined
-    };
-  }
-
-  componentDidMount() {
-    this.onFetchResults();
-  }
-
-  onChange = (newValue) => {
-    window.sessionStorage.value = newValue;
-    this.setState({ value: newValue });
+    this.state = {};
   };
 
-  onFetchResults = () => {
-    this.setState({ results: {} });
-
-    fetch('/results', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ query: this.state.value }),
-    })
-      .then(res => res.json())
-      .then((res) => {
-        this.setState({
-          results: res,
-          view: resultsView.chartView
-        })
-      });
+  onHighlightChange = (column) => {
+    this.setState({ highlighted: column });
   };
 
-  onToggleView = (view) => {
-    this.setState({ view: view });
+  handleMouseMove = (x, y) => {
+    this.setState({ x, y });
+  };
+
+  handleTrackerChanged = (t, scale) => {
+    if (t) {
+      const e = series.atTime(t);
+      const eventTime = new Date(
+        e.begin().getTime() + (e.end().getTime() - e.begin().getTime()) / 2
+      );
+
+      const bestLine = calculateBestHighlight(series, e);
+      const eventValue = e.get(bestLine);
+      const v = `${eventValue > 0 ? "+" : ""}${eventValue}°C`;
+      this.setState({ s: scale(t), t: t, tracker: eventTime, trackerValue: v, trackerEvent: e });
+    } else {
+      this.setState({ s: null, t: null, tracker: null, trackerValue: null, trackerEvent: null });
+    }
+  };
+
+  renderMarker = () => {
+    if (!this.state.tracker) {
+      return <g/>;
+    }
+
+    const bestLine = calculateBestHighlight(series, this.state.trackerEvent);
+
+    return (
+      <EventMarker
+        type="point"
+        axis="axis1"
+        event={this.state.trackerEvent}
+        column={bestLine}
+        markerLabel={this.state.trackerValue}
+        markerLabelAlign="left"
+        markerLabelStyle={{ fill: "#2db3d1", stroke: "white" }}
+        markerRadius={3}
+        markerStyle={{ fill: "#2db3d1" }}
+      />
+    )
   };
 
   render() {
-    const { view, results } = this.state;
+    const style = styler([
+      { key: "customer 1", color: "steelblue", width: 2 },
+      { key: "customer 2", color: "#F68B24", width: 2 }
+    ]);
+
+    let customer1;
+    let customer2;
+
+    if (this.state.tracker) {
+      const f = format("$,.2f");
+      const trackerEvent = series.atTime(this.state.tracker);
+      customer1 = `${f(trackerEvent.get("customer 1"))}`;
+      customer2 = `${f(trackerEvent.get("customer 2"))}`;
+    }
 
     return (
-      <div style={{ padding: '2rem' }}>
-        <div style={{
-          display: 'flex',
-          backgroundColor: '#1e1e1e',
-          padding: '0.8rem',
-          borderRadius: '.25rem',
-          marginBottom: '1rem'
-        }}>
-          <AqlEditor
-            value={this.state.value}
-            onChange={this.onChange}
-            onFetchResults={this.onFetchResults}
-          />
-          <div
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 0 0 0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <Button onClick={this.onFetchResults}>
-                Run
-              </Button>
-              <div style={{ margin: '0 0.5rem' }}>
+      <div>
+        <Resizable>
+          <ChartContainer
+            format="%X"
+            timeRange={series.range()}
+            width={800}
+            showGrid={true}
+            onMouseMove={(x, y) => this.handleMouseMove(x, y)}
+            timeAxisStyle={{
+              ticks: {
+                stroke: "#AAA",
+                opacity: 0.25,
+                "stroke-dasharray": "1,1"
+                // Note: this isn't in camel case because this is
+                // passed into d3's style
+              },
+              values: {
+                fill: "#AAA",
+                "font-size": 12
+              }
+            }}
+            // maxTime={series.range().end()}
+            // minTime={series.range().begin() - 500}
+            // timeAxisAngledLabels={true}
 
-              </div>
-              <InformationTooltip>
-                <div>
-                  <div><a href='#help'>Full SQL explanation</a></div>
-                  <div>Run with Ctrl/Cmd + Enter</div>
-                </div>
-              </InformationTooltip>
-            </div>
-          </div>
-        </div>
+            trackerPosition={this.state.tracker}
+            onTrackerChanged={this.handleTrackerChanged}
+          >
+            <ChartRow height="200" trackerShowTime={true}>
+              <YAxis
+                id="axis1"
+                label="potatoes"
+                min={series.min('customer 1')}
+                max={series.max('customer 2')}
+                width="60"
+                type="linear"
+                style={{
+                  ticks: {
+                    stroke: "#AAA",
+                    opacity: 0.25,
+                    "stroke-dasharray": "1,1"
+                    // Note: this isn't in camel case because this is
+                    // passed into d3's style
+                  }
+                }}
+                showGrid
+                hideAxisLine
+              />
+              <Charts>
+                <LineChart
+                  onHighlightChange={this.onHighlightChange}
+                  style={style}
+                  axis="axis1"
+                  series={series}
+                  columns={["customer 1", "customer 2"]}
+                  highlight={"customer 1"}
+                />
 
-        {(results && results.errors && results.errors.length > 0) && (
-          <div className="alert alert-danger" role="alert">
-            <pre>
-              {JSON.stringify(results.errors, null, 4)}
-            </pre>
-          </div>
-        )}
 
-        <ShowQuery results={results}/>
+                <TimeMarker
+                  axis="axis1"
+                  time={series.range().begin()}
+                  infoStyle={{ line: { strokeWidth: "2px", stroke: "#83C2FC" } }}
+                  infoValues="Peak power"/>
 
-        {results && results.rows && (
-          <Nav tabs>
-            <ToggleView
-              isActive={view === resultsView.listView}
-              icon={faListAlt}
-              value={resultsView.listView}
-              onClick={this.onToggleView}
-            />
-            <ToggleView
-              isActive={view === resultsView.chartView}
-              icon={faChartBar}
-              value={resultsView.chartView}
-              onClick={this.onToggleView}
-            />
-            <ToggleView
-              isActive={view === resultsView.dataView}
-              icon={faFileCode}
-              value={resultsView.dataView}
-              onClick={this.onToggleView}
-            />
-          </Nav>
-        )}
+                {this.renderMarker()}
+              </Charts>
+            </ChartRow>
+          </ChartContainer>
+        </Resizable>
 
-        {results && (
-          <div style={{
-            borderLeft: '1px solid #dee2e6',
-            borderRight: '1px solid #dee2e6',
-            borderBottom: '1px solid #dee2e6',
-          }}>
-            <Results
-              results={results}
-              view={view}
-            />
-          </div>
-        )}
+
+        <Legend
+          type="line"
+          align="right"
+          style={style}
+          categories={[
+            { key: "customer 1", label: "customer 1", value: customer1 },
+            { key: "customer 2", label: "customer 2", value: customer2 }
+          ]}/>
+
+        <pre>
+          {JSON.stringify(this.state, null, 4)}
+        </pre>
       </div>
     )
   }
