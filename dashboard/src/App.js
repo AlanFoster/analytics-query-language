@@ -10,10 +10,11 @@ import {
   Legend,
   styler,
   TimeMarker,
-  EventMarker
+  EventMarker,
+  ScatterChart
 } from "react-timeseries-charts";
-import {TimeSeries, Index} from "pondjs";
-import {format} from "d3-format";
+import { TimeSeries, Index } from "pondjs";
+import { format } from "d3-format";
 import _ from 'lodash';
 
 class CrossHairs extends React.Component {
@@ -40,16 +41,22 @@ const data = {
     [14004259470000, 52, 100],
     [14004259480000, 18, 90],
     [14004259490000, 26, 120,],
-    [14004259500000, 200, 512]
+    [14004259500000, 20, 512],
+    [14004259510000, 20, 512],
+    [14004259520000, 20, 512],
   ]
 };
 
 const series = new TimeSeries(data);
 
+const style = styler([
+  { key: "customer 1", color: "steelblue", width: 2 },
+  { key: "customer 2", color: "#F68B24", width: 2 }
+]);
 
-const calculateBestHighlight = function (series, e) {
-  const bestLine = series.columns().reduce((_previous, column) => {
-    return column;
+const calculateBestHighlight = function (series, e, value) {
+  const bestLine = _.minBy(series.columns(), function (column) {
+    return Math.abs(e.get(column) - value)
   });
 
   return bestLine;
@@ -61,27 +68,22 @@ class App extends React.Component {
     this.state = {};
   };
 
-  onHighlightChange = (column) => {
-    this.setState({ highlighted: column });
-  };
-
   handleMouseMove = (x, y) => {
     this.setState({ x, y });
   };
 
-  handleTrackerChanged = (t, scale) => {
+  handleTrackerChanged = (t, xScale) => {
     if (t) {
       const e = series.atTime(t);
       const eventTime = new Date(
         e.begin().getTime() + (e.end().getTime() - e.begin().getTime()) / 2
       );
 
-      const bestLine = calculateBestHighlight(series, e);
-      const eventValue = e.get(bestLine);
-      const v = `${eventValue > 0 ? "+" : ""}${eventValue}°C`;
-      this.setState({ s: scale(t), t: t, tracker: eventTime, trackerValue: v, trackerEvent: e });
+      const bestLine = calculateBestHighlight(series, e, window.yScale.invert(this.state.y));
+      const trackerValue = e.get(bestLine);
+      this.setState({ tracker: eventTime, trackerValue: trackerValue, trackerEvent: e });
     } else {
-      this.setState({ s: null, t: null, tracker: null, trackerValue: null, trackerEvent: null });
+      this.setState({ tracker: null, trackerValue: null, trackerEvent: null });
     }
   };
 
@@ -90,7 +92,8 @@ class App extends React.Component {
       return <g/>;
     }
 
-    const bestLine = calculateBestHighlight(series, this.state.trackerEvent);
+    const bestLine = calculateBestHighlight(series, this.state.trackerEvent, window.yScale.invert(this.state.y));
+    const color = style.columnStyles[bestLine].color;
 
     return (
       <EventMarker
@@ -100,33 +103,35 @@ class App extends React.Component {
         column={bestLine}
         markerLabel={this.state.trackerValue}
         markerLabelAlign="left"
-        markerLabelStyle={{ fill: "#2db3d1", stroke: "white" }}
+        markerLabelStyle={{ fill: color, stroke: "white" }}
         markerRadius={3}
-        markerStyle={{ fill: "#2db3d1" }}
+        markerStyle={{ fill: color  }}
       />
     )
   };
 
   render() {
-    const style = styler([
-      { key: "customer 1", color: "steelblue", width: 2 },
-      { key: "customer 2", color: "#F68B24", width: 2 }
-    ]);
+    const categories = series.columns().map((column) => {
+      const value =
+        this.state.tracker
+          ? format("$,.2f", series.atTime(this.state.tracker))
+          : null;
 
-    let customer1;
-    let customer2;
+      return {
+        key: column,
+        label: column,
+        value: value
+      }
+    });
 
-    if (this.state.tracker) {
-      const f = format("$,.2f");
-      const trackerEvent = series.atTime(this.state.tracker);
-      customer1 = `${f(trackerEvent.get("customer 1"))}`;
-      customer2 = `${f(trackerEvent.get("customer 2"))}`;
-    }
+
+    const yLabel = "cost";
 
     return (
-      <div>
+      <div style={{ padding: 50 }}>
         <Resizable>
           <ChartContainer
+            utc={true}
             format="%X"
             timeRange={series.range()}
             width={800}
@@ -145,19 +150,22 @@ class App extends React.Component {
                 "font-size": 12
               }
             }}
-            // maxTime={series.range().end()}
-            // minTime={series.range().begin() - 500}
-            // timeAxisAngledLabels={true}
+            maxTime={series.range().end() + 50000}
+            minTime={series.range().begin() - 50000}
 
             trackerPosition={this.state.tracker}
             onTrackerChanged={this.handleTrackerChanged}
           >
-            <ChartRow height="200" trackerShowTime={true}>
+            <ChartRow
+              height="200"
+              trackerShowTime={true}
+              leftAxisWidths={500}
+            >
               <YAxis
                 id="axis1"
-                label="potatoes"
-                min={series.min('customer 1')}
-                max={series.max('customer 2')}
+                label={yLabel}
+                min={_.min(_.map(series.columns(), column => series.min(column)))}
+                max={_.max(_.map(series.columns(), column => series.max(column)))}
                 width="60"
                 type="linear"
                 style={{
@@ -173,21 +181,28 @@ class App extends React.Component {
                 hideAxisLine
               />
               <Charts>
-                <LineChart
-                  onHighlightChange={this.onHighlightChange}
+                <ScatterChart
                   style={style}
                   axis="axis1"
                   series={series}
-                  columns={["customer 1", "customer 2"]}
-                  highlight={"customer 1"}
+                  columns={series.columns()}
                 />
 
+                <LineChart
+                  style={style}
+                  axis="axis1"
+                  series={series}
+                  columns={series.columns()}
+                />
 
                 <TimeMarker
                   axis="axis1"
                   time={series.range().begin()}
                   infoStyle={{ line: { strokeWidth: "2px", stroke: "#83C2FC" } }}
-                  infoValues="Peak power"/>
+                  infoValues="Graph"
+                />
+
+                {/*<CrossHairs x={this.state.x} y={this.state.y}/>*/}
 
                 {this.renderMarker()}
               </Charts>
@@ -200,14 +215,7 @@ class App extends React.Component {
           type="line"
           align="right"
           style={style}
-          categories={[
-            { key: "customer 1", label: "customer 1", value: customer1 },
-            { key: "customer 2", label: "customer 2", value: customer2 }
-          ]}/>
-
-        <pre>
-          {JSON.stringify(this.state, null, 4)}
-        </pre>
+          categories={categories}/>
       </div>
     )
   }
