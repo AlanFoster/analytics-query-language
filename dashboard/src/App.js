@@ -60,11 +60,8 @@ const ListView = pure(({ results }) => {
   );
 });
 
-const ChartView = pure(({ results }) => {
-  if (results.rows.length === 0) {
-    return <div>There is no data to plot</div>
-  }
 
+const getAggregationKeyFor = function (results) {
   // TODO: Guess the key blindly for now. The best way to handle this might be the server returning
   // the data directly in a usable format by our charts, rather than the client guessing what to aggregate on
   const possibleAggregations = ['count', 'sum', 'avg', 'min', 'max', 'coalesce'];
@@ -74,6 +71,15 @@ const ChartView = pure(({ results }) => {
     }
   });
 
+  return key;
+};
+
+const ChartView = pure(({ results }) => {
+  if (results.rows.length === 0) {
+    return <div>There is no data to plot</div>
+  }
+
+  const key = getAggregationKeyFor(results);
   if (!key) return <div>Only Aggregate functions can be plotted</div>;
 
   // TODO: This is an indication that perhaps we always want to chart as a timeseries, or alternatively a barChart
@@ -232,10 +238,12 @@ class App extends React.Component {
       body: JSON.stringify({ query: this.state.value }),
     })
       .then(res => res.json())
-      .then((res) => {
+      .then((results) => {
+        const isAggregation = typeof getAggregationKeyFor(results) === "string";
+
         this.setState({
-          results: res,
-          view: resultsView.chartView
+          results: results,
+          view: isAggregation ? resultsView.chartView : resultsView.listView
         })
       });
   };
