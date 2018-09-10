@@ -64,6 +64,19 @@ class Seed:
                 ),
             )
 
+
+    def generate_walk_in(self, cursor):
+        created_at = self.now - timedelta(weeks=self.weeks)
+        cursor.execute(
+            "INSERT into customers (name, email, number, created_at) VALUES (%s, %s, %s, %s);",
+            (
+                "Walk In Customer",
+                self.fake.email(),
+                self.fake.phone_number(),
+                created_at,
+            ),
+        )
+
     def generate_customers(self, cursor):
         for _ in range(self.customers):
             created_at = self.fake.date_time_between(
@@ -90,7 +103,7 @@ class Seed:
             for day in range(open_business_days):
                 for sale_pattern in self.typical_sales_pattern:
                     for sale in range(0, sale_pattern["average_sales"]):
-                        customer_id = 1
+                        customer_id = self._generate_customer_id()
                         total = round(random.uniform(4, 8), 2)
                         sale_date = monday + timedelta(
                             days=day,
@@ -104,6 +117,14 @@ class Seed:
                             (customer_id, total, sale_date),
                         )
 
+    def _generate_customer_id(self):
+        is_walk_in_customer = random.randint(1, 100) <= 80
+
+        if is_walk_in_customer:
+            return 1
+        else:
+            return random.randint(1, self.customers)
+
 @click.command()
 @click.option(
     "--weeks", "weeks", default=4, help="Number of weeks to seed data for"
@@ -112,7 +133,7 @@ class Seed:
     "--products", "products", default=15, help="Number of products to create"
 )
 @click.option(
-    "--customers", "customers", default=20, help="How many customers to create"
+    "--customers", "customers", default=10, help="How many customers to create"
 )
 @click.option(
     "--connection-string",
@@ -131,6 +152,7 @@ def seed_database(weeks, customers, products, connection_string):
     seed = Seed(now=datetime.utcnow(), weeks=weeks, customers=customers, products=products)
     seed.generate_products(cursor)
     seed.generate_sales(cursor)
+    seed.generate_walk_in(cursor)
     seed.generate_customers(cursor)
 
     connection.commit()

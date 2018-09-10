@@ -254,17 +254,24 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
 
         if (this.isTimeseries) {
             const durationInSeconds = new DurationCalculator().asSeconds(this.timeSeries);
-            const facet = this.facet.column().text;
+            const facet = this.facet ? this.facet.column().text : null;
+
+            const startTimeStamp = `TIMESTAMP WITHOUT TIME ZONE '${this.startDate.toISOString()}'`;
+            const endTimeStamp = `TIMESTAMP WITHOUT TIME ZONE '${this.endDate.toISOString()}'`;
 
             // TODO: Apply filters
-            return `with full_dates as (select generate_series(TIMESTAMP WITHOUT TIME ZONE '${this.startDate.toISOString()}', TIMESTAMP WITHOUT TIME ZONE '${this.endDate.toISOString()}', interval '${durationInSeconds} seconds') timeseries)
-select timeseries, ${facet}, ${selection}
+            return `with full_dates as (select generate_series(${startTimeStamp}, ${endTimeStamp}, interval '${durationInSeconds} seconds') timeseries)
+select timeseries, ${selection} ${facet ? `, ${facet}` : ''}
 from full_dates
-left outer join ${table} on timeseries = TIMESTAMP WITH TIME ZONE 'epoch' + INTERVAL '1 second' * (floor(extract('epoch' from created_at) / ${durationInSeconds}) * ${durationInSeconds})
-group by timeseries, ${facet}
-order by full_dates.timeseries desc`.trim();
+left outer join ${table} on timeseries = TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from ${startTimeStamp}) + (floor((extract('epoch' from created_at) - extract('epoch' from ${startTimeStamp})) / ${durationInSeconds}) * ${durationInSeconds}))
+${filters}
+group by timeseries ${facet ? `, ${facet}` : ''}
+order by full_dates.timeseries desc
+`.trim();
         } else {
-            return `select ${selection} from ${table} ${filters}`;
+            // TODO: We can expose limit through out grammar
+            const limit = 'limit 100';
+            return `select ${selection} from ${table} ${filters} ${limit}`;
         }
     }
 
@@ -332,25 +339,18 @@ order by full_dates.timeseries desc`.trim();
             this.errorListener.error(`End date ${this.startDate} not valid`);
         }
 
-        const datePredicate = `created_at > '${this.startDate.toISOString()}' and created_at <= '${this.endDate.toISOString()}'`;
-
-        let result = "";
+        let predicates = '';
+        let datePredicate = `created_at >= TIMESTAMP WITHOUT TIME ZONE '${this.startDate.toISOString()}' and created_at <= TIMESTAMP WITHOUT TIME ZONE '${this.endDate.toISOString()}'`;
+        predicates += datePredicate;
         if (whereStatements.length > 0) {
-            result += 'where ';
-            result += whereStatements.map(where => this.visitPredicateExpr(where)).join(' and ');
-            result += ` and ${datePredicate}`;
-        } else {
-            result += `where ${datePredicate}`
+            predicates += ' and ' + whereStatements.map(where => this.visitPredicateExpr(where)).join(' and ');
         }
 
         if (this.isTimeseries) {
-            result += " group by timeseries order by timeseries desc"
+            predicates = `created_at is null or (${predicates})`
         }
 
-        // TODO: We can expose limit through out grammar
-        result += ' limit 100';
-
-        return result;
+        return `where ${predicates}`;
     }
 
     /**

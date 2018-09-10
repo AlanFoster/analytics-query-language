@@ -1,221 +1,330 @@
 import React from 'react';
-import {
-  Charts,
-  ChartContainer,
-  ChartRow,
-  YAxis,
-  LineChart,
-  BarChart,
-  Resizable,
-  Legend,
-  styler,
-  TimeMarker,
-  EventMarker,
-  ScatterChart
-} from "react-timeseries-charts";
+import AqlEditor from './aql-editor';
+import {Button, Table, TabContent, TabPane, Nav, NavItem, NavLink} from 'reactstrap';
+import InformationTooltip from './information-tooltip';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {faListAlt, faFileCode, faChartBar} from '@fortawesome/free-regular-svg-icons';
+import TimeSeriesChart from './time-series';
 import { TimeSeries, Index } from "pondjs";
-import { format } from "d3-format";
+import { pure } from 'recompose';
+import * as moment from 'moment';
 import _ from 'lodash';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
+import {styler} from "react-timeseries-charts";
 
-class CrossHairs extends React.Component {
-  render() {
-    const { x, y } = this.props;
-    const style = { pointerEvents: "none", stroke: "#ccc" };
-    if (!_.isNull(x) && !_.isNull(y)) {
-      return (
-        <g>
-          <line style={style} x1={0} y1={y} x2={this.props.width} y2={y}/>
-          <line style={style} x1={x} y1={0} x2={x} y2={this.props.height}/>
-        </g>
-      );
-    } else {
-      return <g/>;
-    }
+const getFormatterFor = function (heading) {
+  if (heading === 'created_at' || heading === 'timeseries') {
+    return value => moment(value).fromNow();
   }
-}
 
-const data = {
-  name: "traffic",
-  columns: ["time", "customer 1", "customer 2"],
-  points: [
-    [14004259470000, 52, 100],
-    [14004259480000, 18, 90],
-    [14004259490000, 26, 120,],
-    [14004259500000, 20, 512],
-    [14004259510000, 20, 512],
-    [14004259520000, 20, 512],
-  ]
+  // Identity
+  return x => x;
 };
 
-const series = new TimeSeries(data);
+const ListView = pure(({ results }) => {
+  if (results.rows.length === 0) return <div>No results</div>;
 
-const style = styler([
-  { key: "customer 1", color: "steelblue", width: 2 },
-  { key: "customer 2", color: "#F68B24", width: 2 }
-]);
+  // The server should expand wildcard to select only the fields we care about, let's cheat for now.
+  const headings = Object.keys(results.rows[0]).filter(heading => !(heading === 'id' || heading === 'deleted_at'));
 
-const calculateBestHighlight = function (series, e, value) {
-  const bestLine = _.minBy(series.columns(), function (column) {
-    return Math.abs(e.get(column) - value)
+  return (
+    <div>
+      <Table>
+        <thead>
+        <tr>
+          <th>#</th>
+          {headings.map(function (value) {
+            return <th key={value}>{value}</th>
+          })}
+        </tr>
+        </thead>
+
+        <tbody>
+        {results.rows.map(function (row, index) {
+          return (
+            <tr key={index}>
+              <th scope="row">{index + 1}</th>
+              {headings.map(function (heading) {
+                const formatter = getFormatterFor(heading);
+                const value = formatter(row[heading]);
+
+                return <td key={heading}>{value}</td>
+              })}
+            </tr>
+          );
+        })}
+        </tbody>
+      </Table>
+    </div>
+  );
+});
+
+const ChartView = pure(({ results }) => {
+  if (results.rows.length === 0) {
+    return <div>There is no data to plot</div>
+  }
+
+  // TODO: Guess the key blindly for now. The best way to handle this might be the server returning
+  // the data directly in a usable format by our charts, rather than the client guessing what to aggregate on
+  const possibleAggregations = ['count', 'sum', 'avg', 'min', 'max', 'coalesce'];
+  const key = possibleAggregations.find(function (key) {
+    if (key in results.rows[0]) {
+      return key;
+    }
   });
 
-  return bestLine;
+  if (!key) return <div>Only Aggregate functions can be plotted</div>;
+
+  // TODO: This is an indication that perhaps we always want to chart as a timeseries, or alternatively a barChart
+  const defaultTimeForNonTimeSeriesCharts = moment.utc().toISOString();
+
+  let columnsSet = {};
+  const timeSeriesToValues = results.rows.reduce(function (acc, row) {
+    const timeseries = row.timeseries || defaultTimeForNonTimeSeriesCharts;
+    acc[timeseries] = acc[timeseries] || {};
+    const availableColumns = _.without(Object.keys(row), 'timeseries', 'time');
+    let facetName;
+
+    if (availableColumns.length === 1) {
+      facetName = availableColumns[0];
+    } else {
+      const columnName = _.without(availableColumns, key)[0];
+      facetName = row[columnName];
+    }
+
+    if (facetName === null) {
+      return acc;
+    }
+
+    acc[timeseries][facetName] = row[key];
+    columnsSet[facetName] = true;
+
+    return acc;
+  }, {});
+
+  const columns = Object.keys(columnsSet);
+  const points = Object.keys(timeSeriesToValues).map(function (timeSeriesKey) {
+    const asNumber = value => Number((value && value.match(/^\$?(.*)/)[1]) || 0);
+    const values = columns.map(column => asNumber(timeSeriesToValues[timeSeriesKey][column]) || 0);
+
+    return [moment.utc(timeSeriesKey).valueOf()].concat(values)
+  });
+
+  const data = {
+    name: `${key} of results`,
+    columns: ["time"].concat(columns),
+    points: _.reverse(points)
+  };
+
+  const series = new TimeSeries(data);
+
+  const style = styler(columns.map(function (column) {
+    // The color will be generated by default using color brewer
+    return {
+      key: column,
+      width: 2
+    };
+  }));
+
+  // return <pre>{JSON.stringify(points, null, 4)}</pre>;
+
+  return (
+    <TimeSeriesChart
+      yLabel={key}
+      series={series}
+      style={style} />
+  );
+});
+
+const DataView = pure(({ results }) => {
+  return (
+    <div style={{ backgroundColor: '#F6F6F6', border: '1px solid #dee2e6', padding: '1rem' }}>
+      <pre>
+        {JSON.stringify(results, null, 4)}
+      </pre>
+    </div>
+  );
+});
+
+const resultsView = {
+  listView: 'list-view',
+  dataView: 'data-view',
+  chartView: 'chart-view',
 };
+
+const ToggleView = ({ onClick, value, isActive, icon }) => {
+  return (
+    <NavItem>
+      <NavLink
+        className={isActive ? 'active' : ''}
+        onClick={() => {
+          onClick(value);
+        }}
+      >
+        <FontAwesomeIcon icon={icon} color={isActive ? '#333' : '#AAA'}/>
+      </NavLink>
+    </NavItem>
+  )
+};
+
+const Results = ({ results, view }) => {
+  if (!results.rows) return null;
+
+  return (
+    <div style={{ background: '#FFFFFF', padding: '1rem' }}>
+      <TabContent activeTab={view}>
+        <TabPane tabId={resultsView.listView}>
+          <ListView results={results}/>
+        </TabPane>
+        <TabPane tabId={resultsView.dataView}>
+          <DataView results={results}/>
+        </TabPane>
+        <TabPane tabId={resultsView.chartView}>
+          <ChartView results={results}/>
+        </TabPane>
+      </TabContent>
+    </div>
+  )
+};
+
+const ShowQuery = pure(({ results }) => {
+  const hasExecuted = (results && results.command);
+  if (!hasExecuted) return null;
+
+  return (
+    <div className="alert alert-primary" role="alert">
+      Server executed query:
+      <pre style={{ margin: '0' }}>
+        {results.command}
+      </pre>
+    </div>
+  );
+});
 
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+
+    this.state = {
+      value: window.sessionStorage.value || "select * from products_view",
+      results: []
+    };
+  }
+
+  componentDidMount() {
+    this.onFetchResults();
+  }
+
+  onChange = (newValue) => {
+    window.sessionStorage.value = newValue;
+    this.setState({ value: newValue });
   };
 
-  handleMouseMove = (x, y) => {
-    this.setState({ x, y });
+  onFetchResults = () => {
+    this.setState({ results: {} });
+
+    fetch('/results', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ query: this.state.value }),
+    })
+      .then(res => res.json())
+      .then((res) => {
+        this.setState({
+          results: res,
+          view: resultsView.chartView
+        })
+      });
   };
 
-  handleTrackerChanged = (t, xScale) => {
-    if (t) {
-      const e = series.atTime(t);
-      const eventTime = new Date(
-        e.begin().getTime() + (e.end().getTime() - e.begin().getTime()) / 2
-      );
-
-      const bestLine = calculateBestHighlight(series, e, window.yScale.invert(this.state.y));
-      const trackerValue = e.get(bestLine);
-      this.setState({ tracker: eventTime, trackerValue: trackerValue, trackerEvent: e });
-    } else {
-      this.setState({ tracker: null, trackerValue: null, trackerEvent: null });
-    }
-  };
-
-  renderMarker = () => {
-    if (!this.state.tracker) {
-      return <g/>;
-    }
-
-    const bestLine = calculateBestHighlight(series, this.state.trackerEvent, window.yScale.invert(this.state.y));
-    const color = style.columnStyles[bestLine].color;
-
-    return (
-      <EventMarker
-        type="point"
-        axis="axis1"
-        event={this.state.trackerEvent}
-        column={bestLine}
-        markerLabel={this.state.trackerValue}
-        markerLabelAlign="left"
-        markerLabelStyle={{ fill: color, stroke: "white" }}
-        markerRadius={3}
-        markerStyle={{ fill: color  }}
-      />
-    )
+  onToggleView = (view) => {
+    this.setState({ view: view });
   };
 
   render() {
-    const categories = series.columns().map((column) => {
-      const value =
-        this.state.tracker
-          ? format("$,.2f", series.atTime(this.state.tracker))
-          : null;
-
-      return {
-        key: column,
-        label: column,
-        value: value
-      }
-    });
-
-
-    const yLabel = "cost";
+    const { view, results } = this.state;
 
     return (
-      <div style={{ padding: 50 }}>
-        <Resizable>
-          <ChartContainer
-            utc={true}
-            format="%X"
-            timeRange={series.range()}
-            width={800}
-            showGrid={true}
-            onMouseMove={(x, y) => this.handleMouseMove(x, y)}
-            timeAxisStyle={{
-              ticks: {
-                stroke: "#AAA",
-                opacity: 0.25,
-                "stroke-dasharray": "1,1"
-                // Note: this isn't in camel case because this is
-                // passed into d3's style
-              },
-              values: {
-                fill: "#AAA",
-                "font-size": 12
-              }
-            }}
-            maxTime={series.range().end() + 50000}
-            minTime={series.range().begin() - 50000}
+      <div style={{ padding: '2rem' }}>
+        <div style={{
+          display: 'flex',
+          backgroundColor: '#1e1e1e',
+          padding: '0.8rem',
+          borderRadius: '.25rem',
+          marginBottom: '1rem'
+        }}>
+          <AqlEditor
+            value={this.state.value}
+            onChange={this.onChange}
+            onFetchResults={this.onFetchResults}
+          />
+          <div
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 0 0 0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Button onClick={this.onFetchResults}>
+                Run
+              </Button>
+              <div style={{ margin: '0 0.5rem' }}>
 
-            trackerPosition={this.state.tracker}
-            onTrackerChanged={this.handleTrackerChanged}
-          >
-            <ChartRow
-              height="200"
-              trackerShowTime={true}
-              leftAxisWidths={500}
-            >
-              <YAxis
-                id="axis1"
-                label={yLabel}
-                min={_.min(_.map(series.columns(), column => series.min(column)))}
-                max={_.max(_.map(series.columns(), column => series.max(column)))}
-                width="60"
-                type="linear"
-                style={{
-                  ticks: {
-                    stroke: "#AAA",
-                    opacity: 0.25,
-                    "stroke-dasharray": "1,1"
-                    // Note: this isn't in camel case because this is
-                    // passed into d3's style
-                  }
-                }}
-                showGrid
-                hideAxisLine
-              />
-              <Charts>
-                <ScatterChart
-                  style={style}
-                  axis="axis1"
-                  series={series}
-                  columns={series.columns()}
-                />
+              </div>
+              <InformationTooltip>
+                <div>
+                  <div><a href='#help'>Full SQL explanation</a></div>
+                  <div>Run with Ctrl/Cmd + Enter</div>
+                </div>
+              </InformationTooltip>
+            </div>
+          </div>
+        </div>
 
-                <LineChart
-                  style={style}
-                  axis="axis1"
-                  series={series}
-                  columns={series.columns()}
-                />
+        {(results && results.errors && results.errors.length > 0) && (
+          <div className="alert alert-danger" role="alert">
+            <pre>
+              {JSON.stringify(results.errors, null, 4)}
+            </pre>
+          </div>
+        )}
 
-                <TimeMarker
-                  axis="axis1"
-                  time={series.range().begin()}
-                  infoStyle={{ line: { strokeWidth: "2px", stroke: "#83C2FC" } }}
-                  infoValues="Graph"
-                />
+        <ShowQuery results={results}/>
 
-                {/*<CrossHairs x={this.state.x} y={this.state.y}/>*/}
+        {results && results.rows && (
+          <Nav tabs>
+            <ToggleView
+              isActive={view === resultsView.listView}
+              icon={faListAlt}
+              value={resultsView.listView}
+              onClick={this.onToggleView}
+            />
+            <ToggleView
+              isActive={view === resultsView.chartView}
+              icon={faChartBar}
+              value={resultsView.chartView}
+              onClick={this.onToggleView}
+            />
+            <ToggleView
+              isActive={view === resultsView.dataView}
+              icon={faFileCode}
+              value={resultsView.dataView}
+              onClick={this.onToggleView}
+            />
+          </Nav>
+        )}
 
-                {this.renderMarker()}
-              </Charts>
-            </ChartRow>
-          </ChartContainer>
-        </Resizable>
-
-
-        <Legend
-          type="line"
-          align="right"
-          style={style}
-          categories={categories}/>
+        {results && (
+          <div style={{
+            borderLeft: '1px solid #dee2e6',
+            borderRight: '1px solid #dee2e6',
+            borderBottom: '1px solid #dee2e6',
+          }}>
+            <Results
+              results={results}
+              view={view}
+            />
+          </div>
+        )}
       </div>
     )
   }
