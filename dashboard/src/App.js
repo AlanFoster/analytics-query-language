@@ -62,6 +62,10 @@ const ListView = pure(({ results }) => {
 
 
 const getAggregationKeyFor = function (results) {
+  if (results.rowCount === 0) {
+   return undefined;
+  }
+
   // TODO: Guess the key blindly for now. The best way to handle this might be the server returning
   // the data directly in a usable format by our charts, rather than the client guessing what to aggregate on
   const possibleAggregations = ['count', 'sum', 'avg', 'min', 'max', 'coalesce'];

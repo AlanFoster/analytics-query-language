@@ -25,6 +25,8 @@ class Seed:
         {"hour": 19, "average_sales": 3},
     ]
 
+    average_products_per_sale = 3
+
     product_names = [
         'danish', 'cheesecake', 'sugar',
         'Lollipop', 'wafer', 'Gummies',
@@ -55,7 +57,7 @@ class Seed:
             )
 
             cursor.execute(
-                "INSERT into  products (name, description, cost, created_at) VALUES (%s, %s, %s, %s);",
+                "INSERT INTO products (name, description, cost, created_at) VALUES (%s, %s, %s, %s);",
                 (
                     ' '.join(self.fake.words(nb=3, ext_word_list=self.product_names)),
                     self.fake.sentence(ext_word_list=self.product_descriptions),
@@ -68,7 +70,7 @@ class Seed:
     def generate_walk_in(self, cursor):
         created_at = self.now - timedelta(weeks=self.weeks)
         cursor.execute(
-            "INSERT into customers (name, email, number, created_at) VALUES (%s, %s, %s, %s);",
+            "INSERT INTO customers (name, email, number, created_at) VALUES (%s, %s, %s, %s);",
             (
                 "Walk In Customer",
                 self.fake.email(),
@@ -84,7 +86,7 @@ class Seed:
             )
 
             cursor.execute(
-                "INSERT into customers (name, email, number, created_at) VALUES (%s, %s, %s, %s);",
+                "INSERT INTO customers (name, email, number, created_at) VALUES (%s, %s, %s, %s);",
                 (
                     self.fake.name(),
                     self.fake.email(),
@@ -104,7 +106,7 @@ class Seed:
                 for sale_pattern in self.typical_sales_pattern:
                     for sale in range(0, sale_pattern["average_sales"]):
                         customer_id = self._generate_customer_id()
-                        total = round(random.uniform(4, 8), 2)
+                        total = 0
                         sale_date = monday + timedelta(
                             days=day,
                             hours=sale_pattern["hour"],
@@ -112,10 +114,25 @@ class Seed:
                             seconds=random.randint(1, 59),
                         )
 
+                        sold_products = []
+                        for _ in range(random.randint(1, self.average_products_per_sale)):
+                            sold_products.append({
+                              'id': random.randint(1, self.products),
+                              'total': round(random.uniform(4, 8), 2)
+                            })
+
                         cursor.execute(
-                            "INSERT into sales (customer_id, total, created_at) VALUES (%s, %s, %s);",
-                            (customer_id, total, sale_date),
+                            "INSERT INTO sales (customer_id, total, created_at) VALUES (%s, %s, %s) RETURNING id;",
+                            (customer_id, sum(row['total'] for row in sold_products), sale_date),
                         )
+
+                        sale_id = cursor.fetchone()[0]
+
+                        for product in sold_products:
+                            cursor.execute(
+                                "INSERT INTO sold_products (sale_id, product_id, total, created_at) VALUES (%s, %s, %s, %s);",
+                                (sale_id, product['id'], product['total'], sale_date)
+                            )
 
     def _generate_customer_id(self):
         is_walk_in_customer = random.randint(1, 100) <= 80
