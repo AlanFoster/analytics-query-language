@@ -28,7 +28,8 @@ import { FuncNameContext } from './AqlParser';
 import { SelectionExprContext } from './AqlParser';
 import { SelectionTermContext } from './AqlParser';
 import { DateContext } from './AqlParser';
-import { RelativeDateContext } from './AqlParser';
+import { RelativeDayContext } from './AqlParser';
+import { RelativeTimeUnitContext } from './AqlParser';
 import { AbsoluteDateContext } from './AqlParser';
 import { DayContext } from './AqlParser';
 import { WildcardContext } from './AqlParser';
@@ -336,15 +337,26 @@ export interface AqlListener extends ParseTreeListener {
 	exitDate?: (ctx: DateContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `AqlParser.relativeDate`.
+	 * Enter a parse tree produced by `AqlParser.relativeDay`.
 	 * @param ctx the parse tree
 	 */
-	enterRelativeDate?: (ctx: RelativeDateContext) => void;
+	enterRelativeDay?: (ctx: RelativeDayContext) => void;
 	/**
-	 * Exit a parse tree produced by `AqlParser.relativeDate`.
+	 * Exit a parse tree produced by `AqlParser.relativeDay`.
 	 * @param ctx the parse tree
 	 */
-	exitRelativeDate?: (ctx: RelativeDateContext) => void;
+	exitRelativeDay?: (ctx: RelativeDayContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `AqlParser.relativeTimeUnit`.
+	 * @param ctx the parse tree
+	 */
+	enterRelativeTimeUnit?: (ctx: RelativeTimeUnitContext) => void;
+	/**
+	 * Exit a parse tree produced by `AqlParser.relativeTimeUnit`.
+	 * @param ctx the parse tree
+	 */
+	exitRelativeTimeUnit?: (ctx: RelativeTimeUnitContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `AqlParser.absoluteDate`.

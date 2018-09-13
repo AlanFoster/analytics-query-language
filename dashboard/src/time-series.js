@@ -16,8 +16,12 @@ import {
 import { format } from "d3-format";
 import _ from 'lodash';
 
+const columnsFor = _.memoize(function (series) {
+  return series.columns();
+});
+
 const calculateBestHighlight = function (series, trackerEvent, value) {
-  const bestLine = _.minBy(series.columns(), function (column) {
+  const bestLine = _.minBy(columnsFor(series), function (column) {
     return Math.abs(trackerEvent.get(column) - value)
   });
 
@@ -25,19 +29,19 @@ const calculateBestHighlight = function (series, trackerEvent, value) {
 };
 
 class TimeSeriesChart extends React.Component {
-  debounceDelay = 0;
+  debounceDelay = 200;
 
   constructor(props) {
     super(props);
     this.state = {};
   };
 
-  handleMouseMove = _.debounce((x, y) => {
+  handleMouseMove = _.throttle((x, y) => {
     console.log("Handle mouse movement");
     this.setState({ x, y });
   }, this.debounceDelay);
 
-  handleTrackerChanged = _.debounce((t) => {
+  handleTrackerChanged = _.throttle((t) => {
     console.log("handle tracker changed");
     if (t) {
       const { series } = this.props;
@@ -86,7 +90,7 @@ class TimeSeriesChart extends React.Component {
   render() {
     const { yLabel, series, style } = this.props;
 
-    const categories = series.columns().map((column) => {
+    const categories = columnsFor(series).map((column) => {
       // TODO: Consider if we want legend values, it seems to get pretty noisey
       // const value =
       //   this.state.tracker
@@ -100,8 +104,6 @@ class TimeSeriesChart extends React.Component {
       }
     });
 
-
-    console.log("rendering");
 
     return (
       <div>
@@ -141,8 +143,8 @@ class TimeSeriesChart extends React.Component {
               <YAxis
                 id="axis1"
                 label={yLabel}
-                min={_.min(_.map(series.columns(), column => series.min(column)))}
-                max={_.max(_.map(series.columns(), column => series.max(column)))}
+                min={_.min(_.map(columnsFor(series), column => series.min(column)))}
+                max={_.max(_.map(columnsFor(series), column => series.max(column)))}
                 width="60"
                 type="linear"
                 style={{
@@ -158,18 +160,11 @@ class TimeSeriesChart extends React.Component {
                 hideAxisLine
               />
               <Charts>
-                <ScatterChart
-                  style={style}
-                  axis="axis1"
-                  series={series}
-                  columns={series.columns()}
-                />
-
                 <LineChart
                   style={style}
                   axis="axis1"
                   series={series}
-                  columns={series.columns()}
+                  columns={columnsFor(series)}
                 />
 
                 <TimeMarker

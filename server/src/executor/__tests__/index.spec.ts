@@ -20,16 +20,23 @@ describe('aql-to-sql', function () {
             });
         });
 
-        it('handles relative dates on the same week without a time specified', function () {
+        it('handles relative days on the same week without a time specified', function () {
             expect(aqlToSql("select * from products since monday until today at '08:30'", saturday)).toEqual({
                 "command": "select * from products where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-20T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-25T08:30:00.000Z' limit 100",
                 "errors": []
             });
         });
 
-        it('handles relative dates for last week without a time specified', function () {
+        it('handles relative days for last week without a time specified', function () {
             expect(aqlToSql("select * from products since last tuesday", saturday)).toEqual({
                 "command": "select * from products where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-14T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-25T15:09:30.566Z' limit 100",
+                "errors": []
+            });
+        });
+
+        it.only('handles relative units', function () {
+            expect(aqlToSql("select * from products since 5 days ago until 4 days ago", saturday)).toEqual({
+                "command": "select * from products where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-20T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-21T23:59:59.999Z' limit 100",
                 "errors": []
             });
         });
@@ -74,7 +81,7 @@ describe('aql-to-sql', function () {
         });
 
         describe('time series', function () {
-            it.only('defaults a timeseries to 1 hour if a duration is not provided', function () {
+            it('defaults a timeseries to 1 hour if a duration is not provided', function () {
                 expect(aqlToSql("select count(total) from sales_view timeseries", sunday)).toEqual({
                     command:"with full_dates as (select generate_series(TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z', TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z', interval '3600 seconds') timeseries)\nselect timeseries, count(total)\nfrom full_dates\nleft outer join sales_view on timeseries = TIMESTAMP WITH TIME ZONE 'epoch' + INTERVAL '1 second' * (floor(extract('epoch' from created_at) / 3600) * 3600)\ngroup by timeseries\norder by full_dates.timeseries desc",
                     errors: []

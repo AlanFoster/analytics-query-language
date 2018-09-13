@@ -28,7 +28,8 @@ import { FuncNameContext } from './AqlParser';
 import { SelectionExprContext } from './AqlParser';
 import { SelectionTermContext } from './AqlParser';
 import { DateContext } from './AqlParser';
-import { RelativeDateContext } from './AqlParser';
+import { RelativeDayContext } from './AqlParser';
+import { RelativeTimeUnitContext } from './AqlParser';
 import { AbsoluteDateContext } from './AqlParser';
 import { DayContext } from './AqlParser';
 import { WildcardContext } from './AqlParser';
@@ -230,11 +231,18 @@ export interface AqlVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitDate?: (ctx: DateContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `AqlParser.relativeDate`.
+	 * Visit a parse tree produced by `AqlParser.relativeDay`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitRelativeDate?: (ctx: RelativeDateContext) => Result;
+	visitRelativeDay?: (ctx: RelativeDayContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `AqlParser.relativeTimeUnit`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitRelativeTimeUnit?: (ctx: RelativeTimeUnitContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `AqlParser.absoluteDate`.

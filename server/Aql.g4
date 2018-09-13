@@ -44,6 +44,7 @@ timeUnit:
   | HOURS
   | DAYS
   | WEEKS
+  | MONTHS
   ;
 
 selection:
@@ -74,7 +75,7 @@ func:
      funcName OPEN_PAREN (wildcard | selectionExpr) CLOSE_PAREN
     ;
 
-funcName: (COUNT | MAX | MIN | AVG | SUM) ;
+funcName: (COUNT | MAX | MIN | AVG | SUM | ABS) ;
 
 selectionExpr:
     left=selectionExpr operator=(STAR | DIVIDE) right=selectionExpr # SelectionBinary
@@ -93,12 +94,17 @@ selectionTerm:
     ;
 
 date:
-    relativeDate
+    relativeDay
+    | relativeTimeUnit
     | absoluteDate
     ;
 
-relativeDate:
+relativeDay:
     LAST? day ( AT  time)?
+    ;
+
+relativeTimeUnit:
+    | INT timeUnit AGO
     ;
 
 absoluteDate:
@@ -129,6 +135,7 @@ UNTIL : U N T I L ;
 AT: A T ;
 WHERE: W H E R E ;
 LAST : L A S T ;
+AGO: A G O ;
 
 TRUE: 'true' ;
 FALSE: 'false' ;
@@ -149,11 +156,13 @@ MINUTES: M I N U T E S? ;
 HOURS: H O U R S? ;
 DAYS: D A Y S? ;
 WEEKS: W E E K S? ;
+MONTHS: M O N T H S? ;
 
 // Function Names
 COUNT : C O U N T;
 MAX : M A X ;
 MIN : M I N ;
+ABS : A B S ;
 SUM : S U M ;
 AVG : A V G ;
 TIMESERIES: T I M E S E R I E S ;
