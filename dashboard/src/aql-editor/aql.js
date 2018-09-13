@@ -56,6 +56,9 @@ export const language = {
       'days',
       'week',
       'weeks',
+      'month',
+      'months',
+      'ago',
 
       'today',
       'last',
@@ -73,7 +76,8 @@ export const language = {
         'max',
         'min',
         'sum',
-        'avg'
+        'avg',
+        'abs'
     ],
 
     brackets: [

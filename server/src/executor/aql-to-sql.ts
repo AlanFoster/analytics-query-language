@@ -1,5 +1,5 @@
 import * as moment from 'moment';
-import { Moment } from "moment";
+import {Moment, unitOfTime} from "moment";
 import {
     ColumnContext, DateContext, FiltersContext, FuncContext,
     PredicateAtomContext,
@@ -34,10 +34,10 @@ class DateCalculator {
             return moment(expr.absoluteDate()!.text);
         }
 
-        const relativeDate = expr.relativeDate();
-        if (relativeDate) {
+        const relativeDay = expr.relativeDay();
+        if (relativeDay) {
             const newDate = this.today.clone();
-            const day = relativeDate.day().text;
+            const day = relativeDay.day().text;
 
             if (day != "today") {
                 newDate.day(day);
@@ -45,11 +45,11 @@ class DateCalculator {
 
             // Note: This is naive, and won't be 'right' for all cases.
             // For instance, on a sunday which day does 'last tuesday' refer to?
-            if (relativeDate.LAST()) {
+            if (relativeDay.LAST()) {
                 newDate.subtract(1, 'week');
             }
 
-            const time = relativeDate.time();
+            const time = relativeDay.time();
 
             if (time) {
                 // Note: This is pretty naive, we could enforce iso8601 in our parser
@@ -67,6 +67,23 @@ class DateCalculator {
                     newDate.endOf('day')
                 }
             }
+
+            return newDate;
+        }
+
+        const relativeTimeUnit = expr.relativeTimeUnit();
+        if (relativeTimeUnit) {
+            const newDate = this.today.clone();
+            if (anchor === 'start') {
+                newDate.startOf('day');
+            } else {
+                newDate.endOf('day')
+            }
+
+            const amount = Number(relativeTimeUnit.INT().text);
+            const unit = relativeTimeUnit.timeUnit()!.text as unitOfTime.DurationConstructor;
+
+            newDate.subtract(amount, unit);
 
             return newDate;
         }
@@ -91,7 +108,10 @@ class DurationCalculator {
             days: 86400,
 
             week: 604800,
-            weeks: 604800
+            weeks: 604800,
+
+            month: 2628000,
+            months: 2628000
         };
 
         if (!expr.duration()) {
@@ -119,7 +139,7 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
     private startDate: Moment | undefined;
     private endDate: Moment | undefined;
     private timeSeries: TimeseriesContext | undefined;
-    private facet: FacetContext | undefined
+    private facet: FacetContext | undefined;
 
     constructor(errorListener: ErrorAggregator, dateCalculator) {
         super();

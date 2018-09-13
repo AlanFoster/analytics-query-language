@@ -218,7 +218,7 @@ class App extends React.Component {
 
     this.state = {
       value: window.sessionStorage.value || "select * from products_view",
-      results: []
+      results: undefined
     };
   }
 
