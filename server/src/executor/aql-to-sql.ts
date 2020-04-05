@@ -11,7 +11,7 @@ import {
 import {ANTLRInputStream, CommonTokenStream} from "antlr4ts";
 import {AqlLexer} from "../parser/gen/AqlLexer";
 import ErrorAggregator from "../parser/error-aggregator";
-import {AbstractParseTreeVisitor } from "antlr4ts/tree"
+import {AbstractParseTreeVisitor} from "antlr4ts/tree"
 import {AqlVisitor} from "../parser/gen/AqlVisitor";
 
 /**
@@ -92,11 +92,18 @@ class DateCalculator {
     }
 }
 
-/**
- * Translates a parsed duration into a moment duration
- */
-class DurationCalculator {
-    asSeconds(expr: TimeseriesContext): number {
+class AqlTimeseriesContext {
+    constructor(private expr: TimeseriesContext | null) { }
+
+    column(): string {
+        if (!this.expr || !this.expr.column()) {
+            return 'created_at';
+        }
+
+        return this.expr.column().text;
+    }
+
+    durationInSeconds(): number {
         const unitToSeconds = {
             minute: 60,
             minutes: 60,
@@ -114,18 +121,17 @@ class DurationCalculator {
             months: 2628000
         };
 
-        if (!expr.duration()) {
+        if (!this.expr || !this.expr.duration()) {
             return unitToSeconds.hour;
         }
 
-        const duration = Number(expr.duration().timeDuration().text);
-        const unit = expr.duration().timeUnit().text.toLowerCase();
+        const duration = Number(this.expr.duration().timeDuration().text);
+        const unit = this.expr.duration().timeUnit().text.toLowerCase();
         const unitAsSeconds = unitToSeconds[unit];
 
         return duration * unitAsSeconds;
     }
 }
-
 
 class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVisitor<string> {
     private errorListener: ErrorAggregator;
@@ -138,7 +144,7 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
     private isTimeseries: boolean = false;
     private startDate: Moment | undefined;
     private endDate: Moment | undefined;
-    private timeSeries: TimeseriesContext | undefined;
+    private timeSeries: AqlTimeseriesContext = new AqlTimeseriesContext(null);
     private facet: FacetContext | undefined;
 
     constructor(errorListener: ErrorAggregator, dateCalculator) {
@@ -273,7 +279,8 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
         const filters = this.visitFilters(ctx.filters());
 
         if (this.isTimeseries) {
-            const durationInSeconds = new DurationCalculator().asSeconds(this.timeSeries);
+            const durationInSeconds = this.timeSeries.durationInSeconds();
+            const timeseriesColumn = this.timeSeries.column();
             const facet = this.facet ? this.facet.column().text : null;
 
             const startTimeStamp = `TIMESTAMP WITHOUT TIME ZONE '${this.startDate.toISOString()}'`;
@@ -283,7 +290,7 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
             return `with full_dates as (select generate_series(${startTimeStamp}, ${endTimeStamp}, interval '${durationInSeconds} seconds') timeseries)
 select timeseries, ${selection}${facet ? `, ${facet}` : ''}
 from full_dates
-left outer join ${table} on timeseries = TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from ${startTimeStamp}) + (floor((extract('epoch' from created_at) - extract('epoch' from ${startTimeStamp})) / ${durationInSeconds}) * ${durationInSeconds}))
+left outer join ${table} on timeseries = TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from ${startTimeStamp}) + (floor((extract('epoch' from ${timeseriesColumn}) - extract('epoch' from ${startTimeStamp})) / ${durationInSeconds}) * ${durationInSeconds}))
 ${filters}
 group by timeseries${facet ? `, ${facet}` : ''}
 order by full_dates.timeseries desc
@@ -326,10 +333,9 @@ order by full_dates.timeseries desc
                 }
                 until = filter.date();
             }
-
             if (filter.timeseries()) {
                 this.isTimeseries = true;
-                this.timeSeries = filter.timeseries();
+                this.timeSeries = new AqlTimeseriesContext(filter.timeseries());
             }
 
             if (filter.facet()) {
@@ -359,15 +365,16 @@ order by full_dates.timeseries desc
             this.errorListener.error(`End date ${this.startDate} not valid`);
         }
 
+        const timeseriesColumn = this.timeSeries.column();
         let predicates = '';
-        let datePredicate = `created_at >= TIMESTAMP WITHOUT TIME ZONE '${this.startDate.toISOString()}' and created_at <= TIMESTAMP WITHOUT TIME ZONE '${this.endDate.toISOString()}'`;
+        let datePredicate = `${timeseriesColumn} >= TIMESTAMP WITHOUT TIME ZONE '${this.startDate.toISOString()}' and ${timeseriesColumn} <= TIMESTAMP WITHOUT TIME ZONE '${this.endDate.toISOString()}'`;
         predicates += datePredicate;
         if (whereStatements.length > 0) {
             predicates += ' and ' + whereStatements.map(where => this.visitPredicateExpr(where)).join(' and ');
         }
 
         if (this.isTimeseries) {
-            predicates = `created_at is null or (${predicates})`
+            predicates = `${timeseriesColumn} is null or (${predicates})`
         }
 
         return `where ${predicates}`;

@@ -45,6 +45,7 @@ export const language = {
         'false',
         'timeseries',
         'facet',
+        'every'
     ],
 
     durations: [

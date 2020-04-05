@@ -94,6 +94,20 @@ describe('aql-to-sql', function () {
                     "errors": []
                 });
             });
+
+            it('calculates the timeseries for a custom duration with the optional every keyword', function () {
+                expect(aqlToSql("select count(total) from sales_view timeseries every 2 hours", sunday)).toEqual({
+                    command: "with full_dates as (select generate_series(TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z', TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z', interval '7200 seconds') timeseries)\nselect timeseries, count(total)\nfrom full_dates\nleft outer join sales_view on timeseries = TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z') + (floor((extract('epoch' from created_at) - extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z')) / 7200) * 7200))\nwhere created_at is null or (created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z')\ngroup by timeseries\norder by full_dates.timeseries desc",
+                    "errors": []
+                });
+            });
+
+            it('calculates the timeseries for a custom duration with the optional every keyword and custom property name', function () {
+                expect(aqlToSql("select count(total) from sales_view timeseries deleted_at every 2 hours", sunday)).toEqual({
+                    command: "with full_dates as (select generate_series(TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z', TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z', interval '7200 seconds') timeseries)\nselect timeseries, count(total)\nfrom full_dates\nleft outer join sales_view on timeseries = TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z') + (floor((extract('epoch' from deleted_at) - extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z')) / 7200) * 7200))\nwhere deleted_at is null or (deleted_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z' and deleted_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z')\ngroup by timeseries\norder by full_dates.timeseries desc",
+                    "errors": []
+                });
+            });
         });
 
         describe('facet', function () {

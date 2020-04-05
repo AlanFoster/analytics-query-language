@@ -28,7 +28,7 @@ facet:
   ;
 
 timeseries:
-  TIMESERIES duration?
+  TIMESERIES column? EVERY? duration?
   ;
 
 duration:
@@ -166,6 +166,7 @@ ABS : A B S ;
 SUM : S U M ;
 AVG : A V G ;
 TIMESERIES: T I M E S E R I E S ;
+EVERY: E V E R Y ;
 FACET: F A C E T ;
 
 AND: A N D ;
