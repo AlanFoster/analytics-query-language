@@ -281,11 +281,11 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
 
             // TODO: Apply filters
             return `with full_dates as (select generate_series(${startTimeStamp}, ${endTimeStamp}, interval '${durationInSeconds} seconds') timeseries)
-select timeseries, ${selection} ${facet ? `, ${facet}` : ''}
+select timeseries, ${selection}${facet ? `, ${facet}` : ''}
 from full_dates
 left outer join ${table} on timeseries = TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from ${startTimeStamp}) + (floor((extract('epoch' from created_at) - extract('epoch' from ${startTimeStamp})) / ${durationInSeconds}) * ${durationInSeconds}))
 ${filters}
-group by timeseries ${facet ? `, ${facet}` : ''}
+group by timeseries${facet ? `, ${facet}` : ''}
 order by full_dates.timeseries desc
 `.trim();
         } else {

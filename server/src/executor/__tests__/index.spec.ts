@@ -34,7 +34,7 @@ describe('aql-to-sql', function () {
             });
         });
 
-        it.only('handles relative units', function () {
+        it('handles relative units', function () {
             expect(aqlToSql("select * from products since 5 days ago until 4 days ago", saturday)).toEqual({
                 "command": "select * from products where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-20T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-21T23:59:59.999Z' limit 100",
                 "errors": []
@@ -83,14 +83,14 @@ describe('aql-to-sql', function () {
         describe('time series', function () {
             it('defaults a timeseries to 1 hour if a duration is not provided', function () {
                 expect(aqlToSql("select count(total) from sales_view timeseries", sunday)).toEqual({
-                    command:"with full_dates as (select generate_series(TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z', TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z', interval '3600 seconds') timeseries)\nselect timeseries, count(total)\nfrom full_dates\nleft outer join sales_view on timeseries = TIMESTAMP WITH TIME ZONE 'epoch' + INTERVAL '1 second' * (floor(extract('epoch' from created_at) / 3600) * 3600)\ngroup by timeseries\norder by full_dates.timeseries desc",
+                    command: "with full_dates as (select generate_series(TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z', TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z', interval '3600 seconds') timeseries)\nselect timeseries, count(total)\nfrom full_dates\nleft outer join sales_view on timeseries = TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z') + (floor((extract('epoch' from created_at) - extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z')) / 3600) * 3600))\nwhere created_at is null or (created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z')\ngroup by timeseries\norder by full_dates.timeseries desc",
                     errors: []
                 });
             });
 
             it('calculates the timeseries for a custom duration', function () {
                 expect(aqlToSql("select count(total) from sales_view timeseries 2 hours", sunday)).toEqual({
-                    command:"with full_dates as (select generate_series(TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z', TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z', interval '7200 seconds') timeseries)\nselect timeseries, count(total)\nfrom full_dates\nleft outer join sales_view on timeseries = TIMESTAMP WITH TIME ZONE 'epoch' + INTERVAL '1 second' * (floor(extract('epoch' from created_at) / 7200) * 7200)\ngroup by timeseries\norder by full_dates.timeseries desc",
+                    command: "with full_dates as (select generate_series(TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z', TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z', interval '7200 seconds') timeseries)\nselect timeseries, count(total)\nfrom full_dates\nleft outer join sales_view on timeseries = TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z') + (floor((extract('epoch' from created_at) - extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z')) / 7200) * 7200))\nwhere created_at is null or (created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z')\ngroup by timeseries\norder by full_dates.timeseries desc",
                     "errors": []
                 });
             });
@@ -108,7 +108,7 @@ describe('aql-to-sql', function () {
         describe('time series and facet', function () {
             it('calculates the timeseries for a custom duration and facet', function () {
                 expect(aqlToSql("select count(total) from sales_view timeseries 2 hours facet customer_name", sunday)).toEqual({
-                    command:"with full_dates as (select generate_series(TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z', TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z', interval '7200 seconds') timeseries)\nselect timeseries, customer_name, count(total)\nfrom full_dates\nleft outer join sales_view on timeseries = TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z') + (floor((extract('epoch' from created_at) - extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z')) / 7200) * 7200))\nwhere created_at is null or (created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z')\ngroup by timeseries, customer_name\norder by full_dates.timeseries desc",
+                    command: "with full_dates as (select generate_series(TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z', TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z', interval '7200 seconds') timeseries)\nselect timeseries, count(total), customer_name\nfrom full_dates\nleft outer join sales_view on timeseries = TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z') + (floor((extract('epoch' from created_at) - extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z')) / 7200) * 7200))\nwhere created_at is null or (created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z')\ngroup by timeseries, customer_name\norder by full_dates.timeseries desc",
                     "errors": []
                 });
             });
