@@ -104,7 +104,6 @@ class TimeSeriesChart extends React.Component {
       }
     });
 
-
     return (
       <div>
         <Resizable>
@@ -181,10 +180,11 @@ class TimeSeriesChart extends React.Component {
         </Resizable>
 
         <Legend
-          type="line"
+          type="swatch"
           align="right"
           style={style}
-          categories={categories}/>
+          categories={categories}
+        />
       </div>
     )
   }
