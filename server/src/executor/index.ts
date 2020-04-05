@@ -57,6 +57,8 @@ export const execute = async function (req, res) {
     } catch (e) {
         res.status(400);
         res.end(JSON.stringify({ errors: [e] }))
+    } finally {
+        await executor.end();
     }
 };
 
@@ -71,6 +73,10 @@ class Executor {
 
     async start() {
         await this.pool.connect()
+    }
+
+    async end() {
+        await this.pool.end();
     }
 
     async extractSchema(): Promise<Schema> {
