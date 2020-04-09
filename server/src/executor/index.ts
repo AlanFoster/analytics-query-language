@@ -109,7 +109,7 @@ class Executor {
         // TODO: There's SQL injection issues to consider here. Note that
         // prepared statements can't be used in the place of table/column
         // positions, only data.
-        const res: QueryResult<string> = await this.pool.query(`
+        const res = await this.pool.query(`
             select ${column} from ${table} limit 100
         `);
 

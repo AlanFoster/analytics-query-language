@@ -1,41 +1,41 @@
-// Generated from Aql.g4 by ANTLR 4.6-SNAPSHOT
+// Generated from Aql.g4 by ANTLR 4.7.3-SNAPSHOT
 
 
-import { ParseTreeVisitor } from 'antlr4ts/tree/ParseTreeVisitor';
+import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
-import { PredicateAtomContext } from './AqlParser';
-import { PredicateNestedContext } from './AqlParser';
-import { SelectionBinaryContext } from './AqlParser';
-import { SelectionTermAltContext } from './AqlParser';
-import { SelectionFunctionContext } from './AqlParser';
-import { SelectionAtomContext } from './AqlParser';
-import { SelectionNestedContext } from './AqlParser';
-import { PredicateTermAltContext } from './AqlParser';
-import { PredicateBinaryContext } from './AqlParser';
-import { ProgContext } from './AqlParser';
-import { FiltersContext } from './AqlParser';
-import { FilterContext } from './AqlParser';
-import { FacetContext } from './AqlParser';
-import { TimeseriesContext } from './AqlParser';
-import { DurationContext } from './AqlParser';
-import { TimeDurationContext } from './AqlParser';
-import { TimeUnitContext } from './AqlParser';
-import { SelectionContext } from './AqlParser';
-import { PredicateExprContext } from './AqlParser';
-import { PredicateTermContext } from './AqlParser';
-import { FuncContext } from './AqlParser';
-import { FuncNameContext } from './AqlParser';
-import { SelectionExprContext } from './AqlParser';
-import { SelectionTermContext } from './AqlParser';
-import { DateContext } from './AqlParser';
-import { RelativeDayContext } from './AqlParser';
-import { RelativeTimeUnitContext } from './AqlParser';
-import { AbsoluteDateContext } from './AqlParser';
-import { DayContext } from './AqlParser';
-import { WildcardContext } from './AqlParser';
-import { TimeContext } from './AqlParser';
-import { TableContext } from './AqlParser';
-import { ColumnContext } from './AqlParser';
+import { PredicateAtomContext } from "./AqlParser";
+import { PredicateNestedContext } from "./AqlParser";
+import { SelectionBinaryContext } from "./AqlParser";
+import { SelectionTermAltContext } from "./AqlParser";
+import { SelectionFunctionContext } from "./AqlParser";
+import { SelectionAtomContext } from "./AqlParser";
+import { SelectionNestedContext } from "./AqlParser";
+import { PredicateBinaryContext } from "./AqlParser";
+import { PredicateTermAltContext } from "./AqlParser";
+import { ProgContext } from "./AqlParser";
+import { FiltersContext } from "./AqlParser";
+import { FilterContext } from "./AqlParser";
+import { FacetContext } from "./AqlParser";
+import { TimeseriesContext } from "./AqlParser";
+import { DurationContext } from "./AqlParser";
+import { TimeDurationContext } from "./AqlParser";
+import { TimeUnitContext } from "./AqlParser";
+import { SelectionContext } from "./AqlParser";
+import { PredicateExprContext } from "./AqlParser";
+import { PredicateTermContext } from "./AqlParser";
+import { FuncContext } from "./AqlParser";
+import { FuncNameContext } from "./AqlParser";
+import { SelectionExprContext } from "./AqlParser";
+import { SelectionTermContext } from "./AqlParser";
+import { DateContext } from "./AqlParser";
+import { RelativeDayContext } from "./AqlParser";
+import { RelativeTimeUnitContext } from "./AqlParser";
+import { AbsoluteDateContext } from "./AqlParser";
+import { DayContext } from "./AqlParser";
+import { WildcardContext } from "./AqlParser";
+import { TimeContext } from "./AqlParser";
+import { TableContext } from "./AqlParser";
+import { ColumnContext } from "./AqlParser";
 
 
 /**
@@ -103,20 +103,20 @@ export interface AqlVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitSelectionNested?: (ctx: SelectionNestedContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by the `PredicateTermAlt`
-	 * labeled alternative in `AqlParser.predicateExpr`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitPredicateTermAlt?: (ctx: PredicateTermAltContext) => Result;
-
-	/**
 	 * Visit a parse tree produced by the `PredicateBinary`
 	 * labeled alternative in `AqlParser.predicateExpr`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	visitPredicateBinary?: (ctx: PredicateBinaryContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `PredicateTermAlt`
+	 * labeled alternative in `AqlParser.predicateExpr`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPredicateTermAlt?: (ctx: PredicateTermAltContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `AqlParser.prog`.

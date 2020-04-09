@@ -10,7 +10,9 @@
     // Note, this is only used when compiled directly for vscode
     // Neutrino will ignore this configuration for monaco:
     "outDir": "out",
-    "rootDir": "src"
+    "rootDirs": [
+      "src"
+    ]
   },
   "exclude": [
     "node_modules",

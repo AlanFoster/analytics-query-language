@@ -7,6 +7,8 @@
 !.eslintrc.js
 !.neutrinorc.js
 !Aql.g4
+!jest.config.js
 !package.json
 !tsconfig.json
+!webpack.config.js
 !yarn.lock
