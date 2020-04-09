@@ -10,7 +10,17 @@ describe("aql-to-sql", function () {
       expect(aqlToSql("select * from products", saturday))
         .toMatchInlineSnapshot(`
         Object {
-          "command": "select products.* from products where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-18T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-25T15:09:30.566Z' limit 100",
+          "command": "
+        select
+          products.*
+        from
+          products
+        where
+          created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-18T00:00:00.000Z'
+          and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-25T15:09:30.566Z'
+        limit
+          100
+        ",
           "errors": Array [],
         }
       `);
@@ -18,10 +28,23 @@ describe("aql-to-sql", function () {
 
     it("handles relative dates on the same week without a time specified", function () {
       expect(
-        aqlToSql("select * from products since monday until tuesday", saturday)
+        aqlToSql(
+          "select * from products since monday until tuesday",
+          saturday
+        )
       ).toMatchInlineSnapshot(`
         Object {
-          "command": "select products.* from products where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-20T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-21T23:59:59.999Z' limit 100",
+          "command": "
+        select
+          products.*
+        from
+          products
+        where
+          created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-20T00:00:00.000Z'
+          and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-21T23:59:59.999Z'
+        limit
+          100
+        ",
           "errors": Array [],
         }
       `);
@@ -35,17 +58,38 @@ describe("aql-to-sql", function () {
         )
       ).toMatchInlineSnapshot(`
         Object {
-          "command": "select products.* from products where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-20T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-25T08:30:00.000Z' limit 100",
+          "command": "
+        select
+          products.*
+        from
+          products
+        where
+          created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-20T00:00:00.000Z'
+          and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-25T08:30:00.000Z'
+        limit
+          100
+        ",
           "errors": Array [],
         }
       `);
     });
 
     it("handles relative days for last week without a time specified", function () {
-      expect(aqlToSql("select * from products since last tuesday", saturday))
-        .toMatchInlineSnapshot(`
+      expect(
+        aqlToSql("select * from products since last tuesday", saturday)
+      ).toMatchInlineSnapshot(`
         Object {
-          "command": "select products.* from products where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-14T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-25T15:09:30.566Z' limit 100",
+          "command": "
+        select
+          products.*
+        from
+          products
+        where
+          created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-14T00:00:00.000Z'
+          and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-25T15:09:30.566Z'
+        limit
+          100
+        ",
           "errors": Array [],
         }
       `);
@@ -59,7 +103,17 @@ describe("aql-to-sql", function () {
         )
       ).toMatchInlineSnapshot(`
         Object {
-          "command": "select products.* from products where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-20T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-21T23:59:59.999Z' limit 100",
+          "command": "
+        select
+          products.*
+        from
+          products
+        where
+          created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-20T00:00:00.000Z'
+          and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-21T23:59:59.999Z'
+        limit
+          100
+        ",
           "errors": Array [],
         }
       `);
@@ -68,9 +122,20 @@ describe("aql-to-sql", function () {
 
   describe("when it is a sunday", function () {
     it("provides default filters of the past week, and a limit of 100", function () {
-      expect(aqlToSql("select * from products", sunday)).toMatchInlineSnapshot(`
+      expect(aqlToSql("select * from products", sunday))
+        .toMatchInlineSnapshot(`
         Object {
-          "command": "select products.* from products where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z' limit 100",
+          "command": "
+        select
+          products.*
+        from
+          products
+        where
+          created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+          and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z'
+        limit
+          100
+        ",
           "errors": Array [],
         }
       `);
@@ -78,10 +143,23 @@ describe("aql-to-sql", function () {
 
     it("handles relative dates on the same week without a time specified", function () {
       expect(
-        aqlToSql("select * from products since monday until tuesday", sunday)
+        aqlToSql(
+          "select * from products since monday until tuesday",
+          sunday
+        )
       ).toMatchInlineSnapshot(`
         Object {
-          "command": "select products.* from products where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-27T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-28T23:59:59.999Z' limit 100",
+          "command": "
+        select
+          products.*
+        from
+          products
+        where
+          created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-27T00:00:00.000Z'
+          and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-28T23:59:59.999Z'
+        limit
+          100
+        ",
           "errors": Array [],
         }
       `);
@@ -95,7 +173,17 @@ describe("aql-to-sql", function () {
         )
       ).toMatchInlineSnapshot(`
         Object {
-          "command": "select products.* from products where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-20T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-21T23:59:59.999Z' limit 100",
+          "command": "
+        select
+          products.*
+        from
+          products
+        where
+          created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-20T00:00:00.000Z'
+          and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-21T23:59:59.999Z'
+        limit
+          100
+        ",
           "errors": Array [],
         }
       `);
@@ -109,7 +197,17 @@ describe("aql-to-sql", function () {
         )
       ).toMatchInlineSnapshot(`
         Object {
-          "command": "select products.* from products where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-27T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T08:30:00.000Z' limit 100",
+          "command": "
+        select
+          products.*
+        from
+          products
+        where
+          created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-27T00:00:00.000Z'
+          and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T08:30:00.000Z'
+        limit
+          100
+        ",
           "errors": Array [
             Object {
               "message": "Start date is after end date",
@@ -127,7 +225,17 @@ describe("aql-to-sql", function () {
         )
       ).toMatchInlineSnapshot(`
         Object {
-          "command": "select products.* from products where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-20T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T08:30:00.000Z' limit 100",
+          "command": "
+        select
+          products.*
+        from
+          products
+        where
+          created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-20T00:00:00.000Z'
+          and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T08:30:00.000Z'
+        limit
+          100
+        ",
           "errors": Array [],
         }
       `);
@@ -136,21 +244,56 @@ describe("aql-to-sql", function () {
     describe("time series", function () {
       it("defaults a timeseries to 1 hour if a duration is not provided", function () {
         expect(
-          aqlToSql("select count(total) from sales_view timeseries", sunday)
+          aqlToSql(
+            "select count(total) from sales_view timeseries",
+            sunday
+          )
         ).toMatchInlineSnapshot(`
           Object {
-            "command": "with full_dates as (
-              select generate_series(TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z', TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z', interval '3600 seconds') timeseries
+            "command": "
+          with full_dates as (
+            select
+              generate_series(
+                TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z',
+                TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z',
+                interval '3600 seconds'
+              ) timeseries
           )
-              select timeseries, count(total)
-              from full_dates
-              left outer join sales_view
-                  on timeseries = (
-                      TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z') + (floor((extract('epoch' from created_at) - extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z')) / 3600) * 3600))
-                  )
-                  and created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z'
-              group by timeseries
-              order by full_dates.timeseries desc",
+          select
+            timeseries,
+            count(total)
+          from
+            full_dates
+            left outer join sales_view on timeseries = (
+              TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (
+                extract(
+                  'epoch'
+                  from
+                    TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+                ) + (
+                  floor(
+                    (
+                      extract(
+                        'epoch'
+                        from
+                          created_at
+                      ) - extract(
+                        'epoch'
+                        from
+                          TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+                      )
+                    ) / 3600
+                  ) * 3600
+                )
+              )
+            )
+            and created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+            and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z'
+          group by
+            timeseries
+          order by
+            full_dates.timeseries desc
+          ",
             "errors": Array [],
           }
         `);
@@ -164,18 +307,50 @@ describe("aql-to-sql", function () {
           )
         ).toMatchInlineSnapshot(`
           Object {
-            "command": "with full_dates as (
-              select generate_series(TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z', TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z', interval '7200 seconds') timeseries
+            "command": "
+          with full_dates as (
+            select
+              generate_series(
+                TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z',
+                TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z',
+                interval '7200 seconds'
+              ) timeseries
           )
-              select timeseries, count(total)
-              from full_dates
-              left outer join sales_view
-                  on timeseries = (
-                      TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z') + (floor((extract('epoch' from created_at) - extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z')) / 7200) * 7200))
-                  )
-                  and created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z'
-              group by timeseries
-              order by full_dates.timeseries desc",
+          select
+            timeseries,
+            count(total)
+          from
+            full_dates
+            left outer join sales_view on timeseries = (
+              TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (
+                extract(
+                  'epoch'
+                  from
+                    TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+                ) + (
+                  floor(
+                    (
+                      extract(
+                        'epoch'
+                        from
+                          created_at
+                      ) - extract(
+                        'epoch'
+                        from
+                          TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+                      )
+                    ) / 7200
+                  ) * 7200
+                )
+              )
+            )
+            and created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+            and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z'
+          group by
+            timeseries
+          order by
+            full_dates.timeseries desc
+          ",
             "errors": Array [],
           }
         `);
@@ -189,18 +364,50 @@ describe("aql-to-sql", function () {
           )
         ).toMatchInlineSnapshot(`
           Object {
-            "command": "with full_dates as (
-              select generate_series(TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z', TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z', interval '7200 seconds') timeseries
+            "command": "
+          with full_dates as (
+            select
+              generate_series(
+                TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z',
+                TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z',
+                interval '7200 seconds'
+              ) timeseries
           )
-              select timeseries, count(total)
-              from full_dates
-              left outer join sales_view
-                  on timeseries = (
-                      TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z') + (floor((extract('epoch' from created_at) - extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z')) / 7200) * 7200))
-                  )
-                  and created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z'
-              group by timeseries
-              order by full_dates.timeseries desc",
+          select
+            timeseries,
+            count(total)
+          from
+            full_dates
+            left outer join sales_view on timeseries = (
+              TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (
+                extract(
+                  'epoch'
+                  from
+                    TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+                ) + (
+                  floor(
+                    (
+                      extract(
+                        'epoch'
+                        from
+                          created_at
+                      ) - extract(
+                        'epoch'
+                        from
+                          TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+                      )
+                    ) / 7200
+                  ) * 7200
+                )
+              )
+            )
+            and created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+            and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z'
+          group by
+            timeseries
+          order by
+            full_dates.timeseries desc
+          ",
             "errors": Array [],
           }
         `);
@@ -214,18 +421,50 @@ describe("aql-to-sql", function () {
           )
         ).toMatchInlineSnapshot(`
           Object {
-            "command": "with full_dates as (
-              select generate_series(TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z', TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z', interval '7200 seconds') timeseries
+            "command": "
+          with full_dates as (
+            select
+              generate_series(
+                TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z',
+                TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z',
+                interval '7200 seconds'
+              ) timeseries
           )
-              select timeseries, count(total)
-              from full_dates
-              left outer join sales_view
-                  on timeseries = (
-                      TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z') + (floor((extract('epoch' from deleted_at) - extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z')) / 7200) * 7200))
-                  )
-                  and deleted_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z' and deleted_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z'
-              group by timeseries
-              order by full_dates.timeseries desc",
+          select
+            timeseries,
+            count(total)
+          from
+            full_dates
+            left outer join sales_view on timeseries = (
+              TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (
+                extract(
+                  'epoch'
+                  from
+                    TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+                ) + (
+                  floor(
+                    (
+                      extract(
+                        'epoch'
+                        from
+                          deleted_at
+                      ) - extract(
+                        'epoch'
+                        from
+                          TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+                      )
+                    ) / 7200
+                  ) * 7200
+                )
+              )
+            )
+            and deleted_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+            and deleted_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z'
+          group by
+            timeseries
+          order by
+            full_dates.timeseries desc
+          ",
             "errors": Array [],
           }
         `);
@@ -241,7 +480,17 @@ describe("aql-to-sql", function () {
           )
         ).toMatchInlineSnapshot(`
           Object {
-            "command": "select count(total) from sales_view where created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z' limit 100",
+            "command": "
+          select
+            count(total)
+          from
+            sales_view
+          where
+            created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+            and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z'
+          limit
+            100
+          ",
             "errors": Array [],
           }
         `);
@@ -257,18 +506,52 @@ describe("aql-to-sql", function () {
           )
         ).toMatchInlineSnapshot(`
           Object {
-            "command": "with full_dates as (
-              select generate_series(TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z', TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z', interval '7200 seconds') timeseries
+            "command": "
+          with full_dates as (
+            select
+              generate_series(
+                TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z',
+                TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z',
+                interval '7200 seconds'
+              ) timeseries
           )
-              select timeseries, count(total), customer_name
-              from full_dates
-              left outer join sales_view
-                  on timeseries = (
-                      TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z') + (floor((extract('epoch' from created_at) - extract('epoch' from TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z')) / 7200) * 7200))
-                  )
-                  and created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z' and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z'
-              group by timeseries, customer_name
-              order by full_dates.timeseries desc",
+          select
+            timeseries,
+            count(total),
+            customer_name
+          from
+            full_dates
+            left outer join sales_view on timeseries = (
+              TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (
+                extract(
+                  'epoch'
+                  from
+                    TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+                ) + (
+                  floor(
+                    (
+                      extract(
+                        'epoch'
+                        from
+                          created_at
+                      ) - extract(
+                        'epoch'
+                        from
+                          TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+                      )
+                    ) / 7200
+                  ) * 7200
+                )
+              )
+            )
+            and created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-19T00:00:00.000Z'
+            and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-26T15:09:30.566Z'
+          group by
+            timeseries,
+            customer_name
+          order by
+            full_dates.timeseries desc
+          ",
             "errors": Array [],
           }
         `);

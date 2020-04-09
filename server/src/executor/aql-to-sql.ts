@@ -13,6 +13,7 @@ import {AqlLexer} from "../parser/gen/AqlLexer";
 import ErrorAggregator from "../parser/error-aggregator";
 import {AbstractParseTreeVisitor} from "antlr4ts/tree"
 import {AqlVisitor} from "../parser/gen/AqlVisitor";
+import sqlFormatter from "sql-formatter";
 
 /**
  * Translates a relative date into an absolute date, i.e.
@@ -497,7 +498,8 @@ export default function (input, today) {
     const aqlToSqlVisitor = new AqlToSqlVisitor(errorAggregator, new DateCalculator(today));
     let command;
     try {
-        command = aqlToSqlVisitor.visit(tree);
+        const sql = aqlToSqlVisitor.visit(tree)
+        command = `\n${sqlFormatter.format(sql)}\n`
     } catch (e) {
         errorAggregator.error(e.toString());
     }
