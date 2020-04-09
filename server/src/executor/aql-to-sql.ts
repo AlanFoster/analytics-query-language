@@ -145,6 +145,7 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
     private startDate: Moment | undefined;
     private endDate: Moment | undefined;
     private timeSeries: AqlTimeseriesContext = new AqlTimeseriesContext(null);
+    private table: string | undefined;
     private facet: FacetContext | undefined;
 
     constructor(errorListener: ErrorAggregator, dateCalculator) {
@@ -274,8 +275,9 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
      * @return the visitor result
      */
     visitProg(ctx: ProgContext) {
-        const selection = this.visitSelection!(ctx.selection());
         const table = this.visitTable!(ctx.table());
+        this.table = table;
+        const selection = this.visitSelection!(ctx.selection());
         const filters = this.visitFilters(ctx.filters());
 
         if (this.isTimeseries) {
@@ -286,19 +288,24 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
             const startTimeStamp = `TIMESTAMP WITHOUT TIME ZONE '${this.startDate.toISOString()}'`;
             const endTimeStamp = `TIMESTAMP WITHOUT TIME ZONE '${this.endDate.toISOString()}'`;
 
-            // TODO: Apply filters
-            return `with full_dates as (select generate_series(${startTimeStamp}, ${endTimeStamp}, interval '${durationInSeconds} seconds') timeseries)
-select timeseries, ${selection}${facet ? `, ${facet}` : ''}
-from full_dates
-left outer join ${table} on timeseries = TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from ${startTimeStamp}) + (floor((extract('epoch' from ${timeseriesColumn}) - extract('epoch' from ${startTimeStamp})) / ${durationInSeconds}) * ${durationInSeconds}))
-${filters}
-group by timeseries${facet ? `, ${facet}` : ''}
-order by full_dates.timeseries desc
+            return `
+with full_dates as (
+    select generate_series(${startTimeStamp}, ${endTimeStamp}, interval '${durationInSeconds} seconds') timeseries
+)
+    select timeseries, ${selection}${facet ? `, ${facet}` : ''}
+    from full_dates
+    left outer join ${table}
+        on timeseries = (
+            TIMESTAMP WITHOUT TIME ZONE 'epoch' + INTERVAL '1 second' * (extract('epoch' from ${startTimeStamp}) + (floor((extract('epoch' from ${timeseriesColumn}) - extract('epoch' from ${startTimeStamp})) / ${durationInSeconds}) * ${durationInSeconds}))
+        )
+        and ${filters}
+    group by timeseries${facet ? `, ${facet}` : ''}
+    order by full_dates.timeseries desc
 `.trim();
         } else {
             // TODO: We can expose limit through out grammar
             const limit = 'limit 100';
-            return `select ${selection} from ${table} ${filters} ${limit}`;
+            return `select ${selection} from ${table} where ${filters} ${limit}`;
         }
     }
 
@@ -373,11 +380,7 @@ order by full_dates.timeseries desc
             predicates += ' and ' + whereStatements.map(where => this.visitPredicateExpr(where)).join(' and ');
         }
 
-        if (this.isTimeseries) {
-            predicates = `${timeseriesColumn} is null or (${predicates})`
-        }
-
-        return `where ${predicates}`;
+        return predicates;
     }
 
     /**
@@ -443,7 +446,7 @@ order by full_dates.timeseries desc
      * @return the visitor result
      */
     visitWildcard(ctx: WildcardContext) {
-        return "*";
+        return `${this.table}.*`;
     }
 
     /**
