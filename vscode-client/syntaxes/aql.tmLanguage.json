@@ -27,7 +27,7 @@
       "patterns": [
         {
           "name": "keyword.other.aql",
-          "match": "\\b(select|from|where|since|until|at|and|or|timeseries|every)\\b"
+          "match": "\\b(select|from|where|since|until|at|and|or|timeseries|every|in)\\b"
         },
         {
           "name": "keyword.other.aql",

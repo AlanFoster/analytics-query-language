@@ -59,6 +59,7 @@ predicateExpr:
     | left=predicateExpr operator=(EQUAL | NOT_EQUAL) right=predicateExpr # PredicateBinary
     | left=predicateExpr operator=AND right=predicateExpr # PredicateBinary
     | left=predicateExpr operator=OR right=predicateExpr # PredicateBinary
+    | left=predicateExpr IN right=predicateTerms # PredicateInTerms
     | predicateTerm # PredicateTermAlt
     ;
 
@@ -70,6 +71,12 @@ predicateTerm:
     | STRING  # PredicateAtom
     | OPEN_PAREN predicateExpr CLOSE_PAREN # PredicateNested
     ;
+
+predicateTermList:
+     terms += predicateTerm (',' terms += predicateTerm)* ;
+
+predicateTerms:
+    OPEN_PAREN predicateTermList CLOSE_PAREN ;
 
 func:
      funcName OPEN_PAREN (wildcard | selectionExpr) CLOSE_PAREN
@@ -136,6 +143,8 @@ AT: A T ;
 WHERE: W H E R E ;
 LAST : L A S T ;
 AGO: A G O ;
+
+IN: I N ;
 
 TRUE: 'true' ;
 FALSE: 'false' ;

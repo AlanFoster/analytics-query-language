@@ -6,7 +6,7 @@ import {
     PredicateBinaryContext, PredicateNestedContext,
     PredicateExprContext, ProgContext, SelectionAtomContext, SelectionBinaryContext,
     SelectionContext, SelectionExprContext, SelectionNestedContext, TableContext,
-    WildcardContext, AqlParser, TimeseriesContext, FacetContext
+    WildcardContext, AqlParser, TimeseriesContext, FacetContext, PredicateInTermsContext
 } from '../parser/gen/AqlParser';
 import {ANTLRInputStream, CommonTokenStream} from "antlr4ts";
 import {AqlLexer} from "../parser/gen/AqlLexer";
@@ -271,6 +271,19 @@ class AqlToSqlVisitor extends AbstractParseTreeVisitor<string> implements AqlVis
     }
 
     /**
+     * Visit a parse tree produced by the `PredicateInTerms`
+     * labeled alternative in `AqlParser.predicateExpr`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitPredicateInTerms(ctx: PredicateInTermsContext) {
+        const left = this.visit(ctx._left);
+        const right = ctx._right.predicateTermList()._terms.map(term => this.visit(term));
+
+        return `(${left} in (${right.join(', ')}))`
+    }
+
+    /**
      * Visit a parse tree produced by `AqlParser.prog`.
      * @param ctx the parse tree
      * @return the visitor result
@@ -323,7 +336,8 @@ with full_dates as (
             if (filter.WHERE()) {
                 const predicateExpr = filter.predicateExpr();
                 if (!predicateExpr) {
-                    return "[error]"
+                    this.errorListener.error("Missing predicate expression");
+                    return this.defaultResult();
                 }
                 whereStatements.push(predicateExpr);
             }
@@ -501,7 +515,7 @@ export default function (input, today) {
         const sql = aqlToSqlVisitor.visit(tree)
         command = `\n${sqlFormatter.format(sql)}\n`
     } catch (e) {
-        errorAggregator.error(e.toString());
+        errorAggregator.error(`${e.toString()}\n${e.stack}`);
     }
 
     return {

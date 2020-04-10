@@ -3,15 +3,16 @@
 
 import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
-import { PredicateAtomContext } from "./AqlParser";
-import { PredicateNestedContext } from "./AqlParser";
 import { SelectionBinaryContext } from "./AqlParser";
 import { SelectionTermAltContext } from "./AqlParser";
+import { PredicateBinaryContext } from "./AqlParser";
+import { PredicateInTermsContext } from "./AqlParser";
+import { PredicateTermAltContext } from "./AqlParser";
+import { PredicateAtomContext } from "./AqlParser";
+import { PredicateNestedContext } from "./AqlParser";
 import { SelectionFunctionContext } from "./AqlParser";
 import { SelectionAtomContext } from "./AqlParser";
 import { SelectionNestedContext } from "./AqlParser";
-import { PredicateBinaryContext } from "./AqlParser";
-import { PredicateTermAltContext } from "./AqlParser";
 import { ProgContext } from "./AqlParser";
 import { FiltersContext } from "./AqlParser";
 import { FilterContext } from "./AqlParser";
@@ -23,6 +24,8 @@ import { TimeUnitContext } from "./AqlParser";
 import { SelectionContext } from "./AqlParser";
 import { PredicateExprContext } from "./AqlParser";
 import { PredicateTermContext } from "./AqlParser";
+import { PredicateTermListContext } from "./AqlParser";
+import { PredicateTermsContext } from "./AqlParser";
 import { FuncContext } from "./AqlParser";
 import { FuncNameContext } from "./AqlParser";
 import { SelectionExprContext } from "./AqlParser";
@@ -47,22 +50,6 @@ import { ColumnContext } from "./AqlParser";
  */
 export interface AqlVisitor<Result> extends ParseTreeVisitor<Result> {
 	/**
-	 * Visit a parse tree produced by the `PredicateAtom`
-	 * labeled alternative in `AqlParser.predicateTerm`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitPredicateAtom?: (ctx: PredicateAtomContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `PredicateNested`
-	 * labeled alternative in `AqlParser.predicateTerm`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitPredicateNested?: (ctx: PredicateNestedContext) => Result;
-
-	/**
 	 * Visit a parse tree produced by the `SelectionBinary`
 	 * labeled alternative in `AqlParser.selectionExpr`.
 	 * @param ctx the parse tree
@@ -77,6 +64,46 @@ export interface AqlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitSelectionTermAlt?: (ctx: SelectionTermAltContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `PredicateBinary`
+	 * labeled alternative in `AqlParser.predicateExpr`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPredicateBinary?: (ctx: PredicateBinaryContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `PredicateInTerms`
+	 * labeled alternative in `AqlParser.predicateExpr`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPredicateInTerms?: (ctx: PredicateInTermsContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `PredicateTermAlt`
+	 * labeled alternative in `AqlParser.predicateExpr`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPredicateTermAlt?: (ctx: PredicateTermAltContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `PredicateAtom`
+	 * labeled alternative in `AqlParser.predicateTerm`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPredicateAtom?: (ctx: PredicateAtomContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `PredicateNested`
+	 * labeled alternative in `AqlParser.predicateTerm`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPredicateNested?: (ctx: PredicateNestedContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `SelectionFunction`
@@ -101,22 +128,6 @@ export interface AqlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitSelectionNested?: (ctx: SelectionNestedContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `PredicateBinary`
-	 * labeled alternative in `AqlParser.predicateExpr`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitPredicateBinary?: (ctx: PredicateBinaryContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `PredicateTermAlt`
-	 * labeled alternative in `AqlParser.predicateExpr`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitPredicateTermAlt?: (ctx: PredicateTermAltContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `AqlParser.prog`.
@@ -194,6 +205,20 @@ export interface AqlVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitPredicateTerm?: (ctx: PredicateTermContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `AqlParser.predicateTermList`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPredicateTermList?: (ctx: PredicateTermListContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `AqlParser.predicateTerms`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPredicateTerms?: (ctx: PredicateTermsContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `AqlParser.func`.

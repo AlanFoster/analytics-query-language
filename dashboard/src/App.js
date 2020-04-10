@@ -202,6 +202,7 @@ const ShowQuery = pure(({ results }) => {
   const hasExecuted = (results && results.command);
   if (!hasExecuted) return null;
   return null;
+
   return (
     <div className="alert alert-primary" role="alert">
       Server executed query:

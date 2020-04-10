@@ -28,10 +28,7 @@ describe("aql-to-sql", function () {
 
     it("handles relative dates on the same week without a time specified", function () {
       expect(
-        aqlToSql(
-          "select * from products since monday until tuesday",
-          saturday
-        )
+        aqlToSql("select * from products since monday until tuesday", saturday)
       ).toMatchInlineSnapshot(`
         Object {
           "command": "
@@ -75,9 +72,8 @@ describe("aql-to-sql", function () {
     });
 
     it("handles relative days for last week without a time specified", function () {
-      expect(
-        aqlToSql("select * from products since last tuesday", saturday)
-      ).toMatchInlineSnapshot(`
+      expect(aqlToSql("select * from products since last tuesday", saturday))
+        .toMatchInlineSnapshot(`
         Object {
           "command": "
         select
@@ -118,12 +114,39 @@ describe("aql-to-sql", function () {
         }
       `);
     });
+
+    it("handles filtering of values", function () {
+      expect(
+        aqlToSql(
+          "select * from products where product_name in ('a', 'b', 'c') and price > 10",
+          saturday
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "command": "
+        select
+          products.*
+        from
+          products
+        where
+          created_at >= TIMESTAMP WITHOUT TIME ZONE '2018-08-18T00:00:00.000Z'
+          and created_at <= TIMESTAMP WITHOUT TIME ZONE '2018-08-25T15:09:30.566Z'
+          and (
+            (product_name in ('a', 'b', 'c'))
+            and (price > 10)
+          )
+        limit
+          100
+        ",
+          "errors": Array [],
+        }
+      `);
+    });
   });
 
   describe("when it is a sunday", function () {
     it("provides default filters of the past week, and a limit of 100", function () {
-      expect(aqlToSql("select * from products", sunday))
-        .toMatchInlineSnapshot(`
+      expect(aqlToSql("select * from products", sunday)).toMatchInlineSnapshot(`
         Object {
           "command": "
         select
@@ -143,10 +166,7 @@ describe("aql-to-sql", function () {
 
     it("handles relative dates on the same week without a time specified", function () {
       expect(
-        aqlToSql(
-          "select * from products since monday until tuesday",
-          sunday
-        )
+        aqlToSql("select * from products since monday until tuesday", sunday)
       ).toMatchInlineSnapshot(`
         Object {
           "command": "
@@ -244,10 +264,7 @@ describe("aql-to-sql", function () {
     describe("time series", function () {
       it("defaults a timeseries to 1 hour if a duration is not provided", function () {
         expect(
-          aqlToSql(
-            "select count(total) from sales_view timeseries",
-            sunday
-          )
+          aqlToSql("select count(total) from sales_view timeseries", sunday)
         ).toMatchInlineSnapshot(`
           Object {
             "command": "
