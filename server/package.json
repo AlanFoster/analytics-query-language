@@ -41,6 +41,6 @@
     "sql-formatter": "^2.3.3",
     "webpack": "^4.42.1",
     "webpack-dev-server": "^3.10.3",
-    "ws": "^6.0.0"
+    "ws": "^7.4.6"
   }
 }
